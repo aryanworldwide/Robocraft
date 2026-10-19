@@ -1,0 +1,147 @@
+// Component catalog for the Tinkercad-like Build With Me lab.
+// Each component has REAL identifiable pins. Pin sides: left/right/top/bottom.
+// Local pin positions are computed by distributing pins evenly along their side.
+
+export const LAB_COMPONENTS = {
+  arduino_uno: {
+    name: 'Arduino Uno', category: 'Boards', w: 210, h: 150, color: '#0EA5E9', emoji: '🔌',
+    pins: [
+      { id: 'D0', label: 'D0', side: 'left', type: 'digital' }, { id: 'D1', label: 'D1', side: 'left', type: 'digital' },
+      { id: 'D2', label: 'D2', side: 'left', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'left', type: 'pwm' },
+      { id: 'D4', label: 'D4', side: 'left', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'left', type: 'pwm' },
+      { id: 'D6', label: 'D6~', side: 'left', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'left', type: 'digital' },
+      { id: 'D8', label: 'D8', side: 'left', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'left', type: 'pwm' },
+      { id: 'D10', label: 'D10~', side: 'left', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'left', type: 'pwm' },
+      { id: 'D12', label: 'D12', side: 'left', type: 'digital' }, { id: 'D13', label: 'D13', side: 'left', type: 'digital' },
+      { id: 'A0', label: 'A0', side: 'right', type: 'analog' }, { id: 'A1', label: 'A1', side: 'right', type: 'analog' },
+      { id: 'A2', label: 'A2', side: 'right', type: 'analog' }, { id: 'A3', label: 'A3', side: 'right', type: 'analog' },
+      { id: 'A4', label: 'A4', side: 'right', type: 'analog' }, { id: 'A5', label: 'A5', side: 'right', type: 'analog' },
+      { id: '5V', label: '5V', side: 'right', type: 'power' }, { id: '3V3', label: '3.3V', side: 'right', type: 'power' },
+      { id: 'GND', label: 'GND', side: 'right', type: 'ground' }, { id: 'GND2', label: 'GND', side: 'right', type: 'ground' },
+      { id: 'VIN', label: 'VIN', side: 'right', type: 'power' }, { id: 'REF', label: 'AREF', side: 'right', type: 'signal' },
+    ],
+  },
+  arduino_nano: {
+    name: 'Arduino Nano', category: 'Boards', w: 170, h: 130, color: '#0EA5E9', emoji: '🔌',
+    pins: [
+      { id: 'D2', label: 'D2', side: 'left', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'left', type: 'pwm' },
+      { id: 'D4', label: 'D4', side: 'left', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'left', type: 'pwm' },
+      { id: 'D6', label: 'D6~', side: 'left', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'left', type: 'digital' },
+      { id: 'D8', label: 'D8', side: 'left', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'left', type: 'pwm' },
+      { id: 'D10', label: 'D10~', side: 'left', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'left', type: 'pwm' },
+      { id: 'D12', label: 'D12', side: 'left', type: 'digital' }, { id: 'D13', label: 'D13', side: 'left', type: 'digital' },
+      { id: 'A0', label: 'A0', side: 'right', type: 'analog' }, { id: 'A1', label: 'A1', side: 'right', type: 'analog' },
+      { id: 'A2', label: 'A2', side: 'right', type: 'analog' }, { id: 'A3', label: 'A3', side: 'right', type: 'analog' },
+      { id: 'A4', label: 'A4', side: 'right', type: 'analog' }, { id: 'A5', label: 'A5', side: 'right', type: 'analog' },
+      { id: 'A6', label: 'A6', side: 'right', type: 'analog' }, { id: 'A7', label: 'A7', side: 'right', type: 'analog' },
+      { id: '5V', label: '5V', side: 'right', type: 'power' }, { id: 'GND', label: 'GND', side: 'right', type: 'ground' },
+      { id: '3V3', label: '3.3V', side: 'right', type: 'power' }, { id: 'VIN', label: 'VIN', side: 'right', type: 'power' },
+    ],
+  },
+  esp32: {
+    name: 'ESP32', category: 'Boards', w: 180, h: 140, color: '#A78BFA', emoji: '📶',
+    pins: [
+      { id: 'D2', label: 'GPIO2', side: 'left', type: 'digital' }, { id: 'D4', label: 'GPIO4', side: 'left', type: 'digital' },
+      { id: 'D5', label: 'GPIO5', side: 'left', type: 'digital' }, { id: 'D12', label: 'GPIO12', side: 'left', type: 'digital' },
+      { id: 'D13', label: 'GPIO13', side: 'left', type: 'digital' }, { id: 'D14', label: 'GPIO14', side: 'left', type: 'digital' },
+      { id: 'D15', label: 'GPIO15', side: 'left', type: 'pwm' }, { id: 'D18', label: 'GPIO18', side: 'left', type: 'pwm' },
+      { id: 'D19', label: 'GPIO19', side: 'left', type: 'digital' }, { id: 'D21', label: 'GPIO21', side: 'left', type: 'digital' },
+      { id: 'D22', label: 'GPIO22', side: 'left', type: 'digital' }, { id: 'D23', label: 'GPIO23', side: 'left', type: 'digital' },
+      { id: 'A34', label: 'VP', side: 'right', type: 'analog' }, { id: 'A35', label: 'VN', side: 'right', type: 'analog' },
+      { id: 'A32', label: 'GPIO32', side: 'right', type: 'analog' }, { id: 'A33', label: 'GPIO33', side: 'right', type: 'analog' },
+      { id: 'A36', label: 'GPIO36', side: 'right', type: 'analog' }, { id: 'A39', label: 'GPIO39', side: 'right', type: 'analog' },
+      { id: '3V3', label: '3.3V', side: 'right', type: 'power' }, { id: 'GND', label: 'GND', side: 'right', type: 'ground' },
+      { id: 'GND2', label: 'GND', side: 'right', type: 'ground' }, { id: 'VIN', label: 'VIN', side: 'right', type: 'power' },
+      { id: 'EN', label: 'EN', side: 'right', type: 'signal' },
+    ],
+  },
+  breadboard: { name: 'Breadboard', category: 'Boards', w: 240, h: 120, color: '#FDE68A', emoji: '🧰', symmetric: true,
+    pins: [
+      { id: 'r1', label: '+', side: 'left', type: 'power' }, { id: 'r2', label: '+', side: 'left', type: 'power' },
+      { id: 'r3', label: '−', side: 'left', type: 'ground' }, { id: 'r4', label: '−', side: 'left', type: 'ground' },
+      { id: 'a1', label: 'a1', side: 'top', type: 'terminal' }, { id: 'a2', label: 'a2', side: 'top', type: 'terminal' },
+      { id: 'a3', label: 'a3', side: 'top', type: 'terminal' }, { id: 'a4', label: 'a4', side: 'top', type: 'terminal' },
+      { id: 'b1', label: 'b1', side: 'bottom', type: 'terminal' }, { id: 'b2', label: 'b2', side: 'bottom', type: 'terminal' },
+      { id: 'b3', label: 'b3', side: 'bottom', type: 'terminal' }, { id: 'b4', label: 'b4', side: 'bottom', type: 'terminal' },
+    ],
+  },
+  led: { name: 'LED', category: 'Outputs', w: 70, h: 70, color: '#F87171', emoji: '💡',
+    pins: [ { id: 'anode', label: 'Anode (+)', side: 'top', type: 'plus' }, { id: 'cathode', label: 'Cathode (−)', side: 'bottom', type: 'minus' } ] },
+  resistor: { name: 'Resistor 220Ω', category: 'Passive', w: 130, h: 44, color: '#D4A373', emoji: '🟫', symmetric: true,
+    pins: [ { id: 'a', label: 'Terminal A', side: 'left', type: 'terminal' }, { id: 'b', label: 'Terminal B', side: 'right', type: 'terminal' } ] },
+  push_button: { name: 'Push Button', category: 'Inputs', w: 80, h: 80, color: '#FBBF24', emoji: '🔘',
+    pins: [ { id: 'a', label: 'Pin A', side: 'left', type: 'terminal' }, { id: 'b', label: 'Pin B', side: 'right', type: 'terminal' } ] },
+  buzzer: { name: 'Buzzer', category: 'Outputs', w: 70, h: 70, color: '#FB923C', emoji: '🔊',
+    pins: [ { id: 'pos', label: '+', side: 'top', type: 'plus' }, { id: 'neg', label: '−', side: 'bottom', type: 'minus' } ] },
+  servo: { name: 'Servo Motor', category: 'Outputs', w: 100, h: 76, color: '#60A5FA', emoji: '⚙️',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'SIG', label: 'Signal', side: 'left', type: 'pwm' } ] },
+  dc_motor: { name: 'DC Motor', category: 'Outputs', w: 90, h: 76, color: '#34D399', emoji: '🌀',
+    pins: [ { id: 't1', label: 'Terminal 1', side: 'left', type: 'terminal' }, { id: 't2', label: 'Terminal 2', side: 'right', type: 'terminal' } ] },
+  ir_sensor: { name: 'IR Sensor', category: 'Sensors', w: 100, h: 84, color: '#22D3EE', emoji: '👁️',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'OUT', label: 'OUT', side: 'right', type: 'digital' } ] },
+  ultrasonic: { name: 'Ultrasonic HC-SR04', category: 'Sensors', w: 110, h: 76, color: '#38BDF8', emoji: '📡',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'TRIG', label: 'TRIG', side: 'right', type: 'digital' }, { id: 'ECHO', label: 'ECHO', side: 'right', type: 'digital' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' } ] },
+  ldr: { name: 'LDR', category: 'Sensors', w: 70, h: 70, color: '#A78BFA', emoji: '🌙',
+    pins: [ { id: 'a', label: 'A', side: 'left', type: 'terminal' }, { id: 'b', label: 'B', side: 'right', type: 'terminal' } ] },
+  potentiometer: { name: 'Potentiometer', category: 'Inputs', w: 84, h: 84, color: '#F472B6', emoji: '🎚️',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'WIPER', label: 'Wiper', side: 'right', type: 'analog' } ] },
+  lcd: { name: 'LCD 16x2 (I2C)', category: 'Display', w: 170, h: 90, color: '#94A3B8', emoji: '📟',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'SDA', label: 'SDA', side: 'right', type: 'data' }, { id: 'SCL', label: 'SCL', side: 'right', type: 'data' } ] },
+  oled: { name: 'OLED 0.96"', category: 'Display', w: 130, h: 80, color: '#94A3B8', emoji: '🔲',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'SDA', label: 'SDA', side: 'right', type: 'data' }, { id: 'SCL', label: 'SCL', side: 'right', type: 'data' } ] },
+  motor_driver: { name: 'L298N Driver', category: 'Drivers', w: 150, h: 110, color: '#F59E0B', emoji: '🧩',
+    pins: [ { id: 'IN1', label: 'IN1', side: 'right', type: 'digital' }, { id: 'IN2', label: 'IN2', side: 'right', type: 'digital' }, { id: 'IN3', label: 'IN3', side: 'right', type: 'digital' }, { id: 'IN4', label: 'IN4', side: 'right', type: 'digital' },
+      { id: 'ENA', label: 'ENA~', side: 'right', type: 'pwm' }, { id: 'ENB', label: 'ENB~', side: 'right', type: 'pwm' },
+      { id: 'OUT1', label: 'OUT1', side: 'left', type: 'terminal' }, { id: 'OUT2', label: 'OUT2', side: 'left', type: 'terminal' }, { id: 'OUT3', label: 'OUT3', side: 'left', type: 'terminal' }, { id: 'OUT4', label: 'OUT4', side: 'left', type: 'terminal' },
+      { id: '12V', label: '12V', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: '5V', label: '5V', side: 'left', type: 'power' } ] },
+  mpu6050: { name: 'MPU6050 (IMU)', category: 'Sensors', w: 100, h: 80, color: '#22D3EE', emoji: '🧭',
+    pins: [ { id: 'VCC', label: 'VCC', side: 'left', type: 'power' }, { id: 'GND', label: 'GND', side: 'left', type: 'ground' }, { id: 'SDA', label: 'SDA', side: 'right', type: 'data' }, { id: 'SCL', label: 'SCL', side: 'right', type: 'data' } ] },
+  battery: { name: '9V Battery', category: 'Power', w: 80, h: 90, color: '#F87171', emoji: '🔋',
+    pins: [ { id: 'P', label: '+', side: 'top', type: 'plus' }, { id: 'N', label: '−', side: 'bottom', type: 'minus' } ] },
+  power_supply: { name: 'Power Supply', category: 'Power', w: 100, h: 90, color: '#F87171', emoji: '⚡',
+    pins: [ { id: 'V', label: 'V+', side: 'top', type: 'plus' }, { id: 'G', label: 'GND', side: 'bottom', type: 'ground' } ] },
+};
+
+export const PALETTE_CATEGORIES = [
+  { name: 'Boards', items: ['arduino_uno', 'arduino_nano', 'esp32', 'breadboard'] },
+  { name: 'Outputs', items: ['led', 'buzzer', 'servo', 'dc_motor'] },
+  { name: 'Inputs', items: ['push_button', 'potentiometer', 'ldr'] },
+  { name: 'Sensors', items: ['ir_sensor', 'ultrasonic', 'mpu6050'] },
+  { name: 'Display', items: ['lcd', 'oled'] },
+  { name: 'Drivers', items: ['motor_driver'] },
+  { name: 'Passive', items: ['resistor'] },
+  { name: 'Power', items: ['battery', 'power_supply'] },
+];
+
+const BOARD_TYPES = new Set(['arduino_uno', 'arduino_nano', 'esp32']);
+
+export function isBoard(type) { return BOARD_TYPES.has(type); }
+
+// Compute a pin's local (pre-rotation) position relative to the component origin.
+export function pinLocalPos(def, pinId) {
+  const pin = def.pins.find(p => p.id === pinId);
+  if (!pin) return null;
+  const arr = def.pins.filter(p => p.side === pin.side);
+  const idx = arr.findIndex(p => p.id === pinId);
+  const n = arr.length;
+  if (pin.side === 'left') return { x: 0, y: n === 1 ? def.h / 2 : (def.h * (idx + 1)) / (n + 1) };
+  if (pin.side === 'right') return { x: def.w, y: n === 1 ? def.h / 2 : (def.h * (idx + 1)) / (n + 1) };
+  if (pin.side === 'top') return { x: n === 1 ? def.w / 2 : (def.w * (idx + 1)) / (n + 1), y: 0 };
+  return { x: n === 1 ? def.w / 2 : (def.w * (idx + 1)) / (n + 1), y: def.h };
+}
+
+export function rotatePoint(px, py, cx, cy, deg) {
+  const r = (deg * Math.PI) / 180;
+  const dx = px - cx, dy = py - cy;
+  return { x: cx + dx * Math.cos(r) - dy * Math.sin(r), y: cy + dx * Math.sin(r) + dy * Math.cos(r) };
+}
+
+// World position of a pin on a placed component (accounting for rotation).
+export function pinWorldPos(comp, def, pinId) {
+  const local = pinLocalPos(def, pinId);
+  if (!local) return null;
+  const r = rotatePoint(local.x, local.y, def.w / 2, def.h / 2, comp.rot || 0);
+  return { x: comp.x + r.x, y: comp.y + r.y };
+}
+
+export function getDef(type) { return LAB_COMPONENTS[type]; }

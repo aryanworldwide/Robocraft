@@ -1,0 +1,42 @@
+{
+  "name": "GeneratedProject",
+  "type": "object",
+  "properties": {
+    "user_prompt": {
+      "type": "string",
+      "description": "The student's original natural language project description"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "AI-generated project name"
+    },
+    "project_data": {
+      "type": "object",
+      "description": "Full generated project JSON (overview, steps, code, etc.)"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "Beginner",
+        "Intermediate",
+        "Advanced"
+      ],
+      "description": "Project difficulty level"
+    },
+    "is_shared": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the project is shared with the community"
+    },
+    "is_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student has completed this project"
+    }
+  },
+  "required": [
+    "user_prompt",
+    "project_name",
+    "project_data"
+  ]
+}
