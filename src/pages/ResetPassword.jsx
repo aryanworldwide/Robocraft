@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { backend } from "@/api/client";
+import { appUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +27,7 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       await backend.auth.resetPassword({ resetToken, newPassword });
-      window.location.href = "/login";
+      window.location.href = appUrl("/login");
     } catch (err) {
       setError(err.message || "Failed to reset password");
     } finally {

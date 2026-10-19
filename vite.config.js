@@ -6,6 +6,8 @@ import path from 'node:path'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
+    // '/' for the Android app; '/Robocraft/' when published on GitHub Pages
+    base: process.env.BASE_PATH || '/',
     plugins: [react()],
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },

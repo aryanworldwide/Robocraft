@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { backend } from "@/api/client";
+import { appUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +48,7 @@ export default function Register() {
       if (result?.access_token) {
         backend.auth.setToken(result.access_token);
       }
-      window.location.href = "/";
+      window.location.href = appUrl("/");
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {

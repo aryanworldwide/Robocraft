@@ -2,6 +2,26 @@
 
 **Learn Robotics. Build Robots. Control Them.**
 
+## 📲 Get the app
+
+| | |
+|---|---|
+| **🤖 Android** | [**⬇️ Download RoboCraft.apk**](https://github.com/aryanworldwide/Robocraft/releases/latest/download/RoboCraft.apk) |
+| **🍎 iPhone / iPad** | [**▶️ Open RoboCraft**](https://aryanworldwide.github.io/Robocraft/) then add it to your Home Screen |
+| **💻 Laptop / any browser** | [**▶️ Open RoboCraft**](https://aryanworldwide.github.io/Robocraft/) |
+
+### Android: install
+1. Tap **Download RoboCraft.apk** and open the downloaded file.
+2. If asked, allow **Install unknown apps** for your browser, then tap **Install**.
+3. If Play Protect warns you, tap **More details → Install anyway**.
+
+### iPhone: install
+1. Open the link in **Safari**.
+2. Tap the **Share** button (square with an arrow ⬆️, in the bottom bar — on iOS 26 tap **•••** first).
+3. Tap **Add to Home Screen → Add**. RoboCraft appears on your home screen and works offline.
+
+---
+
 A robotics learning app for Class 9–11 students: lessons, quizzes, flashcards,
 a virtual circuit lab, Arduino/ESP32 projects, revision PDFs and an AI mentor.
 

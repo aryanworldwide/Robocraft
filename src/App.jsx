@@ -12,6 +12,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 import BadgePopup from '@/components/learning/BadgePopup';
 import LevelUpPopup from '@/components/learning/LevelUpPopup';
+import InstallHint from '@/components/InstallHint';
 // Add page imports here
 import Splash from '@/pages/Splash';
 import Login from '@/pages/Login';
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
       </Suspense>
       {badgePopup && <BadgePopup badges={badgePopup} onClose={() => setBadgePopup(null)} />}
       {levelPopup && <LevelUpPopup level={levelPopup} onClose={() => setLevelPopup(null)} />}
+      <InstallHint />
     </div>
   );
 };
@@ -124,7 +126,7 @@ function App() {
     <AuthProvider>
       <AppProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router>
+          <Router basename={import.meta.env.BASE_URL.replace(/\/$/, '') || undefined}>
             <ScrollToTop />
             <AuthenticatedApp />
           </Router>

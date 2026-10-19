@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { backend } from "@/api/client";
 import { useAuth } from "@/lib/AuthContext";
+import { appUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,7 @@ export default function Login() {
     setLoading(true);
     try {
       await backend.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      window.location.href = appUrl("/");
     } catch (err) {
       if (err?.status === 401) setError("Incorrect email or password.");
       else if (err?.status === 404) setError("No account found with this email.");

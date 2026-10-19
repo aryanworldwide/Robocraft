@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { backend } from '@/api/client';
 import { appParams } from '@/lib/app-params';
+import { appUrl } from '@/lib/utils';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -139,13 +140,13 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     // Sign out locally and stay inside the app (no external logout page)
     try { localStorage.removeItem('base44_access_token'); localStorage.removeItem('token'); } catch {}
-    window.location.href = '/login';
+    window.location.href = appUrl('/login');
   };
 
   const navigateToLogin = () => {
     // Use the app's own login screen (never the platform's hosted login page)
     const back = window.location.pathname + window.location.search;
-    window.location.href = '/login' + (back && back !== '/' ? '?returnTo=' + encodeURIComponent(back) : '');
+    window.location.href = appUrl('/login') + (back && back !== '/' ? '?returnTo=' + encodeURIComponent(back) : '');
   };
 
   return (
