@@ -1,0 +1,214 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useApp } from '@/lib/AppContext';
+import { getCurriculum } from '@/lib/curriculum';
+import { ArrowLeft, Check, Cpu, LogOut, Settings as SettingsIcon, GraduationCap, Trash2, AlertTriangle, X, Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
+
+export default function Settings() {
+  const navigate = useNavigate();
+  const { selectedClass, selectClass, isGuest, user, logout } = useApp();
+  const { theme, setTheme } = useTheme();
+  const [changingClass, setChangingClass] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const classes = [
+    { id: 'class_9', name: 'Class 9', desc: 'Foundation of Robotics, Python, AI & Computing', icon: '🤖', color: '#00D2FF' },
+    { id: 'class_10', name: 'Class 10', desc: 'Advanced Robotics, Python Libraries & ML', icon: '⚙️', color: '#818CF8' },
+    { id: 'class_11', name: 'Class 11', desc: 'Mechanical Systems, Microcontrollers & Control', icon: '🔧', color: '#C084FC' },
+  ];
+
+  const handleClassChange = (classId) => {
+    selectClass(classId);
+    setChangingClass(false);
+    navigate('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('progress') || key.includes('robocraft') || key.includes('class_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between animate-slide-up">
+        <button onClick={() => navigate('/')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-cyan-400 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        <SettingsIcon className="w-5 h-5 text-cyan-400" />
+      </div>
+
+      <h1 className="text-2xl font-bold gradient-text animate-slide-up" style={{ animationDelay: '0.05s' }}>Settings</h1>
+
+      {/* Profile */}
+      <div className="glass-strong rounded-2xl p-5 flex items-center gap-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="w-14 h-14 rounded-full glass flex items-center justify-center text-xl font-bold text-cyan-400">
+          {user?.full_name?.[0]?.toUpperCase() || 'G'}
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-sm">{user?.full_name || (isGuest ? 'Guest User' : 'User')}</h3>
+          <p className="text-xs text-muted-foreground">{user?.email || 'Not signed in'}</p>
+          {isGuest && <span className="text-[10px] text-yellow-400 mt-1 inline-block">Guest mode • Progress saved locally</span>}
+        </div>
+      </div>
+
+      {/* Appearance / Theme */}
+      <div className="glass-strong rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '0.12s' }}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl glass flex items-center justify-center">
+            {theme === 'dark' ? <Moon className="w-5 h-5 text-cyan-400" /> : <Sun className="w-5 h-5 text-cyan-400" />}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-sm">Appearance</h3>
+            <p className="text-xs text-muted-foreground">Choose how RoboCraft looks</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setTheme('dark')}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${theme === 'dark' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white neon-glow' : 'glass text-muted-foreground hover:text-cyan-400'}`}
+          >
+            <Moon className="w-4 h-4" /> Dark
+          </button>
+          <button
+            onClick={() => setTheme('light')}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${theme === 'light' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white neon-glow' : 'glass text-muted-foreground hover:text-cyan-400'}`}
+          >
+            <Sun className="w-4 h-4" /> Light
+          </button>
+        </div>
+      </div>
+
+      {/* Change Class */}
+      <div className="glass-strong rounded-2xl overflow-hidden animate-slide-up" style={{ animationDelay: '0.15s' }}>
+        <button
+          onClick={() => setChangingClass(!changingClass)}
+          className="w-full flex items-center gap-3 p-4 hover:bg-cyan-500/5 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div className="flex-1 text-left">
+            <h3 className="font-bold text-sm">Change Class</h3>
+            <p className="text-xs text-muted-foreground">Currently: {selectedClass?.replace('_', ' ') || 'None'}</p>
+          </div>
+          <span className="text-xs text-cyan-400">{changingClass ? 'Cancel' : 'Change'}</span>
+        </button>
+
+        {changingClass && (
+          <div className="border-t border-cyan-500/10 p-3 space-y-2 animate-fade-in">
+            <p className="text-xs text-muted-foreground px-2 mb-2">Selecting a new class will load its curriculum. Your progress in each class is saved separately.</p>
+            {classes.map(cls => (
+              <button
+                key={cls.id}
+                onClick={() => handleClassChange(cls.id)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                  selectedClass === cls.id ? 'glass-strong neon-glow' : 'glass hover:bg-cyan-500/5'
+                }`}
+              >
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl" style={{ background: `${cls.color}15` }}>
+                  {cls.icon}
+                </div>
+                <div className="flex-1 text-left">
+                  <h4 className="text-sm font-medium" style={{ color: cls.color }}>{cls.name}</h4>
+                  <p className="text-[10px] text-muted-foreground">{cls.desc}</p>
+                </div>
+                {selectedClass === cls.id && <Check className="w-4 h-4 text-cyan-400" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* About */}
+      <div className="glass-strong rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl glass flex items-center justify-center">
+            <Cpu className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm">About RoboCraft</h3>
+            <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          RoboCraft is a premium robotics education platform for students. Learn Robotics. Build Robots. Control Them.
+        </p>
+      </div>
+
+      {/* Account Deletion */}
+      <button
+        onClick={() => setShowDeleteDialog(true)}
+        className="w-full glass-strong rounded-2xl p-4 flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition-colors animate-slide-up"
+        style={{ animationDelay: '0.22s' }}
+      >
+        <Trash2 className="w-5 h-5" />
+        <span className="font-medium text-sm">Delete Account</span>
+      </button>
+
+      {/* Logout */}
+      <button
+        onClick={logout}
+        className="w-full glass-strong rounded-2xl p-4 flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition-colors animate-slide-up"
+        style={{ animationDelay: '0.25s' }}
+      >
+        <LogOut className="w-5 h-5" />
+        <span className="font-medium text-sm">{isGuest ? 'Exit Guest Mode' : 'Sign Out'}</span>
+      </button>
+
+      {/* Delete Account Modal */}
+      {showDeleteDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={() => setShowDeleteDialog(false)} />
+          <div className="relative glass-strong rounded-3xl p-6 max-w-sm w-full animate-scale-in">
+            <button onClick={() => setShowDeleteDialog(false)} className="absolute top-3 right-3 p-1 rounded-lg text-muted-foreground hover:text-cyan-400">
+              <X className="w-4 h-4" />
+            </button>
+            <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-7 h-7 text-red-400" />
+            </div>
+            <h3 className="font-bold text-lg text-center mb-2">Delete Account?</h3>
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              This will permanently remove all your progress, achievements, and saved data from this device. This action cannot be undone.
+            </p>
+            <p className="text-xs text-muted-foreground text-center mb-3">
+              Type <span className="font-bold text-red-400">DELETE</span> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={e => setDeleteConfirm(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full glass rounded-xl p-3 text-sm text-center font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-red-500/50 mb-4"
+            />
+            <div className="flex gap-2">
+              <button onClick={() => { setShowDeleteDialog(false); setDeleteConfirm(''); }} className="flex-1 py-3 rounded-xl glass text-cyan-400 font-medium text-sm hover:bg-cyan-500/10 transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirm !== 'DELETE' || isDeleting}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-sm disabled:opacity-40 hover:bg-red-700 transition-colors"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
