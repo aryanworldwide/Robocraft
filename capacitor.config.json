@@ -1,0 +1,11 @@
+{
+  "appId": "com.robocraft.learn",
+  "appName": "RoboCraft",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
