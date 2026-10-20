@@ -2,7 +2,7 @@
 // Paste this whole file into a new Worker, add a "Workers AI" binding named AI,
 // then Deploy. No API keys needed.
 
-const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
 const GUARD = '@cf/meta/llama-guard-3-8b';
 const ALLOWED_ORIGINS = [
   'https://aryanworldwide.github.io', // web / iPhone version
