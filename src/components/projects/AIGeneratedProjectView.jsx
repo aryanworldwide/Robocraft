@@ -118,9 +118,9 @@ export default function AIGeneratedProjectView({ project, onBack }) {
         </div>
       )}
       {validation.valid && (
-        <div className="glass-strong rounded-2xl p-4 mb-4 border-l-2 border-green-500 animate-slide-up flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
-          <p className="text-xs text-green-400"><strong>AI Validated:</strong> Pin mappings, circuit, and code have been verified for correctness.</p>
+        <div className="glass-strong rounded-2xl p-4 mb-4 border-l-2 border-yellow-500 animate-slide-up flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground"><strong className="text-foreground">Made by AI — check before you build.</strong> The code passed basic checks, but AI can get wiring wrong (for example, every LED needs a resistor in series). Ask a teacher to check the wiring, and only use batteries or USB power.</p>
         </div>
       )}
 
