@@ -258,7 +258,7 @@ export default function Quiz() {
     <div className="max-w-2xl mx-auto px-4 py-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 animate-slide-up">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-cyan-400 transition-colors">
+        <button onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate(`/lesson/${id}`))} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-cyan-400 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Exit
         </button>
         <span className="text-xs glass px-3 py-1 rounded-full text-cyan-400 font-medium">
