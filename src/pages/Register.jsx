@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { accountsEnabled } from "@/lib/features";
+import AccountsComingSoon from "@/components/AccountsComingSoon";
 import { Link, useNavigate } from "react-router-dom";
 import { backend } from "@/api/client";
 import { appUrl } from "@/lib/utils";
@@ -104,7 +106,7 @@ export default function Register() {
       icon={UserPlus}
       title="Create your account"
       subtitle="Sign up to get started"
-      footer={
+      footer={!accountsEnabled ? null :
         <>
           Already have an account?{" "}
           <Link to="/login" className="text-cyan-400 font-medium hover:underline">Log in</Link>
@@ -117,6 +119,7 @@ export default function Register() {
         Continue as Guest
       </Button>
 
+      {accountsEnabled ? (<>
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-cyan-500/10" /></div>
         <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-3 text-muted-foreground">or</span></div>
@@ -150,6 +153,7 @@ export default function Register() {
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating account...</> : "Create account"}
         </Button>
       </form>
+      </>) : <AccountsComingSoon />}
     </AuthLayout>
   );
 }

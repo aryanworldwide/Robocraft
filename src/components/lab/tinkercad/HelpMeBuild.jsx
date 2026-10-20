@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { Sparkles, X, Loader2, Send } from 'lucide-react';
 import { backend } from '@/api/client';
 
@@ -9,7 +10,7 @@ const SUGGESTIONS = [
   "Why isn't my robot working?",
 ];
 
-export default function HelpMeBuild({ components, wires, code, status }) {
+function HelpMeBuildInner({ components, wires, code, status }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [reply, setReply] = useState('');
@@ -62,4 +63,10 @@ export default function HelpMeBuild({ components, wires, code, status }) {
       )}
     </>
   );
+}
+
+
+export default function HelpMeBuild(props) {
+  if (!aiEnabled) return null; // AI not configured for this build
+  return <HelpMeBuildInner {...props} />;
 }

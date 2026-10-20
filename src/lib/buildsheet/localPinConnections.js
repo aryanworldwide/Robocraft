@@ -4,6 +4,7 @@
 // so every section stays consistent and consumes ZERO integration credits.
 
 import { sanitizeCode } from './sanitizeCode';
+import { formatClass } from '@/lib/utils';
 import { getPinMap } from '@/lib/circuit/pinMaps';
 
 const WIRE_COLOR_HEX = {
@@ -310,7 +311,7 @@ export function generateLocalPinConnections(project) {
 // ── Build a full local Build Sheet (ZERO AI) from a curriculum project ───────
 export function generateLocalBuildSheet(project, classId) {
   const pinConnections = generateLocalPinConnections(project);
-  const classLabel = classId ? classId.replace('_', ' ').replace('class', 'Class') : 'Robotics Project';
+  const classLabel = classId ? formatClass(classId).replace('class', 'Class') : 'Robotics Project';
 
   const components = (project.components || []).map(c => {
     const name = typeof c === 'string' ? c : c.name;

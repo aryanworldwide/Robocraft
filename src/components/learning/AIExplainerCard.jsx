@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 
-export default function AIExplainerCard({ title, subtitle, icon: Icon, color = '#00D2FF', prompt, renderResponse }) {
+function AIExplainerCardInner({ title, subtitle, icon: Icon, color = '#00D2FF', prompt, renderResponse }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState(null);
@@ -50,4 +51,10 @@ export default function AIExplainerCard({ title, subtitle, icon: Icon, color = '
       )}
     </div>
   );
+}
+
+
+export default function AIExplainerCard(props) {
+  if (!aiEnabled) return null; // AI not configured for this build
+  return <AIExplainerCardInner {...props} />;
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Play, Pause, SkipForward, RotateCw, MessageCircle, X, Loader2, Volume2, Globe } from 'lucide-react';
 
@@ -101,7 +102,7 @@ export default function AIBuildMentor({ project, step, isPlaying, lang, componen
           {loading && <div className="flex items-center gap-1.5 py-1"><Loader2 className="w-3 h-3 animate-spin text-cyan-400" /><span className="text-[10px] text-muted-foreground">AI thinking...</span></div>}
           {aiReply && <p className="text-[11px] text-foreground/90 leading-relaxed glass rounded-lg p-2 animate-fade-in">{aiReply}</p>}
         </div>
-      ) : (
+      ) : aiEnabled && (
         <button onClick={() => setShowAsk(true)}
           className="w-full py-2 rounded-xl glass text-purple-400 text-[11px] font-medium hover:bg-purple-500/10 transition-colors flex items-center justify-center gap-1.5">
           <MessageCircle className="w-3.5 h-3.5" /> Ask AI

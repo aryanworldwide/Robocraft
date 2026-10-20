@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { backend } from '@/api/client';
 import { appParams } from '@/lib/app-params';
 import { appUrl } from '@/lib/utils';
+import { backendEnabled } from '@/lib/features';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -24,6 +25,17 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
+
+      // No backend configured: guest/offline mode only, no network requests.
+      if (!backendEnabled) {
+        const guestSession = localStorage.getItem('robocraft_guest_session');
+        setIsGuest(!!guestSession);
+        setIsAuthenticated(!!guestSession);
+        setAuthChecked(true);
+        setIsLoadingAuth(false);
+        setIsLoadingPublicSettings(false);
+        return;
+      }
       
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.

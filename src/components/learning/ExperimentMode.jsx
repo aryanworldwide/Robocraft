@@ -96,15 +96,24 @@ function ExperimentNote({ children }) {
   return <p className="text-[10px] text-muted-foreground text-center mt-3 leading-relaxed">{children}</p>;
 }
 
+// Pick the experiment that matches what the lesson is about. Lessons with no
+// matching hands-on experiment (e.g. Python, AI theory) get none.
+export function pickExperiment(lesson) {
+  const head = `${lesson.title} ${(lesson.keyConcepts || []).join(' ')}`.toLowerCase();
+  const body = `${head} ${(lesson.theory || '').slice(0, 1500)}`.toLowerCase();
+  const has = (re, txt = head) => re.test(txt);
+  if (has(/servo/)) return 'servo';
+  if (has(/ultrasonic|hc-sr04|distance|sensor/)) return 'ultrasonic';
+  if (has(/\bmotors?\b|actuator|pwm|l298|motor driver/)) return 'motor';
+  if (has(/\bleds?\b|blink|digital output|circuit|arduino|microcontroller|esp32|electronics/)) return 'led';
+  if (has(/servo/, body)) return 'servo';
+  if (has(/ultrasonic|hc-sr04/, body)) return 'ultrasonic';
+  if (has(/\bdc motors?\b|pwm/, body)) return 'motor';
+  return null;
+}
+
 export default function ExperimentMode({ lesson, onComplete, xpReward = 40 }) {
-  const experimentType = useMemo(() => {
-    const id = lesson.id.toLowerCase();
-    const title = lesson.title.toLowerCase();
-    if (id.includes('servo') || title.includes('servo')) return 'servo';
-    if (id.includes('motor') || title.includes('motor') || id.includes('dc')) return 'motor';
-    if (id.includes('ultrasonic') || id.includes('sensor') || title.includes('distance')) return 'ultrasonic';
-    return 'led';
-  }, [lesson]);
+  const experimentType = useMemo(() => pickExperiment(lesson), [lesson]);
 
   const experiments = {
     servo: <ServoExperiment />,
@@ -113,8 +122,13 @@ export default function ExperimentMode({ lesson, onComplete, xpReward = 40 }) {
     ultrasonic: <UltrasonicExperiment />,
   };
 
+  const [rewarded, setRewarded] = React.useState(false);
+  if (!experimentType) return null;
+  // Award the XP once, the first time the student actually moves a slider.
+  const handleInteract = () => { if (!rewarded) { setRewarded(true); onComplete?.(); } };
+
   return (
-    <div className="glass-strong rounded-2xl p-5">
+    <div className="glass-strong rounded-2xl p-5" onInputCapture={handleInteract}>
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center">
           <FlaskConical className="w-4 h-4 text-green-400" />

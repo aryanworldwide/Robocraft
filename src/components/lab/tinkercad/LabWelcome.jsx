@@ -1,4 +1,5 @@
 import React from 'react';
+import { aiEnabled } from '@/lib/features';
 import { Sparkles, Wrench, ArrowRight } from 'lucide-react';
 import { LAB_EXPERIMENTS } from '@/lib/lab/labExperiments';
 
@@ -16,13 +17,13 @@ export default function LabWelcome({ onBuildAnything, onScratch, onPickExperimen
         <p className="text-xs text-muted-foreground mb-5">Build a robot, wire it, code it, and run it — all in your browser.</p>
 
         {/* Build Anything — large featured */}
-        <button onClick={onBuildAnything}
+        {aiEnabled && <button onClick={onBuildAnything}
           className="w-full flex items-center justify-between gap-2 p-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-bold hover:neon-glow transition-all mb-4">
           <span className="flex items-center gap-2"><Sparkles className="w-5 h-5" /> Build Anything</span>
           <span className="text-[10px] font-normal opacity-80 hidden sm:inline">Describe it → AI guides you</span>
           <ArrowRight className="w-4 h-4" />
-        </button>
-        <p className="text-[10px] text-muted-foreground mb-2 text-left">Or start with a beginner project:</p>
+        </button>}
+        <p className="text-[10px] text-muted-foreground mb-2 text-left">{aiEnabled ? 'Or start with a beginner project:' : 'Start with a beginner project:'}</p>
 
         {/* Featured projects */}
         <div className="grid grid-cols-2 gap-2 mb-3">

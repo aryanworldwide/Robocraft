@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getMode } from '@/lib/adaptive';
@@ -54,7 +55,7 @@ export default function ProgressPage() {
     <div className="max-w-5xl mx-auto px-4 py-4 space-y-5">
       <div className="animate-slide-up">
         <h1 className="text-2xl font-bold gradient-text">Progress</h1>
-        <p className="text-sm text-muted-foreground">{selectedClass.replace('_', ' ')} • Your learning journey</p>
+        <p className="text-sm text-muted-foreground">{formatClass(selectedClass)} • Your learning journey</p>
       </div>
 
       {/* Overall Progress Ring */}

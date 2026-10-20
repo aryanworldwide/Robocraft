@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { accountsEnabled } from "@/lib/features";
+import AccountsComingSoon from "@/components/AccountsComingSoon";
 import { Link, useNavigate } from "react-router-dom";
 import { backend } from "@/api/client";
 import { useAuth } from "@/lib/AuthContext";
@@ -46,7 +48,7 @@ export default function Login() {
       icon={LogIn}
       title="Welcome back"
       subtitle="Log in to your account"
-      footer={
+      footer={!accountsEnabled ? null :
         <>
           Don't have an account?{" "}
           <Link to="/register" className="text-cyan-400 font-medium hover:underline">
@@ -65,6 +67,7 @@ export default function Login() {
         Continue as Guest
       </Button>
 
+      {accountsEnabled ? (<>
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-cyan-500/10" />
@@ -130,6 +133,7 @@ export default function Login() {
           )}
         </Button>
       </form>
+      </>) : <AccountsComingSoon />}
     </AuthLayout>
   );
 }

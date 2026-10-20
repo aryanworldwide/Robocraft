@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { BookOpen, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function CodeExplainer({ code, title = 'Arduino Code' }) {
+function CodeExplainerInner({ code, title = 'Arduino Code' }) {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState(null);
@@ -72,4 +73,10 @@ Use simple English. Use short sentences. Use bullet points. Do NOT use HTML tags
       )}
     </div>
   );
+}
+
+
+export default function CodeExplainer(props) {
+  if (!aiEnabled) return null; // AI not configured for this build
+  return <CodeExplainerInner {...props} />;
 }

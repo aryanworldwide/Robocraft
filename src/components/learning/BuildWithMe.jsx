@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { Wrench, Cpu, Zap, Check, X, RotateCcw, Upload, Lightbulb, ChevronRight, ChevronLeft, Code2, Copy, Download, Wrench as WrenchIcon, Package, AlertCircle } from 'lucide-react';
 import { backend } from '@/api/client';
 import { COMPONENTS, BUILD_CHALLENGES, getComponentById } from '@/lib/curriculum/buildChallenges';
@@ -112,7 +113,7 @@ export default function BuildWithMe({ challengeId, onComplete, xpReward = 50 }) 
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard?.writeText(challenge.code);
+    navigator.clipboard?.writeText(challenge.code)?.catch?.(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -335,7 +336,7 @@ export default function BuildWithMe({ challengeId, onComplete, xpReward = 50 }) 
       )}
 
       {/* AI Build Assistant */}
-      <div className="glass-strong rounded-2xl p-3">
+      {aiEnabled && <div className="glass-strong rounded-2xl p-3">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center">
             <Lightbulb className="w-3.5 h-3.5 text-purple-400" />
@@ -357,7 +358,7 @@ export default function BuildWithMe({ challengeId, onComplete, xpReward = 50 }) 
           </button>
         </div>
         {aiLoading && <p className="text-[9px] text-muted-foreground mt-1.5">AI is thinking...</p>}
-      </div>
+      </div>}
 
       {/* Action buttons */}
       <div className="flex gap-2">

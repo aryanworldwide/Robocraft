@@ -183,7 +183,9 @@ export default function Canvas({
       </svg>
 
       <div className="absolute left-3 bottom-3 text-[10px] text-muted-foreground/70 glass px-2 py-1 rounded-lg pointer-events-none">
-        Drag from left · Click 2 pins to wire · Drag to move · Scroll to zoom
+        {typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
+          ? 'Tap 2 pins to wire · Drag a part to move it · Pinch or +/− to zoom'
+          : 'Drag from left · Click 2 pins to wire · Drag to move · Scroll to zoom'}
       </div>
     </div>
   );

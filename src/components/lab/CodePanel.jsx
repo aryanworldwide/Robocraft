@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { X, Copy, Check, Download, BookOpen, Loader2 } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export default function CodePanel({ project, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(project.code);
+    navigator.clipboard?.writeText(project.code)?.catch?.(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -70,10 +71,10 @@ export default function CodePanel({ project, onClose }) {
             <button onClick={handleDownload} className="flex items-center gap-1 text-[10px] glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
               <Download className="w-3 h-3" /> Download
             </button>
-            <button onClick={explainCode} disabled={loading}
+            {aiEnabled && <button onClick={explainCode} disabled={loading}
               className="flex items-center gap-1 text-[10px] glass px-3 py-1.5 rounded-lg text-purple-400 hover:bg-purple-500/10 disabled:opacity-50">
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <BookOpen className="w-3 h-3" />} Explain
-            </button>
+            </button>}
           </div>
 
           <pre className="text-[11px] font-mono leading-relaxed glass rounded-xl p-3 overflow-x-auto bg-black/30" dangerouslySetInnerHTML={{ __html: highlightCode(project.code) }} />

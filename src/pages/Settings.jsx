@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getCurriculum } from '@/lib/curriculum';
@@ -61,7 +62,7 @@ export default function Settings() {
         <div className="flex-1">
           <h3 className="font-bold text-sm">{user?.full_name || (isGuest ? 'Guest User' : 'User')}</h3>
           <p className="text-xs text-muted-foreground">{user?.email || 'Not signed in'}</p>
-          {isGuest && <span className="text-[10px] text-yellow-400 mt-1 inline-block">Guest mode • Progress saved locally</span>}
+          {isGuest && <span className="text-[10px] text-amber-600 dark:text-yellow-400 mt-1 inline-block">Guest mode • Progress saved locally</span>}
         </div>
       </div>
 
@@ -103,7 +104,7 @@ export default function Settings() {
           </div>
           <div className="flex-1 text-left">
             <h3 className="font-bold text-sm">Change Class</h3>
-            <p className="text-xs text-muted-foreground">Currently: {selectedClass?.replace('_', ' ') || 'None'}</p>
+            <p className="text-xs text-muted-foreground">Currently: {formatClass(selectedClass) || 'None'}</p>
           </div>
           <span className="text-xs text-cyan-400">{changingClass ? 'Cancel' : 'Change'}</span>
         </button>

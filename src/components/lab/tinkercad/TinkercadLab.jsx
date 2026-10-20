@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { useNavigate } from 'react-router-dom';
 import {
   Undo2, Redo2, Trash2, ChevronLeft, Code2, Play, Pause, RotateCcw, Languages,
@@ -248,9 +249,9 @@ export default function TinkercadLab({ onExit }) {
         </button>
         <span className="text-xs font-bold text-cyan-400 hidden sm:inline">LAB</span>
 
-        <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all">
+        {aiEnabled && <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all">
           <Sparkles className="w-3.5 h-3.5" /><span className="hidden sm:inline">Build Anything</span>
-        </button>
+        </button>}
 
         <div className="ml-auto flex items-center gap-1">
           <button onClick={undo} disabled={!past.length} title="Undo" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 disabled:opacity-30 transition-colors hidden sm:block"><Undo2 className="w-4 h-4" /></button>

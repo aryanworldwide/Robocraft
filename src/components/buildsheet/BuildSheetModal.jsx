@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { generateBuildSheetData } from '@/lib/buildsheet/generateData';
 import { exportToPDF } from '@/lib/buildsheet/exportUtils';
 import BuildSheet from '@/components/buildsheet/BuildSheet';
@@ -90,7 +91,7 @@ Use simple English. Use emojis. Write 4-6 paragraphs.`;
       </div>
 
       {/* AI Explain Build bar */}
-      {data && (
+      {data && aiEnabled && (
         <div className="relative z-10 px-4 py-2 glass border-b border-cyan-500/10 flex items-center justify-center" onClick={e => e.stopPropagation()}>
           <button onClick={handleExplain}
             className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-colors">

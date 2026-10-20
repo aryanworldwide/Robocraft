@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Send, Sparkles, X, Bot, Loader2, Code, Trophy, Lightbulb, TrendingUp } from 'lucide-react';
 import MessageBubble from '@/components/learning/MessageBubble';
 
-export default function AIMentor({ lessonContext, compact }) {
+function AIMentorInner({ lessonContext, compact }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,7 +164,7 @@ export default function AIMentor({ lessonContext, compact }) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
-      <div className="glass-strong rounded-3xl flex flex-col h-[75vh]">
+      <div className="glass-strong rounded-3xl flex flex-col" style={{ height: 'calc(100dvh - 19rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))', minHeight: 360 }}>
         <div className="flex items-center gap-2 p-4 border-b border-cyan-500/10">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center">
             <Bot className="w-5 h-5 text-cyan-400" />
@@ -228,4 +229,9 @@ export default function AIMentor({ lessonContext, compact }) {
       </div>
     </div>
   );
+}
+
+export default function AIMentor(props) {
+  if (!aiEnabled) return null;
+  return <AIMentorInner {...props} />;
 }

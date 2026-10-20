@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { accountsEnabled } from "@/lib/features";
+import AccountsComingSoon from "@/components/AccountsComingSoon";
 import { Link } from "react-router-dom";
 import { backend } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,7 @@ export default function ForgotPassword() {
         </Link>
       }
     >
+      {accountsEnabled ? (<>
       {sent ? (
         <p className="text-sm text-foreground text-center">
           If an account exists with that email, you'll receive a password reset link shortly.
@@ -71,6 +74,7 @@ export default function ForgotPassword() {
           </Button>
         </form>
       )}
+      </>) : <AccountsComingSoon />}
     </AuthLayout>
   );
 }

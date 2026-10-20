@@ -96,7 +96,7 @@ function Thinking({ question, color }) {
   );
 }
 
-export default function LessonExperience({ lesson, quizQuestions, color, onComplete }) {
+export default function LessonExperience({ lesson, quizQuestions, color, onComplete, onOpenFlashcards }) {
   const navigate = useNavigate();
   const { selectedClass } = useApp();
   const engineering = getMode(selectedClass) === 'engineering';
@@ -296,7 +296,7 @@ export default function LessonExperience({ lesson, quizQuestions, color, onCompl
 
           {/* FLASHCARDS + QUIZ + REVISION row */}
           <div className="grid grid-cols-3 gap-2">
-            <button onClick={() => navigate(`/quiz/${lesson.id}`)} className="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:neon-glow transition-all">
+            <button onClick={() => (onOpenFlashcards ? onOpenFlashcards() : navigate(`/quiz/${lesson.id}`))} className="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:neon-glow transition-all">
               <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center"><Layers className="w-4 h-4 text-purple-400" /></div>
               <span className="text-[10px] font-medium text-center leading-tight">Flashcards<br /><span className="text-muted-foreground">{flashCards.length}</span></span>
             </button>

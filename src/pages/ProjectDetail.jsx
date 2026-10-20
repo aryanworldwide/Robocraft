@@ -49,7 +49,7 @@ export default function ProjectDetail() {
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(sanitizeCode(project.arduinoCode || ''));
+    navigator.clipboard?.writeText(sanitizeCode(project.arduinoCode || ''))?.catch?.(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

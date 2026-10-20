@@ -11,3 +11,6 @@ export const isIframe = window.self !== window.top;
 // Absolute URL inside the app, respecting the deploy base path
 // (e.g. '/' in the Android app, '/Robocraft/' on GitHub Pages).
 export const appUrl = (path = '/') => import.meta.env.BASE_URL.replace(/\/$/, '') + (path.startsWith('/') ? path : '/' + path);
+
+// 'class_9' → 'Class 9'
+export const formatClass = (id) => (id ? id.replace('_', ' ').replace(/^c/, 'C') : '');

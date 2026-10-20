@@ -13,6 +13,9 @@ const shorten = (s, n = 130) => {
   return t.length <= n ? t : t.slice(0, n - 1).replace(/\s+\S*$/, '') + '…';
 };
 const normKey = (q) => clean(q).toLowerCase();
+// Small deterministic helpers (same lesson → same quiz, no randomness in PDFs)
+const seed = (str) => { let h = 2166136261; for (const ch of String(str)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return Math.abs(h); };
+const rotate = (arr, n) => (arr.length ? [...arr.slice(n % arr.length), ...arr.slice(0, n % arr.length)] : arr);
 
 // Split theory into {heading, body, bullets} blocks
 function theoryBlocks(lesson) {
@@ -173,6 +176,58 @@ export function generateQuizForLesson(lesson, allLessons = []) {
     }
   }
 
+  // ── 7. Key-concept MCQs: which term belongs to this lesson ──
+  const otherSubjectConcepts = allLessons
+    .filter(l => l.subject !== lesson.subject)
+    .flatMap(l => l.keyConcepts || [])
+    .filter(c => !theoryText.toLowerCase().includes(String(c).toLowerCase()));
+  (lesson.keyConcepts || []).slice(0, 3).forEach((concept, k) => {
+    const term = clean(concept);
+    if (!term || term.length > 60) return;
+    const pool = rotate(otherSubjectConcepts, seed(lesson.id) + k * 7).map(clean).filter(t => t.length >= 3 && t.length <= 60);
+    const distractors = [];
+    for (const t of pool) { if (distractors.length >= 3) break; if (normKey(t) !== normKey(term) && !distractors.some(d => normKey(d) === normKey(t))) distractors.push(t); }
+    if (distractors.length < 3) return;
+    questions.push({
+      q: k === 0 ? `Which of these is a key idea in "${lesson.title}"?` : `"${lesson.title}" also covers which of these?`,
+      type: 'mcq', options: [term, ...distractors], answer: 0,
+      explanation: `${term} is one of the key ideas in "${lesson.title}".`,
+    });
+  });
+
+  // ── 8. Learning-objective true/false ──
+  const objectives = (lesson.objectives || []).map(clean).filter(o => o.length > 10 && o.length < 120);
+  objectives.slice(0, 2).forEach(o => {
+    questions.push({ q: `True or false: "${lesson.title}" teaches you to ${o.charAt(0).toLowerCase() + o.slice(1).replace(/\.$/, '')}.`, type: 'tf', answer: true,
+      explanation: `Yes — this is one of the lesson's learning goals.` });
+  });
+  const foreignObjective = rotate(allLessons.filter(l => l.subject !== lesson.subject).flatMap(l => l.objectives || []), seed(lesson.id))
+    .map(clean).find(o => o.length > 10 && o.length < 120);
+  if (foreignObjective) {
+    questions.push({ q: `True or false: "${lesson.title}" teaches you to ${foreignObjective.charAt(0).toLowerCase() + foreignObjective.slice(1).replace(/\.$/, '')}.`, type: 'tf', answer: false,
+      explanation: `No — that belongs to a different topic, not "${lesson.title}".` });
+  }
+
+  // ── 9. Summary statements (always, not only when few definitions) ──
+  if (lesson.summary) {
+    clean(lesson.summary).split(/(?<=[.!?])\s+/).filter(x => x.length > 25).slice(0, 2).forEach(sent => {
+      const distractors = pickDistractors(sent, rotate([...crossPool, ...answerPool], seed(sent)), 3);
+      if (distractors.length < 3) return;
+      questions.push({ q: `According to "${lesson.title}", which statement is correct?`, type: 'mcq',
+        options: [shorten(sent), ...distractors], answer: 0, explanation: shorten(sent) });
+    });
+  }
+
+  // Shuffle each MCQ's options (deterministically per question) so the correct
+  // answer isn't always option A — matters for the printed PDF answer key.
+  questions.forEach((q, i) => {
+    if (q.type !== 'mcq' || !Array.isArray(q.options)) return;
+    const order = rotate(q.options.map((_, k) => k), seed(lesson.id + i) ).sort((x, y) => ((seed(lesson.id + i + ':' + x) % 97) - (seed(lesson.id + i + ':' + y) % 97)));
+    const correctText = q.options[q.answer];
+    q.options = order.map(k => q.options[k]);
+    q.answer = q.options.indexOf(correctText);
+  });
+
   // Deduplicate by question text, then take the first 10 (definitions and
   // content questions first — they are the highest quality).
   const seen = new Set();
@@ -181,5 +236,5 @@ export function generateQuizForLesson(lesson, allLessons = []) {
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
-  }).slice(0, 10);
+  }).slice(0, 12);
 }

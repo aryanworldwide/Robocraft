@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { formatClass } from '@/lib/utils';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Home, BookOpen, FolderGit2, Search, BarChart3, Wrench } from 'lucide-react';
 import { useApp } from '@/lib/AppContext';
@@ -23,12 +24,15 @@ export default function Layout() {
     if (pathname.startsWith('/project')) return '/projects';
     if (pathname.startsWith('/lab')) return '/lab';
     if (pathname.startsWith('/progress')) return '/progress';
-    return '/';
+    if (pathname === '/') return '/';
+    return null; // settings, mentor, revision, search, challenges: no tab highlighted
   };
 
   const activeTab = useMemo(() => getActiveTab(location.pathname), [location.pathname]);
+  const inLab = location.pathname.startsWith('/lab');
 
   useEffect(() => {
+    if (!activeTab) return;
     const saved = tabState.current[activeTab]?.scrollY;
     if (saved !== undefined) {
       requestAnimationFrame(() => window.scrollTo(0, saved));
@@ -38,12 +42,14 @@ export default function Layout() {
   }, [activeTab, location.pathname]);
 
   const handleTabClick = (path) => {
-    if (activeTab === path) {
+    if (activeTab && activeTab === path) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    tabState.current[activeTab] = tabState.current[activeTab] || {};
-    tabState.current[activeTab].scrollY = window.scrollY;
+    if (activeTab) {
+      tabState.current[activeTab] = tabState.current[activeTab] || {};
+      tabState.current[activeTab].scrollY = window.scrollY;
+    }
     navigate(path);
   };
 
@@ -83,7 +89,7 @@ export default function Layout() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs glass px-3 py-1.5 rounded-full text-cyan-400 font-medium">
-              {selectedClass.replace('_', ' ')}
+              {formatClass(selectedClass)}
             </span>
             <button
               onClick={() => navigate('/settings')}
@@ -100,8 +106,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-cyan-500/10" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      {/* Bottom navigation (hidden in the Lab, which has its own toolbar) */}
+      {!inLab && <div className="fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-cyan-500/10" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-2xl mx-auto flex items-center justify-around px-2 py-2">
           {navItems.map(item => {
             const active = activeTab === item.path;
@@ -122,10 +128,10 @@ export default function Layout() {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Floating AI Mentor */}
-      <AIMentor compact />
+      {!inLab && location.pathname !== '/mentor' && <AIMentor compact />}
     </div>
   );
 }

@@ -38,7 +38,7 @@ export const BADGES = [
   { id: 'streak_3', name: 'On Fire', description: '3-day learning streak', icon: 'Flame', color: '#F97316' },
   { id: 'streak_7', name: 'Week Warrior', description: '7-day learning streak', icon: 'Flame', color: '#EF4444' },
   { id: 'streak_30', name: 'Unstoppable', description: '30-day learning streak', icon: 'Flame', color: '#DC2626' },
-  { id: 'all_flashcards', name: 'Card Master', description: 'Review all flash cards in a lesson', icon: 'Layers', color: '#06B6D4' },
+  { id: 'all_flashcards', name: 'Card Master', description: 'Review a full deck of flash cards', icon: 'Layers', color: '#06B6D4' },
   { id: 'activity_complete', name: 'Game On', description: 'Complete your first interactive activity', icon: 'Gamepad2', color: '#8B5CF6' },
   { id: 'fast_learner', name: 'Fast Learner', description: 'Complete 3 lessons in one day', icon: 'Zap', color: '#F59E0B' },
   { id: 'circuit_master', name: 'Circuit Master', description: 'Complete all Computing lessons in a class', icon: 'Cpu', color: '#10B981' },
@@ -71,7 +71,10 @@ export function checkBadges(progress, classId, allLessons) {
   if (streak >= 7) tryAdd('streak_7');
   if (streak >= 30) tryAdd('streak_30');
   if (Object.keys(flashcardReviews).length >= 1) tryAdd('all_flashcards');
-  if (progress.activitiesCompleted) tryAdd('activity_complete');
+  if ((progress.activitiesCompleted || []).length > 0) tryAdd('activity_complete');
+  const today = localDay();
+  const doneToday = Object.values(progress.lessonDates || {}).filter(d => d === today).length;
+  if (doneToday >= 3) tryAdd('fast_learner');
 
   if (allLessons && allLessons.length > 0) {
     const roboticsLessons = allLessons.filter(l => l.subject === 'Robotics');
@@ -98,7 +101,13 @@ export const WEEKLY_MISSIONS = [
   { id: 'w_perfect_3', name: 'Get 100% on 3 Quizzes', xp: 250, coins: 60, icon: 'Crown' },
 ];
 
-function getToday() { return new Date().toISOString().split('T')[0]; }
+// Local calendar day (not UTC) so streaks and daily missions reset at the
+// student's own midnight.
+export function localDay(offsetDays = 0) {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getToday() { return localDay(); }
 function getWeekId() { const d = new Date(); const y = d.getFullYear(); const start = new Date(y, 0, 1); const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7); return `${y}_W${week}`; }
 
 export function getDailyMissionsStatus(progress) {

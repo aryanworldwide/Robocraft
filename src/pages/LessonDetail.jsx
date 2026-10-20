@@ -22,6 +22,7 @@ import ChallengeMe from '@/components/learning/ChallengeMe';
 import ExperimentMode from '@/components/learning/ExperimentMode';
 import LessonExperience from '@/components/lesson/LessonExperience';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
+import { toast } from '@/components/ui/use-toast';
 
 export default function LessonDetail() {
   const { id } = useParams();
@@ -116,10 +117,19 @@ export default function LessonDetail() {
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try { await navigator.share({ title: lesson.title, text: `Learning ${lesson.title} on RoboCraft!` }); } catch {}
-    } else {
-      navigator.clipboard?.writeText(window.location.href);
+    const text = `I'm learning "${lesson.title}" on RoboCraft!`;
+    try {
+      if (window.Capacitor?.isNativePlatform?.()) {
+        const { Share } = await import('@capacitor/share');
+        await Share.share({ title: lesson.title, text, dialogTitle: 'Share lesson' });
+        return;
+      }
+      if (navigator.share) { await navigator.share({ title: lesson.title, text, url: window.location.href }); return; }
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ title: 'Link copied', description: 'Paste it anywhere to share this lesson.' });
+    } catch (e) {
+      if (e?.name === 'AbortError' || /cancel/i.test(e?.message || '')) return; // user closed the share sheet
+      toast({ title: "Couldn't share", description: 'Sharing isn\'t available on this device.' });
     }
   };
 
@@ -197,7 +207,7 @@ export default function LessonDetail() {
 
         {/* READ MODE */}
         {activeMode === 'read' && (
-          <LessonExperience lesson={lesson} quizQuestions={quizQuestions} color={color} onComplete={handleComplete} />
+          <LessonExperience lesson={lesson} quizQuestions={quizQuestions} color={color} onComplete={handleComplete} onOpenFlashcards={() => { setActiveMode('interact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         )}
 
         {/* LISTEN MODE */}

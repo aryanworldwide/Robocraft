@@ -28,12 +28,12 @@ export default function ClassSelection() {
       <div className="relative z-10 w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8 animate-slide-up">
-          <button
-            onClick={() => navigate('/login')}
+          {selectedClass && <button
+            onClick={() => navigate('/')}
             className="absolute left-0 top-0 text-muted-foreground hover:text-cyan-400 flex items-center gap-1 text-sm transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back
-          </button>
+          </button>}
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass-strong neon-glow mb-4 animate-pulse-glow">
             <Cpu className="w-8 h-8 text-cyan-400" />
           </div>

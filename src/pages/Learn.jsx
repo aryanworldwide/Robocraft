@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import PullToRefresh from '@/components/PullToRefresh';
 import { useApp } from '@/lib/AppContext';
@@ -28,7 +29,7 @@ export default function Learn() {
     <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
       <div className="animate-slide-up">
         <h1 className="text-2xl font-bold gradient-text">Learn</h1>
-        <p className="text-sm text-muted-foreground">{selectedClass.replace('_', ' ')} curriculum • {subjects.length} subjects</p>
+        <p className="text-sm text-muted-foreground">{formatClass(selectedClass)} curriculum • {subjects.length} subjects</p>
       </div>
 
       {subjects.map((subject, sIdx) => {

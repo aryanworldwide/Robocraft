@@ -107,7 +107,7 @@ export default function FullscreenCircuit({ pinConnections, projectName, onClose
 
           {/* Hint */}
           <div className="absolute bottom-3 left-3 text-[10px] glass-strong px-3 py-1.5 rounded-lg text-muted-foreground pointer-events-none">
-            Drag to pan · Scroll to zoom · Tap a wire or component
+            {typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches ? 'Drag to pan · Pinch to zoom · Tap a wire or component' : 'Drag to pan · Scroll to zoom · Tap a wire or component'}
           </div>
 
           {/* Wire list (tap to highlight) */}

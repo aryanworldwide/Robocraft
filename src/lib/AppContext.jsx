@@ -1,10 +1,12 @@
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { backend } from '@/api/client';
-import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES } from '@/lib/gamification';
+import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES, localDay } from '@/lib/gamification';
 import { getAllLessons } from '@/lib/curriculum';
 import { useAuth } from '@/lib/AuthContext';
 
 const AppContext = createContext();
+
+const localDayOf = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 export const AppProvider = ({ children }) => {
   const { user, isGuest, authChecked, logout: authLogout } = useAuth();
@@ -112,7 +114,9 @@ export const AppProvider = ({ children }) => {
     const oldLevel = getLevel(oldXp);
     const newXp = oldXp + amount;
     const newLevel = getLevel(newXp);
-    updateProgress(classId, { xp: newXp });
+    const day = localDay();
+    const xpToday = (classProgress.xpDay === day ? classProgress.xpToday || 0 : 0) + amount;
+    updateProgress(classId, { xp: newXp, xpDay: day, xpToday });
     if (newLevel.levelNumber > oldLevel.levelNumber) {
       setLevelPopup(newLevel.current);
     }
@@ -132,9 +136,9 @@ export const AppProvider = ({ children }) => {
 
   const updateStreak = (classId) => {
     const classProgress = getProgressForClass(classId);
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDay();
     if (classProgress.lastStreakDate === today) return;
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const yesterday = localDay(-1);
     const newStreak = classProgress.lastStreakDate === yesterday ? (classProgress.streak || 0) + 1 : 1;
     updateProgress(classId, { streak: newStreak, lastStreakDate: today });
   };
@@ -152,7 +156,7 @@ export const AppProvider = ({ children }) => {
     }
     // Check earn_100_xp
     classProgress = getProgressForClass(classId);
-    if ((classProgress.xp || 0) >= 100) {
+    if (classProgress.xpDay === localDay() && (classProgress.xpToday || 0) >= 100) {
       const { progress: u2, awarded: a2 } = recordMission(classProgress, 'earn_100_xp', 'daily');
       if (a2) {
         const m = DAILY_MISSIONS.find(x => x.id === 'earn_100_xp');
@@ -178,6 +182,18 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Weekly missions: 5 lessons this week, a 7-day streak, three 100% quizzes this week.
+  const checkWeeklyMissions = (classId) => {
+    const cp = getProgressForClass(classId);
+    const weekStart = localDay(-((new Date().getDay() + 6) % 7)); // Monday
+    const lessonsThisWeek = Object.values(cp.lessonDates || {}).filter(d => d >= weekStart).length;
+    const perfectThisWeek = Object.values(cp.quizScores || {}).flat()
+      .filter(s => s.percentage === 100 && s.date && localDayOf(s.date) >= weekStart).length;
+    if (lessonsThisWeek >= 5) recordWeeklyMission(classId, 'w_complete_5');
+    if ((cp.streak || 0) >= 7) recordWeeklyMission(classId, 'w_7_day_streak');
+    if (perfectThisWeek >= 3) recordWeeklyMission(classId, 'w_perfect_3');
+  };
+
   const markLessonComplete = (classId, lessonId) => {
     const classProgress = getProgressForClass(classId);
     if (!classProgress.completedLessons.includes(lessonId)) {
@@ -185,11 +201,13 @@ export const AppProvider = ({ children }) => {
       const coins = (classProgress.coins || 0) + 10;
       updateProgress(classId, {
         completedLessons: [...classProgress.completedLessons, lessonId],
+        lessonDates: { ...(classProgress.lessonDates || {}), [lessonId]: localDay() },
         coins,
         lastActiveDate: new Date().toISOString()
       });
       updateStreak(classId);
       recordDailyMission(classId, 'complete_lesson');
+      checkWeeklyMissions(classId);
       setTimeout(() => checkAndAwardBadges(classId), 100);
     }
   };
@@ -221,6 +239,7 @@ export const AppProvider = ({ children }) => {
     });
     updateStreak(classId);
     recordDailyMission(classId, 'take_quiz');
+    checkWeeklyMissions(classId);
     setTimeout(() => checkAndAwardBadges(classId), 100);
   };
 
@@ -289,7 +308,7 @@ export const AppProvider = ({ children }) => {
 
   const getDailyMissions = (classId) => {
     const classProgress = getProgressForClass(classId);
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDay();
     const todayMissions = (classProgress.dailyMissions && classProgress.dailyMissions[today]) || { completed: [] };
     return DAILY_MISSIONS.map(m => ({ ...m, done: todayMissions.completed.includes(m.id) }));
   };

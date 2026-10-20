@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { Wand2, Lightbulb, HelpCircle, Swords, Loader2, Bot } from 'lucide-react';
 import { backend } from '@/api/client';
 
 // AI-powered "explain differently" tools — only invoked on explicit click.
-export default function ExplainDifferently({ lesson }) {
+function ExplainDifferentlyInner({ lesson }) {
   const [active, setActive] = useState(null); // 'simpler' | 'example' | 'why' | 'challenge'
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,4 +67,10 @@ export default function ExplainDifferently({ lesson }) {
       )}
     </div>
   );
+}
+
+
+export default function ExplainDifferently(props) {
+  if (!aiEnabled) return null; // AI not configured for this build
+  return <ExplainDifferentlyInner {...props} />;
 }

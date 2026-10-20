@@ -20,7 +20,9 @@ export function useBackStack() {
   const canGoBack = !isRoot;
 
   const goBack = () => {
-    if (window.history.length > 1) {
+    // Only go back if the previous page is inside the app; opened from a shared
+    // link there is no in-app history, so go to the parent screen instead.
+    if ((window.history.state?.idx ?? 0) > 0) {
       navigate(-1);
     } else {
       navigate(parentPath);

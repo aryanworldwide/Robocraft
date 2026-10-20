@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { searchContent } from '@/lib/curriculum';
@@ -20,7 +21,7 @@ export default function SearchPage() {
     <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
       <div className="animate-slide-up">
         <h1 className="text-2xl font-bold gradient-text">Search</h1>
-        <p className="text-sm text-muted-foreground">Searching within {selectedClass.replace('_', ' ')} curriculum</p>
+        <p className="text-sm text-muted-foreground">Searching within {formatClass(selectedClass)} curriculum</p>
       </div>
 
       {/* Search input */}
@@ -107,7 +108,7 @@ export default function SearchPage() {
         <div className="text-center py-16 animate-fade-in">
           <SearchIcon className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
           <p className="text-sm text-muted-foreground">Start typing to search lessons and projects</p>
-          <p className="text-xs text-muted-foreground mt-1">Only {selectedClass.replace('_', ' ')} content will be shown</p>
+          <p className="text-xs text-muted-foreground mt-1">Only {formatClass(selectedClass)} content will be shown</p>
         </div>
       )}
     </div>

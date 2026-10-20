@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getProjects } from '@/lib/curriculum';
@@ -6,6 +7,8 @@ import PullToRefresh from '@/components/PullToRefresh';
 import AISearchBar from '@/components/projects/AISearchBar';
 import AIGeneratedProjectView from '@/components/projects/AIGeneratedProjectView';
 import { generateOrRetrieveProject } from '@/lib/buildsheet/aiProjectSearch';
+import { aiEnabled } from '@/lib/features';
+import { toast } from '@/components/ui/use-toast';
 import { Clock, DollarSign, ChevronRight, Wrench, Filter, Bot, Loader2, Cpu } from 'lucide-react';
 
 export default function Projects() {
@@ -33,7 +36,10 @@ export default function Projects() {
       }
       setGeneratedProject(result.project);
     } catch (err) {
-      console.error('AI generation failed:', err);
+      console.error('Project search failed:', err);
+      toast(aiEnabled
+        ? { title: "Couldn't create that project", description: 'Please check your internet and try again.' }
+        : { title: 'No matching project yet', description: 'The AI project creator is coming soon. Try a shorter search like "line follower" or "servo".' });
     } finally {
       setLoading(false);
     }
@@ -53,7 +59,7 @@ export default function Projects() {
     <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
       <div className="animate-slide-up">
         <h1 className="text-2xl font-bold gradient-text">Projects</h1>
-        <p className="text-sm text-muted-foreground">Search any robotics project • AI generates instantly • {selectedClass.replace('_', ' ')}</p>
+        <p className="text-sm text-muted-foreground">{aiEnabled ? 'Search any robotics project • AI generates instantly' : 'Search the project library'} • {formatClass(selectedClass)}</p>
       </div>
 
       {/* AI Search Bar */}

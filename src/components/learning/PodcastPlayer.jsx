@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Play, Pause, SkipForward, SkipBack, Gauge, Languages, Loader2, Radio, RotateCcw } from 'lucide-react';
 import SpeedPicker from './SpeedPicker';
 
-export default function PodcastPlayer({ lesson, language = 'en', onLanguageChange }) {
+function PodcastPlayerInner({ lesson, language = 'en', onLanguageChange }) {
   const [segments, setSegments] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -293,4 +294,9 @@ Return as JSON with a "turns" array.`,
       />
     </div>
   );
+}
+
+export default function PodcastPlayer(props) {
+  if (!aiEnabled) return null; // AI not configured for this build
+  return <PodcastPlayerInner {...props} />;
 }

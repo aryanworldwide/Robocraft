@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getMode } from '@/lib/adaptive';
@@ -187,7 +188,7 @@ export default function Home() {
           </div>
           <div>
             <h3 className="font-bold text-sm mb-1">Your Progress</h3>
-            <p className="text-xs text-muted-foreground">{selectedClass.replace('_', ' ')} curriculum</p>
+            <p className="text-xs text-muted-foreground">{formatClass(selectedClass)} curriculum</p>
             <p className="text-xs text-cyan-400 mt-2 font-medium">{progress.completedLessons?.length || 0} of {totalLessons} lessons done</p>
           </div>
         </div>

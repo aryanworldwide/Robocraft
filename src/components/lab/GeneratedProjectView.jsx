@@ -21,7 +21,7 @@ function CodeBlock({ code, filename }) {
   const [copied, setCopied] = useState(false);
   if (!code || !code.trim()) return <p className="text-xs text-muted-foreground py-4 text-center">No code available for this board.</p>;
 
-  const handleCopy = () => { navigator.clipboard?.writeText(sanitizeCode(code)); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  const handleCopy = () => { navigator.clipboard?.writeText(sanitizeCode(code))?.catch?.(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   const handleDownload = () => {
     const blob = new Blob([sanitizeCode(code)], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

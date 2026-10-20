@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { aiEnabled } from '@/lib/features';
 import { Copy, Check, Download, Sparkles, Loader2 } from 'lucide-react';
 import { backend } from '@/api/client';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
@@ -11,7 +12,7 @@ export default function CodePanel({ code, pins, experiment, canProgram, onKnowCo
 
   const shown = sanitizeCode(mode === 'ai' ? (aiCode || '') : code);
 
-  const handleCopy = () => { navigator.clipboard.writeText(shown); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  const handleCopy = () => { navigator.clipboard?.writeText(shown)?.catch?.(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   const handleDownload = () => {
     const blob = new Blob([shown], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -53,9 +54,9 @@ export default function CodePanel({ code, pins, experiment, canProgram, onKnowCo
       {canProgram && (
         <div className="flex gap-1.5 p-2 border-t border-cyan-500/10">
           <button onClick={onKnowCode} className={`flex-1 text-[10px] font-bold rounded-lg py-1.5 ${mode === 'local' ? 'bg-cyan-500/20 text-cyan-400' : 'glass text-muted-foreground'}`}>I know the code</button>
-          <button onClick={handleHelp} disabled={aiLoading} className="flex-1 text-[10px] font-bold rounded-lg py-1.5 glass text-purple-400 hover:bg-purple-500/10 flex items-center justify-center gap-1">
+          {aiEnabled && <button onClick={handleHelp} disabled={aiLoading} className="flex-1 text-[10px] font-bold rounded-lg py-1.5 glass text-purple-400 hover:bg-purple-500/10 flex items-center justify-center gap-1">
             {aiLoading ? <><Loader2 className="w-3 h-3 animate-spin" /> …</> : <><Sparkles className="w-3 h-3" /> Help me</>}
-          </button>
+          </button>}
         </div>
       )}
     </div>
