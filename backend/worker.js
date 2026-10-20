@@ -1,0 +1,103 @@
+// RoboCraft AI server — Cloudflare Worker using Workers AI (free tier).
+// Paste this whole file into a new Worker, add a "Workers AI" binding named AI,
+// then Deploy. No API keys needed.
+
+const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const GUARD = '@cf/meta/llama-guard-3-8b';
+const ALLOWED_ORIGINS = [
+  'https://aryanworldwide.github.io', // web / iPhone version
+  'https://localhost',                // Android app
+  'capacitor://localhost',
+  'http://localhost:5173',            // local development
+];
+
+// Rules for every answer: the app is used by school students (about 13–17).
+const SYSTEM = `You are RoboMentor, a friendly study helper inside RoboCraft, a learning app for Indian school students in Classes 9–11 (ages about 13–17).
+Rules you must always follow:
+- Only help with learning: robotics, electronics, Arduino/ESP32, coding, AI, maths and science, and how to study them.
+- Keep language simple, encouraging and age-appropriate. No adult, violent, hateful or frightening content.
+- Electrical safety: only suggest low-voltage battery/USB projects (under 12 V). Never give instructions for mains (230 V AC) wiring, lithium battery modification, weapons, or anything dangerous; tell the student to ask a teacher or adult instead.
+- Never ask for or store personal information (full name, phone, address, school, photos, passwords).
+- If a student seems upset, unsafe or mentions self-harm, respond kindly, encourage them to talk to a trusted adult, and share India's Tele-MANAS helpline 14416.
+- If asked about anything off-topic, gently steer back to learning.
+- When asked for JSON, reply with valid JSON only.`;
+
+// Simple per-IP limit (per server instance) to protect the free daily allowance.
+const hits = new Map();
+function limited(ip) {
+  const now = Date.now(), win = 10 * 60 * 1000, max = 40;
+  const arr = (hits.get(ip) || []).filter(t => now - t < win);
+  arr.push(now); hits.set(ip, arr);
+  return arr.length > max;
+}
+
+function cors(origin) {
+  const ok = ALLOWED_ORIGINS.includes(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin || '');
+  return {
+    'Access-Control-Allow-Origin': ok ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  };
+}
+const json = (data, status, origin) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...cors(origin) } });
+
+function extractJson(text) {
+  if (typeof text !== 'string') return text;
+  try { return JSON.parse(text); } catch {}
+  const m = text.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
+}
+
+export default {
+  async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors(origin) });
+    const url = new URL(request.url);
+    if (request.method === 'GET') return json({ ok: true, service: 'robocraft-ai' }, 200, origin);
+    if (request.method !== 'POST' || url.pathname !== '/ai') return json({ error: 'Not found' }, 404, origin);
+
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    if (limited(ip)) return json({ error: 'Too many requests. Please wait a few minutes.' }, 429, origin);
+
+    let body;
+    try { body = await request.json(); } catch { return json({ error: 'Bad request' }, 400, origin); }
+    const prompt = String(body.prompt || '').slice(0, 12000);
+    const userInput = body.user_input ? String(body.user_input).slice(0, 2000) : '';
+    const schema = body.schema && typeof body.schema === 'object' ? body.schema : null;
+    if (!prompt) return json({ error: 'Empty prompt' }, 400, origin);
+
+    try {
+      // Safety check on what the student typed (only for free-text questions).
+      if (userInput) {
+        const g = await env.AI.run(GUARD, { messages: [{ role: 'user', content: userInput }] });
+        const verdict = (g && (g.response?.safe === false || /unsafe/i.test(JSON.stringify(g.response ?? g)))) ? 'unsafe' : 'safe';
+        if (verdict === 'unsafe') {
+          const msg = "I can only help with learning topics like robotics, coding and science. If something is worrying you, please talk to a trusted adult — or call India's Tele-MANAS helpline 14416.";
+          return json({ result: schema ? { response: msg, text: msg, explanation: msg, code: '' } : msg, blocked: true }, 200, origin);
+        }
+      }
+
+      const messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }];
+      const base = { messages, max_tokens: 1800, temperature: 0.4 };
+      let out;
+      if (schema) {
+        try {
+          out = await env.AI.run(MODEL, { ...base, response_format: { type: 'json_schema', json_schema: schema } });
+        } catch {
+          out = await env.AI.run(MODEL, { ...base, messages: [...messages, { role: 'system', content: 'Reply with one JSON object only, matching this schema: ' + JSON.stringify(schema) }] });
+        }
+        const parsed = extractJson(out.response);
+        if (!parsed) return json({ error: 'The AI gave an unexpected answer. Please try again.' }, 502, origin);
+        return json({ result: parsed }, 200, origin);
+      }
+      out = await env.AI.run(MODEL, base);
+      return json({ result: String(out.response || '').trim() }, 200, origin);
+    } catch (e) {
+      const msg = /neuron|quota|limit|capacity/i.test(String(e)) ? "Today's free AI limit has been reached. Please try again tomorrow." : 'AI is busy right now. Please try again.';
+      return json({ error: msg }, 503, origin);
+    }
+  },
+};
