@@ -43,6 +43,15 @@ function cors(origin) {
 }
 const json = (data, status, origin) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...cors(origin) } });
 
+// Workers AI answers come back either as { response } or OpenAI-style { choices }.
+function textOf(out) {
+  if (!out) return '';
+  if (typeof out === 'string') return out;
+  if (out.response !== undefined) return typeof out.response === 'string' ? out.response : JSON.stringify(out.response);
+  const c = out.choices?.[0];
+  return c?.message?.content ?? c?.text ?? '';
+}
+
 function extractJson(text) {
   if (typeof text !== 'string') return text;
   try { return JSON.parse(text); } catch {}
@@ -73,7 +82,7 @@ export default {
       // Safety check on what the student typed (only for free-text questions).
       if (userInput) {
         const g = await env.AI.run(GUARD, { messages: [{ role: 'user', content: userInput }] });
-        const verdict = (g && (g.response?.safe === false || /unsafe/i.test(JSON.stringify(g.response ?? g)))) ? 'unsafe' : 'safe';
+        const verdict = /\bunsafe\b/i.test(textOf(g)) || g?.response?.safe === false ? 'unsafe' : 'safe';
         if (verdict === 'unsafe') {
           const msg = "I can only help with learning topics like robotics, coding and science. If something is worrying you, please talk to a trusted adult — or call India's Tele-MANAS helpline 14416.";
           return json({ result: schema ? { response: msg, text: msg, explanation: msg, code: '' } : msg, blocked: true }, 200, origin);
@@ -89,15 +98,15 @@ export default {
         } catch {
           out = await env.AI.run(MODEL, { ...base, messages: [...messages, { role: 'system', content: 'Reply with one JSON object only, matching this schema: ' + JSON.stringify(schema) }] });
         }
-        const parsed = extractJson(out.response);
+        const parsed = extractJson(textOf(out));
         if (!parsed) return json({ error: 'The AI gave an unexpected answer. Please try again.' }, 502, origin);
         return json({ result: parsed }, 200, origin);
       }
       out = await env.AI.run(MODEL, base);
-      return json({ result: String(out.response || '').trim() }, 200, origin);
+      return json({ result: textOf(out).trim() }, 200, origin);
     } catch (e) {
       const msg = /neuron|quota|limit|capacity/i.test(String(e)) ? "Today's free AI limit has been reached. Please try again tomorrow." : 'AI is busy right now. Please try again.';
-      return json({ error: msg }, 503, origin);
+      return json({ error: msg, detail: String(e?.message || e).slice(0, 300) }, 503, origin);
     }
   },
 };
