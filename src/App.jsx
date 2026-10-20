@@ -30,6 +30,7 @@ const Quiz = lazy(() => import('@/pages/Quiz'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const ProgressPage = lazy(() => import('@/pages/ProgressPage'));
 const Settings = lazy(() => import('@/pages/Settings'));
+const Shop = lazy(() => import('@/pages/Shop'));
 const Mentor = lazy(() => import('@/pages/Mentor'));
 const Lab = lazy(() => import('@/pages/Lab'));
 const EngineeringChallenges = lazy(() => import('@/pages/EngineeringChallenges'));
@@ -103,6 +104,7 @@ const AuthenticatedApp = () => {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/shop" element={<Shop />} />
             <Route path="/mentor" element={<Mentor />} />
             <Route path="/lab" element={<Lab />} />
             <Route path="/challenges" element={<EngineeringChallenges />} />

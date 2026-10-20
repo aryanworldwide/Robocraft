@@ -1,8 +1,9 @@
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { backend } from '@/api/client';
-import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES, localDay } from '@/lib/gamification';
+import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES, localDay, REWARD_SHOP, equippedItems } from '@/lib/gamification';
 import { getAllLessons } from '@/lib/curriculum';
 import { useAuth } from '@/lib/AuthContext';
+import { scheduleReminders } from '@/lib/reminders';
 
 const AppContext = createContext();
 
@@ -70,6 +71,23 @@ export const AppProvider = ({ children }) => {
 
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
   }, [progress, selectedClass, isLoading, user, isGuest]);
+
+  // Reward Shop colour theme for the current class.
+  const currentProgress = selectedClass ? progress[selectedClass] : null;
+  const accentValue = equippedItems(currentProgress).accent?.value || 'cyan';
+  useEffect(() => {
+    const root = document.documentElement;
+    if (accentValue === 'cyan') root.removeAttribute('data-accent');
+    else root.setAttribute('data-accent', accentValue);
+  }, [accentValue]);
+
+  // Daily reminders (Android app): reschedule on open and once the student has
+  // studied today, so today's reminder is skipped after they've done a lesson.
+  const studiedToday = !!currentProgress && (currentProgress.lastStreakDate === localDay() || (currentProgress.xpDay === localDay() && (currentProgress.xpToday || 0) > 0));
+  useEffect(() => {
+    if (isLoading) return;
+    scheduleReminders(studiedToday);
+  }, [studiedToday, isLoading]);
 
   const selectClass = (classId) => {
     const uid = user?.id || 'guest';
@@ -306,6 +324,23 @@ export const AppProvider = ({ children }) => {
     return { rewards, box };
   };
 
+  // Reward Shop: buy (if needed) and equip an item. Returns 'equipped' | 'bought' | null.
+  const buyOrEquipItem = (classId, itemId) => {
+    const item = REWARD_SHOP.find(i => i.id === itemId);
+    if (!item) return null;
+    const cp = getProgressForClass(classId);
+    const shop = cp.shop || {};
+    const owned = shop.owned || [];
+    const isOwned = item.cost === 0 || owned.includes(itemId);
+    if (!isOwned) {
+      if ((cp.coins || 0) < item.cost) return null;
+      updateProgress(classId, { coins: (cp.coins || 0) - item.cost, shop: { ...shop, owned: [...owned, itemId], [item.type]: itemId } });
+      return 'bought';
+    }
+    updateProgress(classId, { shop: { ...shop, [item.type]: itemId } });
+    return 'equipped';
+  };
+
   const getDailyMissions = (classId) => {
     const classProgress = getProgressForClass(classId);
     const today = localDay();
@@ -340,7 +375,7 @@ export const AppProvider = ({ children }) => {
       recordQuizScore, addRecentlyViewed, logout,
       recordFlashcardReview, recordActivityComplete, addXP, spendCoins,
       badgePopup, setBadgePopup, levelPopup, setLevelPopup,
-      checkAndAwardBadges, getDailyMissions, getWeeklyMissions, buyMysteryBox,
+      checkAndAwardBadges, getDailyMissions, getWeeklyMissions, buyMysteryBox, buyOrEquipItem,
     }}>
       {children}
     </AppContext.Provider>

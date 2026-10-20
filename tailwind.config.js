@@ -10,6 +10,14 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// Accent colour: "cyan" classes read CSS variables so Reward Shop themes can recolour the whole app.
+  			cyan: {
+  				200: 'rgb(var(--ac-200) / <alpha-value>)',
+  				300: 'rgb(var(--ac-300) / <alpha-value>)',
+  				400: 'rgb(var(--ac-400) / <alpha-value>)',
+  				500: 'rgb(var(--ac-500) / <alpha-value>)',
+  				600: 'rgb(var(--ac-600) / <alpha-value>)'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

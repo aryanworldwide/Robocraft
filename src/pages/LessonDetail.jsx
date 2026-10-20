@@ -20,6 +20,7 @@ import MemoryHacks from '@/components/learning/MemoryHacks';
 import ImConfused from '@/components/learning/ImConfused';
 import ChallengeMe from '@/components/learning/ChallengeMe';
 import ExperimentMode from '@/components/learning/ExperimentMode';
+import LessonVideo from '@/components/learning/LessonVideo';
 import LessonExperience from '@/components/lesson/LessonExperience';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { toast } from '@/components/ui/use-toast';
@@ -207,7 +208,10 @@ export default function LessonDetail() {
 
         {/* READ MODE */}
         {activeMode === 'read' && (
+          <>
+          <LessonVideo lesson={lesson} />
           <LessonExperience lesson={lesson} quizQuestions={quizQuestions} color={color} onComplete={handleComplete} onOpenFlashcards={() => { setActiveMode('interact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          </>
         )}
 
         {/* LISTEN MODE */}

@@ -3,6 +3,7 @@ import { class10Data } from './class10';
 import { class11Data } from './class11';
 import { generateQuizForLesson } from './quizGenerator';
 import { shuffle, getRandomQuiz } from './helpers';
+import { LESSON_VIDEOS } from './videos';
 import { class9ExtraProjects, class10ExtraProjects, class11ExtraProjects } from './extraProjects';
 
 export { shuffle, getRandomQuiz };
@@ -12,10 +13,24 @@ const class9Merged = { ...class9Data, projects: [...(class9Data.projects || []),
 const class10Merged = { ...class10Data, projects: [...(class10Data.projects || []), ...class10ExtraProjects] };
 const class11Merged = { ...class11Data, projects: [...(class11Data.projects || []), ...class11ExtraProjects] };
 
+// Swap in the verified lesson videos (old links that stopped working are replaced).
+function withVideos(data) {
+  return {
+    ...data,
+    subjects: data.subjects.map(s => ({
+      ...s,
+      lessons: s.lessons.map(l => {
+        const v = LESSON_VIDEOS[l.id];
+        return v ? { ...l, videoUrl: `https://www.youtube.com/watch?v=${v.id}`, videoTitle: v.title } : l;
+      }),
+    })),
+  };
+}
+
 export const curricula = {
-  class_9: class9Merged,
-  class_10: class10Merged,
-  class_11: class11Merged
+  class_9: withVideos(class9Merged),
+  class_10: withVideos(class10Merged),
+  class_11: withVideos(class11Merged)
 };
 
 export function getCurriculum(classId) {

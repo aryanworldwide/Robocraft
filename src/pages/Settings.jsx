@@ -3,12 +3,30 @@ import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getCurriculum } from '@/lib/curriculum';
-import { ArrowLeft, Check, Cpu, LogOut, Settings as SettingsIcon, GraduationCap, Trash2, AlertTriangle, X, Moon, Sun } from 'lucide-react';
+import { getReminderSettings, setReminderSettings, remindersAreNative } from '@/lib/reminders';
+import { localDay } from '@/lib/gamification';
+import { toast } from '@/components/ui/use-toast';
+import { Bell, ShoppingBag, ArrowLeft, Check, Cpu, LogOut, Settings as SettingsIcon, GraduationCap, Trash2, AlertTriangle, X, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeContext';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { selectedClass, selectClass, isGuest, user, logout } = useApp();
+  const { selectedClass, selectClass, isGuest, user, logout, getProgressForClass } = useApp();
+  const [reminder, setReminder] = useState(getReminderSettings);
+  const cp = selectedClass ? getProgressForClass(selectedClass) : null;
+  const studiedToday = !!cp && cp.lastStreakDate === localDay();
+  const updateReminder = async (next) => {
+    const merged = { ...reminder, ...next };
+    setReminder(merged);
+    const res = await setReminderSettings(merged, studiedToday);
+    if (!res.ok && res.reason === 'permission') {
+      setReminder({ ...merged, enabled: false });
+      await setReminderSettings({ enabled: false });
+      toast({ title: 'Notifications are blocked', description: 'Allow notifications for RoboCraft in your phone settings, then try again.' });
+    } else if (next.enabled === true) {
+      toast({ title: 'Daily reminder on', description: remindersAreNative ? `We'll remind you at ${merged.time} (skipped on days you've already studied).` : 'You will see a streak reminder on Home. Install the Android app for phone notifications.' });
+    }
+  };
   const { theme, setTheme } = useTheme();
   const [changingClass, setChangingClass] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -98,6 +116,43 @@ export default function Settings() {
           </button>
         </div>
       </div>
+
+      {/* Daily reminder */}
+      <div className="glass-strong rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '0.13s' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center">
+            <Bell className="w-5 h-5 text-orange-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-sm">Daily Study Reminder</h3>
+            <p className="text-xs text-muted-foreground">{remindersAreNative ? 'A phone notification to keep your streak' : 'Shows a streak reminder on Home (phone notifications in the Android app)'}</p>
+          </div>
+          <button role="switch" aria-checked={reminder.enabled} aria-label="Daily study reminder"
+            onClick={() => updateReminder({ enabled: !reminder.enabled })}
+            className={`w-12 h-7 rounded-full p-1 transition-colors ${reminder.enabled ? 'bg-cyan-500' : 'bg-muted'}`}>
+            <span className={`block w-5 h-5 rounded-full bg-white shadow transition-transform ${reminder.enabled ? 'translate-x-5' : ''}`} />
+          </button>
+        </div>
+        {reminder.enabled && (
+          <label className="mt-3 flex items-center justify-between glass rounded-xl px-3 py-2 text-sm">
+            <span className="text-muted-foreground text-xs">Remind me at</span>
+            <input type="time" value={reminder.time} onChange={e => e.target.value && updateReminder({ time: e.target.value })}
+              className="bg-transparent font-bold text-cyan-400 outline-none" />
+          </label>
+        )}
+      </div>
+
+      {/* Reward Shop */}
+      <button onClick={() => navigate('/shop')} className="w-full glass-strong rounded-2xl p-4 flex items-center gap-3 hover:bg-cyan-500/5 transition-colors animate-slide-up" style={{ animationDelay: '0.14s' }}>
+        <div className="w-10 h-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+          <ShoppingBag className="w-5 h-5 text-yellow-400" />
+        </div>
+        <div className="flex-1 text-left">
+          <h3 className="font-bold text-sm">Reward Shop</h3>
+          <p className="text-xs text-muted-foreground">Avatars, colour themes, frames and mystery boxes</p>
+        </div>
+        <span className="text-xs text-cyan-400">Open ›</span>
+      </button>
 
       {/* Change Class */}
       <div className="glass-strong rounded-2xl overflow-hidden animate-slide-up" style={{ animationDelay: '0.15s' }}>

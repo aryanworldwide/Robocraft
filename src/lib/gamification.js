@@ -180,15 +180,49 @@ export function openMysteryBox(boxId) {
   }));
 }
 
+// Reward Shop: things students can spend coins on. Owned items are saved in
+// progress.shop = { owned: [...ids], avatar, frame, accent, title }.
 export const REWARD_SHOP = [
-  { id: 'avatar_1', name: 'Neon Bot Avatar', cost: 100, type: 'avatar', icon: 'Bot' },
-  { id: 'avatar_2', name: 'Circuit Bot Avatar', cost: 150, type: 'avatar', icon: 'Cpu' },
-  { id: 'avatar_3', name: 'AI Bot Avatar', cost: 200, type: 'avatar', icon: 'Brain' },
-  { id: 'avatar_4', name: 'Drone Avatar', cost: 250, type: 'avatar', icon: 'Plane' },
-  { id: 'theme_1', name: 'Purple Theme', cost: 300, type: 'theme' },
-  { id: 'mystery_1', name: 'Mystery Box', cost: 500, type: 'mystery' },
-  { id: 'certificate', name: 'Course Certificate', cost: 1000, type: 'certificate' },
+  // Avatars (shown on Home and the leaderboard)
+  { id: 'av_bot', type: 'avatar', name: 'Classic Bot', emoji: '🤖', cost: 0 },
+  { id: 'av_arm', type: 'avatar', name: 'Robo Arm', emoji: '🦾', cost: 60 },
+  { id: 'av_rocket', type: 'avatar', name: 'Rocket', emoji: '🚀', cost: 80 },
+  { id: 'av_alien', type: 'avatar', name: 'Pixel Alien', emoji: '👾', cost: 100 },
+  { id: 'av_ufo', type: 'avatar', name: 'UFO', emoji: '🛸', cost: 120 },
+  { id: 'av_brain', type: 'avatar', name: 'AI Brain', emoji: '🧠', cost: 150 },
+  { id: 'av_satellite', type: 'avatar', name: 'Satellite', emoji: '🛰️', cost: 180 },
+  { id: 'av_dino', type: 'avatar', name: 'Robo Dino', emoji: '🦖', cost: 220 },
+  { id: 'av_owl', type: 'avatar', name: 'Wise Owl', emoji: '🦉', cost: 260 },
+  { id: 'av_dragon', type: 'avatar', name: 'Dragon', emoji: '🐉', cost: 400 },
+  // App colour themes (recolour buttons, highlights and icons)
+  { id: 'ac_cyan', type: 'accent', name: 'Neon Cyan', value: 'cyan', swatch: '#22d3ee', cost: 0 },
+  { id: 'ac_sky', type: 'accent', name: 'Sky Blue', value: 'sky', swatch: '#38bdf8', cost: 150 },
+  { id: 'ac_emerald', type: 'accent', name: 'Circuit Green', value: 'emerald', swatch: '#34d399', cost: 200 },
+  { id: 'ac_violet', type: 'accent', name: 'Cyber Violet', value: 'violet', swatch: '#a78bfa', cost: 250 },
+  { id: 'ac_amber', type: 'accent', name: 'Solar Gold', value: 'amber', swatch: '#fbbf24', cost: 300 },
+  { id: 'ac_rose', type: 'accent', name: 'Laser Pink', value: 'rose', swatch: '#fb7185', cost: 300 },
+  // Avatar frames
+  { id: 'fr_none', type: 'frame', name: 'No Frame', value: 'transparent', cost: 0 },
+  { id: 'fr_silver', type: 'frame', name: 'Silver Ring', value: 'linear-gradient(135deg,#e5e7eb,#9ca3af)', cost: 80 },
+  { id: 'fr_gold', type: 'frame', name: 'Gold Ring', value: 'linear-gradient(135deg,#fde68a,#f59e0b)', cost: 200 },
+  { id: 'fr_rainbow', type: 'frame', name: 'Rainbow Ring', value: 'conic-gradient(#f43f5e,#f59e0b,#22c55e,#06b6d4,#8b5cf6,#f43f5e)', cost: 350 },
+  // Titles (shown under your name)
+  { id: 'ti_learner', type: 'title', name: 'Robotics Learner', cost: 0 },
+  { id: 'ti_tinkerer', type: 'title', name: 'Tinkerer', cost: 70 },
+  { id: 'ti_coder', type: 'title', name: 'Code Ninja', cost: 120 },
+  { id: 'ti_circuit', type: 'title', name: 'Circuit Wizard', cost: 180 },
+  { id: 'ti_engineer', type: 'title', name: 'Future Engineer', cost: 250 },
+  { id: 'ti_master', type: 'title', name: 'Robot Master', cost: 500 },
 ];
+
+export const SHOP_DEFAULTS = { avatar: 'av_bot', accent: 'ac_cyan', frame: 'fr_none', title: 'ti_learner' };
+
+/** The equipped item of each type (falls back to the free default). */
+export function equippedItems(progress) {
+  const shop = progress?.shop || {};
+  const pick = (type) => REWARD_SHOP.find(i => i.id === (shop[type] || SHOP_DEFAULTS[type])) || REWARD_SHOP.find(i => i.id === SHOP_DEFAULTS[type]);
+  return { avatar: pick('avatar'), accent: pick('accent'), frame: pick('frame'), title: pick('title') };
+}
 
 export const XP_REWARDS = {
   LESSON_COMPLETE: 50,

@@ -5,7 +5,10 @@ import { useApp } from '@/lib/AppContext';
 import { getMode } from '@/lib/adaptive';
 import { getAllLessons, getRecommendedLessons, getRecommendedProjects, getTotalLessons, getSubjects, getQuizForLesson } from '@/lib/curriculum';
 import { getLevel, BADGES } from '@/lib/gamification';
-import { Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
+import { AvatarBadge } from '@/pages/Shop';
+import { equippedItems, localDay } from '@/lib/gamification';
+import { getReminderSettings } from '@/lib/reminders';
+import { Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
 import DailyMissions from '@/components/learning/DailyMissions';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
 
@@ -82,10 +85,13 @@ export default function Home() {
     <div className="max-w-5xl mx-auto px-4 py-4 space-y-5">
       {/* Hero greeting + level */}
       <div className="animate-slide-up flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{greeting}! 👋</h1>
-          <p className="text-sm text-muted-foreground">Ready to build some robots today?</p>
-        </div>
+        <button onClick={() => navigate('/shop')} className="flex items-center gap-3 text-left" aria-label="Open Reward Shop">
+          <AvatarBadge progress={progress} size={52} />
+          <div>
+            <h1 className="text-2xl font-bold">{greeting}! 👋</h1>
+            <p className="text-sm text-muted-foreground">{equippedItems(progress).title?.name} · Ready to build robots?</p>
+          </div>
+        </button>
         <div className="relative" style={{ width: levelRingSize, height: levelRingSize }}>
           <svg width={levelRingSize} height={levelRingSize} className="-rotate-90">
             <circle cx={levelRingSize/2} cy={levelRingSize/2} r={levelRingRadius} fill="none" stroke="rgba(0,210,255,0.1)" strokeWidth={levelRingStroke} />
@@ -122,6 +128,25 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Streak reminder (shown in the evening if the student hasn't studied today) */}
+      {(() => {
+        const studied = progress.lastStreakDate === localDay() || (progress.xpDay === localDay() && (progress.xpToday || 0) > 0);
+        const r = getReminderSettings();
+        const [h] = (r.time || '18:00').split(':').map(Number);
+        if (studied || new Date().getHours() < Math.min(h, 17)) return null;
+        return (
+          <button onClick={() => navigate(continueLearning ? `/lesson/${continueLearning.id}` : '/learn')}
+            className="w-full glass-strong rounded-2xl p-3 flex items-center gap-3 text-left border border-orange-500/30 animate-slide-up">
+            <div className="w-9 h-9 rounded-xl bg-orange-500/15 flex items-center justify-center"><Bell className="w-4 h-4 text-orange-400" /></div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-orange-400">{progress.streak > 0 ? `Keep your ${progress.streak}-day streak alive!` : 'Start a streak today!'}</p>
+              <p className="text-[11px] text-muted-foreground">One quick lesson or quiz today counts.</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-orange-400" />
+          </button>
+        );
+      })()}
+
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up" style={{ animationDelay: '0.05s' }}>
         <div className="glass rounded-2xl p-3 flex items-center gap-2.5 hover:scale-[1.02] transition-transform cursor-pointer">
@@ -142,12 +167,12 @@ export default function Home() {
             <p className="text-base font-bold text-orange-400">{progress.streak || 0} <span className="text-[10px]">days</span></p>
           </div>
         </div>
-        <div className="glass rounded-2xl p-3 flex items-center gap-2.5 hover:scale-[1.02] transition-transform cursor-pointer">
+        <div onClick={() => navigate('/shop')} role="button" title="Spend coins in the Reward Shop" className="glass rounded-2xl p-3 flex items-center gap-2.5 hover:scale-[1.02] transition-transform cursor-pointer">
           <div className="w-9 h-9 rounded-xl bg-yellow-500/15 flex items-center justify-center">
             <Coins className="w-4 h-4 text-yellow-400" />
           </div>
           <div>
-            <p className="text-[10px] text-muted-foreground">Coins</p>
+            <p className="text-[10px] text-muted-foreground">Coins · Shop ›</p>
             <p className="text-base font-bold text-yellow-400">{progress.coins || 0}</p>
           </div>
         </div>
