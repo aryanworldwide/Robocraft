@@ -52,6 +52,15 @@ function textOf(out) {
   return c?.message?.content ?? c?.text ?? '';
 }
 
+// Compact description of a JSON schema, e.g. {"name":string,"steps":[{"title":string}]}.
+// Llama follows this better than strict schema mode, which leaves fields empty.
+function shapeOf(s) {
+  if (!s || typeof s !== 'object') return 'string';
+  if (s.type === 'object' && s.properties) return '{' + Object.entries(s.properties).map(([k, v]) => JSON.stringify(k) + ':' + shapeOf(v)).join(',') + '}';
+  if (s.type === 'array') return '[' + shapeOf(s.items) + ']';
+  return s.type || 'string';
+}
+
 function extractJson(text) {
   if (typeof text !== 'string') return text;
   try { return JSON.parse(text); } catch {}
@@ -90,15 +99,20 @@ export default {
       }
 
       const messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }];
-      const base = { messages, max_tokens: 1800, temperature: 0.4 };
+      const big = schema && Object.keys(schema.properties || {}).length > 6;
+      const base = { messages, max_tokens: big ? 4000 : 1500, temperature: 0.4 };
       let out;
       if (schema) {
-        try {
-          out = await env.AI.run(MODEL, { ...base, response_format: { type: 'json_schema', json_schema: schema } });
-        } catch {
-          out = await env.AI.run(MODEL, { ...base, messages: [...messages, { role: 'system', content: 'Reply with one JSON object only, matching this schema: ' + JSON.stringify(schema) }] });
+        const shapeMsg = { role: 'system', content: 'Reply with ONE valid JSON object only (no markdown), with every field filled in, matching exactly this shape: ' + shapeOf(schema) };
+        let parsed = null;
+        for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
+          try {
+            out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]], response_format: { type: 'json_object' } });
+          } catch {
+            out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]] });
+          }
+          parsed = extractJson(textOf(out));
         }
-        const parsed = extractJson(textOf(out));
         if (!parsed) return json({ error: 'The AI gave an unexpected answer. Please try again.' }, 502, origin);
         return json({ result: parsed }, 200, origin);
       }
