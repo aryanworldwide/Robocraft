@@ -27,11 +27,25 @@ a virtual circuit lab, Arduino/ESP32 projects, revision PDFs and an AI mentor.
 
 Built with React, Vite and Tailwind CSS, packaged for Android with Capacitor.
 
+## Features
+
+- 94 lessons for Classes 9–11 (Robotics, Python, AI, Computing, Mechanical, Microcontrollers, Electrical & Control)
+- Quizzes (6–10 questions each), flashcards, games, revision mode and PDF notes
+- 22 build projects with wiring tables, Arduino/ESP32 code and build sheets
+- Virtual circuit lab with simulation
+- Accounts with cloud-saved progress (or guest mode, saved on the device)
+- AI: RoboMentor chat, "explain simpler", AI podcast, AI project creator, lab helper — with study-only safety rules
+- Works offline for lessons, quizzes and the lab
+
+## How it runs (all free)
+
+- **Accounts & cloud progress:** Firebase · **AI:** Cloudflare Workers AI (`backend/worker.js`) · **Voice:** the device's own text-to-speech
+- Settings live in `src/config/services.js`; see [BUILD_APK.md](BUILD_APK.md) for details.
+
 ## Run locally
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your values
 npm run dev
 ```
 

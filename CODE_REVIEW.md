@@ -8,7 +8,13 @@ Assumed names: `src/lib/safeReturnTo.js`, `src/lib/lab/experiments.js`,
 Missing: `public/` folder (e.g. `manifest.json` referenced by `index.html`) and `.env.local`.
 
 
-## Fixed in this version
+## Fixed
+
+- All bugs from the full app test (Oct 2026): quizzes ≥6 questions, back/share buttons, flashcards shortcut, experiment mode, badges & missions, menu/lab layout
+- Accounts, cloud progress sync and account deletion now on Firebase (cross-device sync works)
+- AI features now on Cloudflare Workers AI with safety rules; podcast/voice use device text-to-speech (also in the Android app)
+
+## Fixed earlier
 
 - Lesson page crash (`hasSpeech()` → `hasSpeech`) — `src/pages/LessonDetail.jsx`
 - True/false quiz crash (adds True/False options) and quiz reshuffling every render — `src/pages/Quiz.jsx`
@@ -39,7 +45,6 @@ Everything else below is still open.
 ## Important
 
 - `src/pages/Quiz.jsx` / `LessonDetail.jsx`: `getQuizForLesson` returns a new array every render → quiz reshuffles; "Retry wrong" shows random questions. Memoise on `[selectedClass, id]`.
-- `src/lib/AppContext.jsx`: `robocraft_data` is not in `base44/entities/User.jsonc` → cross-device sync silently fails.
 - `src/lib/lesson/parseTheory.js`: substring keyword match (`can`, `power`, `sensor`…) → 11 generic insights reused across 94 lessons (43× "sensor readings…"). Use whole-word match or per-lesson `notes`.
 - `src/lib/curriculum/quizGenerator.js`: correct answer always option 0 (fine in Quiz page which shuffles; not in revision PDF answer key); distractors from other lessons.
 - `src/lib/gamification.js`: "Game On" badge awarded immediately; "Card Master" after one deck; "Fast Learner" unreachable; weekly missions never recorded; "Earn 100 XP Today" uses total XP; dates in UTC.

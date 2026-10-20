@@ -28,8 +28,6 @@ jobs:
       - name: Build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
-          VITE_APP_ID: ${{ secrets.VITE_APP_ID }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
           npm run build
           cp dist/index.html dist/404.html   # deep links like /lesson/xyz work on refresh
