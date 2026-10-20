@@ -80,6 +80,7 @@ Return a JSON object with EXACTLY these fields:
 - futureImprovements: possible upgrades (2-3 bullet points)`;
 
   const res = await backend.integrations.Core.InvokeLLM({
+    user_input: userPrompt,
     prompt,
     response_json_schema: {
       type: 'object',

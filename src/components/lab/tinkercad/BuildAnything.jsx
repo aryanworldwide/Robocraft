@@ -26,6 +26,7 @@ export default function BuildAnything({ boardType, onAddComponents, onUseGuide, 
     setLoading(true); setError(null); setResult(null);
     try {
       const res = await backend.integrations.Core.InvokeLLM({
+        user_input: prompt,
         prompt: `A school student wants to build: "${prompt}".
 Available component types (use ONLY these ids): ${catalog}.
 The board is: ${getDef(boardType)?.name || 'Arduino Uno'}.

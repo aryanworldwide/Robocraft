@@ -14,7 +14,7 @@
     "cap:add": "npx cap add android"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.54",
+    "@capacitor-community/text-to-speech": "^6.0.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/filesystem": "^7.0.0",
@@ -57,6 +57,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.5.2",
+    "firebase": "^11.0.0",
     "framer-motion": "^11.16.4",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",

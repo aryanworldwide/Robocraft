@@ -22,6 +22,7 @@ function HelpMeBuildInner({ components, wires, code, status }) {
     const ctx = `Components on workspace: ${components.map(c => c.type).join(', ') || 'none'}.\nNumber of wires: ${wires.length}.\nCircuit status: ${status}.\nCurrent generated code:\n${(code || '').slice(0, 500)}`;
     try {
       const res = await backend.integrations.Core.InvokeLLM({
+        user_input: q,
         prompt: `You are a friendly robotics build mentor for a school student. Keep answers short and practical (2-4 sentences), simple English.\n\nBuild context:\n${ctx}\n\nStudent question: ${q}`,
       });
       setReply(typeof res === 'string' ? res : (res.text || res.explanation || JSON.stringify(res)));

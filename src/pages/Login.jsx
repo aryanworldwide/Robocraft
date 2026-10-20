@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { accountsEnabled } from "@/lib/features";
 import AccountsComingSoon from "@/components/AccountsComingSoon";
 import { Link, useNavigate } from "react-router-dom";
@@ -57,6 +58,8 @@ export default function Login() {
         </>
       }
     >
+
+      <GoogleSignInButton onError={setError} />
 
       <Button
         variant="outline"

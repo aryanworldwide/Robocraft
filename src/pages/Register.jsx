@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { accountsEnabled } from "@/lib/features";
 import AccountsComingSoon from "@/components/AccountsComingSoon";
 import { Link, useNavigate } from "react-router-dom";
@@ -31,10 +32,15 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
     setLoading(true);
     try {
       await backend.auth.register({ email, password });
-      setShowOtp(true);
+      toast({ title: "Account created! 🎉", description: "We've emailed you a link to verify your address." });
+      setTimeout(() => { window.location.href = appUrl("/class-selection"); }, 600);
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {
@@ -113,6 +119,8 @@ export default function Register() {
         </>
       }
     >
+
+      <GoogleSignInButton onError={setError} />
 
       <Button variant="outline" className="w-full h-12 text-sm font-medium mb-6 glass hover:bg-cyan-500/10 border-cyan-500/20 text-foreground hover:text-cyan-400" onClick={handleGuest}>
         <UserRound className="w-5 h-5 mr-2 text-cyan-400" />

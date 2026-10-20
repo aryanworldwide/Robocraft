@@ -11,7 +11,8 @@ export const canShareFiles = typeof navigator !== 'undefined' &&
 // True inside the Capacitor Android app (built from this repo).
 export const isNative = typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.();
 
-export const hasSpeech = typeof window !== 'undefined' && 'speechSynthesis' in window;
+// True in browsers, on iPhone and (via lib/speechPolyfill.js) in the Android app.
+export const hasSpeech = typeof window !== 'undefined' && ('speechSynthesis' in window || !!window.Capacitor?.isNativePlatform?.());
 
 /**
  * Download a file in the browser, or share/open it when running inside the

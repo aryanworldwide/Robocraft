@@ -34,6 +34,7 @@ export default function AIBuildMentor({ project, step, isPlaying, lang, componen
     setLoading(true);
     try {
       const res = await backend.integrations.Core.InvokeLLM({
+        user_input: q,
         prompt: `You are a friendly robotics build mentor. Student is building "${project.title}" (Step ${step + 1}: "${currentStep?.instruction}"). Components placed: ${components.map(c => c.name).join(', ')}. Wires connected: ${wires.filter(w => w.correct).length}/${project.correctWiring.length}. Question: "${q}". Language: ${lang === 'hi' ? 'Hindi' : 'English'}. Answer in 2-3 sentences, friendly and encouraging.`,
         response_json_schema: { type: 'object', properties: { response: { type: 'string' } } },
       });

@@ -14,6 +14,7 @@ export default function Settings() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const classes = [
     { id: 'class_9', name: 'Class 9', desc: 'Foundation of Robotics, Python, AI & Computing', icon: '🤖', color: '#00D2FF' },
@@ -30,6 +31,10 @@ export default function Settings() {
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     try {
+      if (user && !isGuest) {
+        const { backend } = await import('@/api/client');
+        await backend.auth.deleteAccount();
+      }
       Object.keys(localStorage).forEach(key => {
         if (key.includes('progress') || key.includes('robocraft') || key.includes('class_')) {
           localStorage.removeItem(key);
@@ -39,6 +44,7 @@ export default function Settings() {
       navigate('/login');
     } catch (err) {
       setIsDeleting(false);
+      setDeleteError(err?.message || 'Could not delete the account. Please log out, log in again and retry.');
     }
   };
 
@@ -183,11 +189,12 @@ export default function Settings() {
             </div>
             <h3 className="font-bold text-lg text-center mb-2">Delete Account?</h3>
             <p className="text-sm text-muted-foreground text-center mb-4">
-              This will permanently remove all your progress, achievements, and saved data from this device. This action cannot be undone.
+              {user && !isGuest ? 'This permanently deletes your RoboCraft account and all saved progress, on every device. This cannot be undone.' : 'This will permanently remove all your progress, achievements, and saved data from this device. This action cannot be undone.'}
             </p>
             <p className="text-xs text-muted-foreground text-center mb-3">
               Type <span className="font-bold text-red-400">DELETE</span> to confirm:
             </p>
+            {deleteError && <p className="text-xs text-red-400 text-center mb-3">{deleteError}</p>}
             <input
               type="text"
               value={deleteConfirm}

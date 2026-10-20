@@ -3,6 +3,7 @@ import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Play, Pause, SkipForward, SkipBack, Gauge, Languages, Loader2, Radio, RotateCcw } from 'lucide-react';
 import SpeedPicker from './SpeedPicker';
+import { speak, stopSpeaking, speechAvailable } from '@/lib/speech';
 
 function PodcastPlayerInner({ lesson, language = 'en', onLanguageChange }) {
   const [segments, setSegments] = useState([]);
@@ -11,80 +12,41 @@ function PodcastPlayerInner({ lesson, language = 'en', onLanguageChange }) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [rate, setRate] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [showSpeedPicker, setShowSpeedPicker] = useState(false);
   const [error, setError] = useState(null);
-  const audioRef = useRef(null);
-  const cacheKey = `podcast_${lesson.id}_${language}`;
+  const playToken = useRef(0); // increments to stop an ongoing playback loop
+  const cacheKey = `podcast_v2_${lesson.id}_${language}`;
 
   useEffect(() => {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      try { setSegments(JSON.parse(cached)); } catch { setSegments([]); }
-    } else {
-      setSegments([]);
-      setCurrentIdx(0);
-    }
+    stopSpeaking(); setIsPlaying(false); setCurrentIdx(0);
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      setSegments(cached ? JSON.parse(cached) : []);
+    } catch { setSegments([]); }
   }, [cacheKey]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const onTime = () => setCurrentTime(audio.currentTime);
-    const onDur = () => setDuration(audio.duration);
-    const onEnd = () => {
-      if (currentIdx < segments.length - 1) {
-        const next = currentIdx + 1;
-        setCurrentIdx(next);
-        audio.src = segments[next].audioUrl;
-        audio.playbackRate = rate;
-        audio.play().catch(() => {});
-      } else {
-        setIsPlaying(false);
-      }
-    };
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onError = () => { setError('Audio playback failed. Try regenerating.'); setIsPlaying(false); };
-    audio.addEventListener('timeupdate', onTime);
-    audio.addEventListener('durationchange', onDur);
-    audio.addEventListener('ended', onEnd);
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-    audio.addEventListener('error', onError);
-    return () => {
-      audio.removeEventListener('timeupdate', onTime);
-      audio.removeEventListener('durationchange', onDur);
-      audio.removeEventListener('ended', onEnd);
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-      audio.removeEventListener('error', onError);
-    };
-  }, [currentIdx, segments, rate]);
+  // Stop talking when leaving the screen.
+  useEffect(() => () => { playToken.current++; stopSpeaking(); }, []);
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.playbackRate = rate;
-  }, [rate]);
-
-  useEffect(() => {
-    if (segments.length > 0 && 'mediaSession' in navigator) {
-      try {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: lesson.title,
-          artist: 'RoboCraft Podcast',
-          album: lesson.subject,
-        });
-        navigator.mediaSession.setActionHandler('play', () => audioRef.current?.play());
-        navigator.mediaSession.setActionHandler('pause', () => audioRef.current?.pause());
-      } catch {}
+  // Read the segments aloud one after another with the phone's own voices.
+  const playFrom = async (idx, list = segments) => {
+    const token = ++playToken.current;
+    stopSpeaking();
+    setIsPlaying(true);
+    for (let i = idx; i < list.length; i++) {
+      if (token !== playToken.current) return;
+      setCurrentIdx(i);
+      await speak(list[i].text, { lang: language, rate, speaker: list[i].speaker === 1 ? 1 : 2 });
     }
-  }, [segments, lesson]);
+    if (token === playToken.current) setIsPlaying(false);
+  };
+
+  const stop = () => { playToken.current++; stopSpeaking(); setIsPlaying(false); };
 
   const generatePodcast = async () => {
     setIsLoading(true);
     setError(null);
-    setLoadingStep('Writing podcast script...');
+    setLoadingStep('Writing the podcast script…');
     try {
       const res = await backend.integrations.Core.InvokeLLM({
         prompt: `Create an engaging podcast-style conversation between two speakers discussing "${lesson.title}" for Indian school students (Classes 9-11).
@@ -125,70 +87,33 @@ Return as JSON with a "turns" array.`,
           required: ['turns']
         }
       });
-      const turns = res.turns || [];
+      const turns = (res.turns || []).filter(t => t && t.text).map(t => ({ speaker: Number(t.speaker) === 1 ? 1 : 2, text: String(t.text) }));
       if (turns.length === 0) throw new Error('No script generated');
-      const audioSegs = [];
-      for (let i = 0; i < turns.length; i++) {
-        const turn = turns[i];
-        setLoadingStep(`Generating audio ${i + 1}/${turns.length}...`);
-        const voice = turn.speaker === 1 ? 'storm' : 'sunny';
-        const result = await backend.integrations.Core.GenerateSpeech({
-          text: turn.text, voice, language_code: language
-        });
-        audioSegs.push({ ...turn, audioUrl: result.url });
-      }
-      setSegments(audioSegs);
-      localStorage.setItem(cacheKey, JSON.stringify(audioSegs));
+      setSegments(turns);
+      try { localStorage.setItem(cacheKey, JSON.stringify(turns)); } catch {}
       setIsLoading(false);
       setCurrentIdx(0);
-      setTimeout(() => {
-        if (audioRef.current && audioSegs[0]) {
-          audioRef.current.src = audioSegs[0].audioUrl;
-          audioRef.current.playbackRate = rate;
-          audioRef.current.play().catch(() => {});
-        }
-      }, 300);
+      if (speechAvailable()) playFrom(0, turns);
     } catch (err) {
-      setError('Failed to generate podcast. Please try again.');
+      setError(err?.message && !/script/i.test(err.message) ? err.message : 'Could not create the podcast. Please try again.');
       setIsLoading(false);
     }
   };
 
   const togglePlayPause = () => {
     if (segments.length === 0) { generatePodcast(); return; }
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) { audio.pause(); }
-    else {
-      if (!audio.src) audio.src = segments[currentIdx]?.audioUrl || '';
-      audio.playbackRate = rate;
-      audio.play().catch(() => {});
-    }
-  };
-
-  const skipForward = () => {
-    const audio = audioRef.current;
-    if (audio) audio.currentTime = Math.min(audio.currentTime + 15, audio.duration || 0);
-  };
-
-  const skipBackward = () => {
-    const audio = audioRef.current;
-    if (audio) audio.currentTime = Math.max(audio.currentTime - 15, 0);
+    if (isPlaying) stop(); else playFrom(currentIdx);
   };
 
   const goSegment = (idx) => {
     if (idx < 0 || idx >= segments.length) return;
     setCurrentIdx(idx);
-    const audio = audioRef.current;
-    if (audio) {
-      audio.src = segments[idx].audioUrl;
-      audio.playbackRate = rate;
-      audio.play().catch(() => {});
-    }
+    if (isPlaying) playFrom(idx);
   };
 
   const regenerate = () => {
-    localStorage.removeItem(cacheKey);
+    stop();
+    try { localStorage.removeItem(cacheKey); } catch {}
     setSegments([]);
     setCurrentIdx(0);
     setError(null);
@@ -214,7 +139,7 @@ Return as JSON with a "turns" array.`,
           <Radio className="w-8 h-8 text-cyan-400" />
         </div>
         <h3 className="font-bold text-sm mb-1">AI Podcast Lesson</h3>
-        <p className="text-xs text-muted-foreground mb-4">Listen to a natural conversation between two AI hosts explaining this topic in a fun, podcast-style format.</p>
+        <p className="text-xs text-muted-foreground mb-4">Listen to two hosts chat about this topic in a fun, podcast style. Uses your phone's voice — no data needed after it's created.</p>
         {error && <p className="text-xs text-red-400 mb-3">{error}</p>}
         <button onClick={generatePodcast} className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm hover:neon-glow transition-all">
           Generate Podcast
@@ -224,12 +149,11 @@ Return as JSON with a "turns" array.`,
   }
 
   const currentSegment = segments[currentIdx];
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const progress = segments.length ? ((currentIdx + (isPlaying ? 0.5 : 0)) / segments.length) * 100 : 0;
   const speakerColor = currentSegment?.speaker === 1 ? '#22D3EE' : '#A78BFA';
 
   return (
     <div className="glass-strong rounded-3xl p-5" style={{ border: '1px solid rgba(0,210,255,0.15)' }}>
-      <audio ref={audioRef} />
       <div className="flex items-center gap-2 mb-4">
         <Radio className="w-4 h-4 text-cyan-400" />
         <span className="text-xs font-bold text-cyan-400">AI PODCAST</span>
@@ -261,14 +185,8 @@ Return as JSON with a "turns" array.`,
         <button onClick={() => goSegment(currentIdx - 1)} disabled={currentIdx === 0} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">
           <SkipBack className="w-4 h-4 text-cyan-400" />
         </button>
-        <button onClick={skipBackward} className="p-2.5 rounded-xl glass hover:bg-cyan-500/10 transition-colors">
-          <span className="text-[10px] font-bold text-cyan-400">15s</span>
-        </button>
         <button onClick={togglePlayPause} className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center hover:neon-glow transition-all">
           {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-0.5" />}
-        </button>
-        <button onClick={skipForward} className="p-2.5 rounded-xl glass hover:bg-cyan-500/10 transition-colors">
-          <span className="text-[10px] font-bold text-cyan-400">15s</span>
         </button>
         <button onClick={() => goSegment(currentIdx + 1)} disabled={currentIdx === segments.length - 1} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">
           <SkipForward className="w-4 h-4 text-cyan-400" />
@@ -289,7 +207,7 @@ Return as JSON with a "turns" array.`,
       <SpeedPicker
         open={showSpeedPicker}
         currentRate={rate}
-        onSelect={(r) => { setRate(r); setShowSpeedPicker(false); }}
+        onSelect={(r) => { setRate(r); setShowSpeedPicker(false); if (isPlaying) setTimeout(() => playFrom(currentIdx), 0); }}
         onClose={() => setShowSpeedPicker(false)}
       />
     </div>

@@ -36,6 +36,7 @@ function AIMentorInner({ lessonContext, compact }) {
       }));
 
       const res = await backend.integrations.Core.InvokeLLM({
+        user_input: userMsg.content,
         prompt: `${systemPrompt}\n\nConversation so far:\n${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nRespond as RoboMentor:`,
         response_json_schema: {
           type: 'object',

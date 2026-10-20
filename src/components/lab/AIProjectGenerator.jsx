@@ -39,6 +39,7 @@ export default function AIProjectGenerator({ onGenerate }) {
 
     try {
       const res = await backend.integrations.Core.InvokeLLM({
+        user_input: idea,
         prompt: `You are an expert robotics project generator for Indian school students (classes 9-11). A student described: "${idea}".
 Generate a COMPLETE robotics project. Use simple, friendly English that school students can understand.
 
