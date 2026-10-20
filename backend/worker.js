@@ -2,7 +2,9 @@
 // Paste this whole file into a new Worker, add a "Workers AI" binding named AI,
 // then Deploy. No API keys needed.
 
-const MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
+const MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct'; // JSON / long answers
+const FAST_MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';    // short chat answers (much quicker)
+const CACHE_SECONDS = 7 * 24 * 3600;                         // identical requests are answered from cache
 const GUARD = '@cf/meta/llama-guard-3-8b';
 const ALLOWED_ORIGINS = [
   'https://aryanworldwide.github.io', // web / iPhone version
@@ -61,6 +63,12 @@ function shapeOf(s) {
   return s.type || 'string';
 }
 
+async function cacheKeyFor(body) {
+  const data = new TextEncoder().encode(JSON.stringify([body.prompt, body.schema || null, body.user_input || '']));
+  const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', data))].map(b => b.toString(16).padStart(2, '0')).join('');
+  return new Request('https://cache.robocraft-ai/v1/' + hash);
+}
+
 function extractJson(text) {
   if (typeof text !== 'string') return text;
   try { return JSON.parse(text); } catch {}
@@ -87,37 +95,60 @@ export default {
     const schema = body.schema && typeof body.schema === 'object' ? body.schema : null;
     if (!prompt) return json({ error: 'Empty prompt' }, 400, origin);
 
+    // Answer from cache when the exact same request was made before (fast, and saves the free allowance).
+    const cache = caches.default;
+    const key = await cacheKeyFor({ prompt, schema, user_input: userInput });
+    const hit = await cache.match(key);
+    if (hit) {
+      const cached = await hit.json();
+      return json({ ...cached, cached: true }, 200, origin);
+    }
+
     try {
-      // Safety check on what the student typed (only for free-text questions).
-      if (userInput) {
-        const g = await env.AI.run(GUARD, { messages: [{ role: 'user', content: userInput }] });
-        const verdict = /\bunsafe\b/i.test(textOf(g)) || g?.response?.safe === false ? 'unsafe' : 'safe';
-        if (verdict === 'unsafe') {
-          const msg = "I can only help with learning topics like robotics, coding and science. If something is worrying you, please talk to a trusted adult — or call India's Tele-MANAS helpline 14416.";
-          return json({ result: schema ? { response: msg, text: msg, explanation: msg, code: '' } : msg, blocked: true }, 200, origin);
-        }
-      }
+      // Safety check on what the student typed runs at the same time as the answer.
+      const guard = userInput
+        ? env.AI.run(GUARD, { messages: [{ role: 'user', content: userInput }] })
+            .then(g => /\bunsafe\b/i.test(textOf(g)) || g?.response?.safe === false)
+            .catch(() => false)
+        : Promise.resolve(false);
 
       const messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }];
       const big = schema && Object.keys(schema.properties || {}).length > 6;
       const base = { messages, max_tokens: big ? 4000 : 1500, temperature: 0.4 };
-      let out;
-      if (schema) {
-        const shapeMsg = { role: 'system', content: 'Reply with ONE valid JSON object only (no markdown), with every field filled in, matching exactly this shape: ' + shapeOf(schema) };
-        let parsed = null;
-        for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
-          try {
-            out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]], response_format: { type: 'json_object' } });
-          } catch {
-            out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]] });
+
+      const answer = (async () => {
+        if (schema) {
+          const shapeMsg = { role: 'system', content: 'Reply with ONE valid JSON object only (no markdown), with every field filled in, matching exactly this shape: ' + shapeOf(schema) };
+          for (let attempt = 0; attempt < 2; attempt++) {
+            let out;
+            try {
+              out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]], response_format: { type: 'json_object' } });
+            } catch {
+              out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]] });
+            }
+            const parsed = extractJson(textOf(out));
+            if (parsed) return parsed;
           }
-          parsed = extractJson(textOf(out));
+          return null;
         }
-        if (!parsed) return json({ error: 'The AI gave an unexpected answer. Please try again.' }, 502, origin);
-        return json({ result: parsed }, 200, origin);
+        // Short questions use the fast model; long prompts use the bigger one.
+        const model = prompt.length < 4000 ? FAST_MODEL : MODEL;
+        let out;
+        try { out = await env.AI.run(model, { ...base, max_tokens: 900 }); }
+        catch { out = await env.AI.run(MODEL, base); }
+        return textOf(out).trim();
+      })();
+
+      const [unsafe, result] = await Promise.all([guard, answer]);
+      if (unsafe) {
+        const msg = "I can only help with learning topics like robotics, coding and science. If something is worrying you, please talk to a trusted adult — or call India's Tele-MANAS helpline 14416.";
+        return json({ result: schema ? { response: msg, text: msg, explanation: msg, code: '' } : msg, blocked: true }, 200, origin);
       }
-      out = await env.AI.run(MODEL, base);
-      return json({ result: textOf(out).trim() }, 200, origin);
+      if (result === null || result === '') return json({ error: 'The AI gave an unexpected answer. Please try again.' }, 502, origin);
+
+      const payload = { result };
+      await cache.put(key, new Response(JSON.stringify(payload), { headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${CACHE_SECONDS}` } }));
+      return json(payload, 200, origin);
     } catch (e) {
       const msg = /neuron|quota|limit|capacity/i.test(String(e)) ? "Today's free AI limit has been reached. Please try again tomorrow." : 'AI is busy right now. Please try again.';
       return json({ error: msg, detail: String(e?.message || e).slice(0, 300) }, 503, origin);

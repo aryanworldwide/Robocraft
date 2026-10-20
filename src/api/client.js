@@ -87,8 +87,36 @@ const auth = {
 };
 
 // ── AI (Cloudflare Workers AI) ──────────────────────────────────────────────
+// Saved AI answers for lesson features (Explain simpler, podcasts, etc.), so
+// opening the same thing again is instant. Free-text questions are not saved.
+const AI_CACHE_KEY = 'robocraft_ai_cache_v1';
+const AI_CACHE_MAX = 40;
+const AI_CACHE_DAYS = 7;
+function hashOf(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36) + '_' + str.length;
+}
+function readAiCache() {
+  try { return JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}'); } catch { return {}; }
+}
+function writeAiCache(key, result) {
+  try {
+    const c = readAiCache();
+    c[key] = { t: Date.now(), r: result };
+    const keys = Object.keys(c).sort((a, b) => c[b].t - c[a].t);
+    keys.slice(AI_CACHE_MAX).forEach(k => delete c[k]);
+    localStorage.setItem(AI_CACHE_KEY, JSON.stringify(c));
+  } catch { /* storage full or blocked: skip caching */ }
+}
+
 async function invokeLLM({ prompt, response_json_schema, user_input } = {}) {
   if (!aiEnabled) return unavailable('AI features');
+  const cacheKey = user_input ? null : hashOf(JSON.stringify([prompt, response_json_schema || null]));
+  if (cacheKey) {
+    const hit = readAiCache()[cacheKey];
+    if (hit && Date.now() - hit.t < AI_CACHE_DAYS * 86400000) return hit.r;
+  }
   let res;
   try {
     res = await fetch(aiServerUrl.replace(/\/$/, '') + '/ai', {
@@ -101,6 +129,7 @@ async function invokeLLM({ prompt, response_json_schema, user_input } = {}) {
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) throw Object.assign(new Error(data.error || 'AI is busy right now. Please try again.'), { status: res.status });
+  if (cacheKey && !data.blocked) writeAiCache(cacheKey, data.result);
   return data.result;
 }
 

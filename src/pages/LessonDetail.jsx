@@ -20,6 +20,8 @@ import MemoryHacks from '@/components/learning/MemoryHacks';
 import ImConfused from '@/components/learning/ImConfused';
 import ChallengeMe from '@/components/learning/ChallengeMe';
 import ExperimentMode from '@/components/learning/ExperimentMode';
+import PythonRunner from '@/components/learning/PythonRunner';
+import { PYTHON_PRACTICE } from '@/lib/curriculum/pythonPractice';
 import LessonVideo from '@/components/learning/LessonVideo';
 import LessonExperience from '@/components/lesson/LessonExperience';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
@@ -211,6 +213,16 @@ export default function LessonDetail() {
           <>
           <LessonVideo lesson={lesson} />
           <LessonExperience lesson={lesson} quizQuestions={quizQuestions} color={color} onComplete={handleComplete} onOpenFlashcards={() => { setActiveMode('interact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          {PYTHON_PRACTICE[lesson.id] && (
+            <PythonRunner
+              initialCode={PYTHON_PRACTICE[lesson.id].code}
+              initialInput={PYTHON_PRACTICE[lesson.id].input || ''}
+              task={PYTHON_PRACTICE[lesson.id].task}
+              note={PYTHON_PRACTICE[lesson.id].note}
+              storageKey={`py_code_${lesson.id}`}
+              onRun={() => recordActivityComplete(selectedClass, lesson.id, 'python')}
+            />
+          )}
           </>
         )}
 

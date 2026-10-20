@@ -101,6 +101,40 @@ export const WEEKLY_MISSIONS = [
   { id: 'w_perfect_3', name: 'Get 100% on 3 Quizzes', xp: 250, coins: 60, icon: 'Crown' },
 ];
 
+// Weeks run Monday–Sunday in the student's own time zone.
+export function weekStartDay() {
+  const d = new Date();
+  const back = (d.getDay() + 6) % 7; // days since Monday
+  return localDay(-back);
+}
+export function weekId() {
+  // e.g. "2026-10-19" (the Monday the week starts on)
+  return weekStartDay();
+}
+
+// One featured challenge per week, rotating. Progress is this week's XP or lessons.
+export const WEEKLY_CHALLENGES = [
+  { id: 'xp300', name: 'Earn 300 XP this week', metric: 'xp', target: 300, coins: 60, xp: 50, emoji: '⚡' },
+  { id: 'lessons3', name: 'Finish 3 lessons this week', metric: 'lessons', target: 3, coins: 60, xp: 50, emoji: '📘' },
+  { id: 'xp600', name: 'Earn 600 XP this week', metric: 'xp', target: 600, coins: 100, xp: 80, emoji: '🚀' },
+  { id: 'lessons5', name: 'Finish 5 lessons this week', metric: 'lessons', target: 5, coins: 100, xp: 80, emoji: '🏁' },
+  { id: 'xp1000', name: 'Earn 1000 XP this week', metric: 'xp', target: 1000, coins: 150, xp: 120, emoji: '🏆' },
+];
+export function currentWeeklyChallenge() {
+  const start = new Date(weekStartDay() + 'T00:00:00');
+  const n = Math.floor(start.getTime() / (7 * 86400000));
+  return WEEKLY_CHALLENGES[((n % WEEKLY_CHALLENGES.length) + WEEKLY_CHALLENGES.length) % WEEKLY_CHALLENGES.length];
+}
+/** { value, target, done, claimed } for this week's challenge. */
+export function weeklyChallengeStatus(progress) {
+  const ch = currentWeeklyChallenge();
+  const wk = weekId();
+  const value = ch.metric === 'xp'
+    ? (progress?.weekId === wk ? progress.weekXp || 0 : 0)
+    : Object.values(progress?.lessonDates || {}).filter(d => d >= wk).length;
+  return { challenge: ch, value: Math.min(value, ch.target), target: ch.target, done: value >= ch.target, claimed: progress?.challengeClaimed === wk + ':' + ch.id };
+}
+
 // Local calendar day (not UTC) so streaks and daily missions reset at the
 // student's own midnight.
 export function localDay(offsetDays = 0) {

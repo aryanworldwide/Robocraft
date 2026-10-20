@@ -31,6 +31,9 @@ const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const ProgressPage = lazy(() => import('@/pages/ProgressPage'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Shop = lazy(() => import('@/pages/Shop'));
+const PythonPlayground = lazy(() => import('@/pages/PythonPlayground'));
+const Leaderboard = lazy(() => import('@/pages/Leaderboard'));
+const StoryMap = lazy(() => import('@/pages/StoryMap'));
 const Mentor = lazy(() => import('@/pages/Mentor'));
 const Lab = lazy(() => import('@/pages/Lab'));
 const EngineeringChallenges = lazy(() => import('@/pages/EngineeringChallenges'));
@@ -105,6 +108,9 @@ const AuthenticatedApp = () => {
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/python" element={<PythonPlayground />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/story" element={<StoryMap />} />
             <Route path="/mentor" element={<Mentor />} />
             <Route path="/lab" element={<Lab />} />
             <Route path="/challenges" element={<EngineeringChallenges />} />

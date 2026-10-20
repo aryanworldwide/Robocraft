@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { backend } from '@/api/client';
-import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES, localDay, REWARD_SHOP, equippedItems } from '@/lib/gamification';
+import { getLevel, checkBadges, XP_REWARDS, DAILY_MISSIONS, WEEKLY_MISSIONS, recordMission, openMysteryBox, MYSTERY_BOXES, localDay, REWARD_SHOP, equippedItems, weekId, weeklyChallengeStatus } from '@/lib/gamification';
 import { getAllLessons } from '@/lib/curriculum';
 import { useAuth } from '@/lib/AuthContext';
 import { scheduleReminders } from '@/lib/reminders';
@@ -81,6 +81,19 @@ export const AppProvider = ({ children }) => {
     else root.setAttribute('data-accent', accentValue);
   }, [accentValue]);
 
+  // Weekly leaderboard: share this week's XP (nickname only) for signed-in students.
+  const weekXpNow = currentProgress && currentProgress.weekId === weekId() ? currentProgress.weekXp || 0 : 0;
+  const avatarEmoji = equippedItems(currentProgress).avatar?.emoji;
+  useEffect(() => {
+    if (isLoading || !user || isGuest || !selectedClass || weekXpNow <= 0) return;
+    const t = setTimeout(() => {
+      import('@/api/leaderboard')
+        .then(m => m.publishScore({ classId: selectedClass, week: weekId(), weekXp: weekXpNow, avatar: avatarEmoji }))
+        .catch(() => {});
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [weekXpNow, avatarEmoji, selectedClass, isLoading, user, isGuest]);
+
   // Daily reminders (Android app): reschedule on open and once the student has
   // studied today, so today's reminder is skipped after they've done a lesson.
   const studiedToday = !!currentProgress && (currentProgress.lastStreakDate === localDay() || (currentProgress.xpDay === localDay() && (currentProgress.xpToday || 0) > 0));
@@ -134,7 +147,9 @@ export const AppProvider = ({ children }) => {
     const newLevel = getLevel(newXp);
     const day = localDay();
     const xpToday = (classProgress.xpDay === day ? classProgress.xpToday || 0 : 0) + amount;
-    updateProgress(classId, { xp: newXp, xpDay: day, xpToday });
+    const wk = weekId();
+    const weekXp = (classProgress.weekId === wk ? classProgress.weekXp || 0 : 0) + amount;
+    updateProgress(classId, { xp: newXp, xpDay: day, xpToday, weekId: wk, weekXp });
     if (newLevel.levelNumber > oldLevel.levelNumber) {
       setLevelPopup(newLevel.current);
     }
@@ -324,6 +339,16 @@ export const AppProvider = ({ children }) => {
     return { rewards, box };
   };
 
+  // Weekly challenge reward (once per week).
+  const claimWeeklyChallenge = (classId) => {
+    const cp = getProgressForClass(classId);
+    const st = weeklyChallengeStatus(cp);
+    if (!st.done || st.claimed) return null;
+    updateProgress(classId, { coins: (cp.coins || 0) + st.challenge.coins, challengeClaimed: weekId() + ':' + st.challenge.id });
+    addXP(classId, st.challenge.xp);
+    return st.challenge;
+  };
+
   // Reward Shop: buy (if needed) and equip an item. Returns 'equipped' | 'bought' | null.
   const buyOrEquipItem = (classId, itemId) => {
     const item = REWARD_SHOP.find(i => i.id === itemId);
@@ -375,7 +400,7 @@ export const AppProvider = ({ children }) => {
       recordQuizScore, addRecentlyViewed, logout,
       recordFlashcardReview, recordActivityComplete, addXP, spendCoins,
       badgePopup, setBadgePopup, levelPopup, setLevelPopup,
-      checkAndAwardBadges, getDailyMissions, getWeeklyMissions, buyMysteryBox, buyOrEquipItem,
+      checkAndAwardBadges, getDailyMissions, getWeeklyMissions, buyMysteryBox, buyOrEquipItem, claimWeeklyChallenge,
     }}>
       {children}
     </AppContext.Provider>

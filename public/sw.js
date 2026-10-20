@@ -25,7 +25,9 @@ self.addEventListener('fetch', (e) => {
     );
     return;
   }
-  const cacheable = url.origin === location.origin || /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
+  // Python (Pyodide) files are versioned, so they are safe to keep for offline use.
+  const cacheable = url.origin === location.origin || /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)
+    || (url.hostname === 'cdn.jsdelivr.net' && url.pathname.startsWith('/pyodide/'));
   if (!cacheable) return;
   e.respondWith(
     caches.match(req).then((hit) => hit || fetch(req).then((res) => {
