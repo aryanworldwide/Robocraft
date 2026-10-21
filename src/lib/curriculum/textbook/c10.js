@@ -551,7 +551,7 @@ for ch in s:
     elif ch.islower(): lo += 1
     elif ch.isdigit(): dg += 1
     elif ch.isspace(): sp += 1
-print(up, lo, dg, sp)     # 3 12 4 2
+print(up, lo, dg, sp)     # 3 11 4 2
 ~~~
 Longest word in a sentence:
 ~~~

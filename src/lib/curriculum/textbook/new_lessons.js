@@ -348,8 +348,8 @@ import numpy as np
 hours = np.array([1, 2, 3, 4, 5])
 marks = np.array([30, 38, 45, 52, 61])
 m, c = np.polyfit(hours, marks, 1)
-print(round(m, 2), round(c, 2))   # 7.6 22.2
-print(m * 6 + c)                  # about 67.8
+print(round(m, 2), round(c, 2))   # 7.6 22.4
+print(m * 6 + c)                  # about 68.0
 ~~~` },
       { h: 'Confusion matrix worked example', b: `A spam filter is tested on 100 emails:
 • True Positive (spam correctly flagged) = 40

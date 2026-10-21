@@ -7,6 +7,7 @@ import { LESSON_VIDEOS } from './videos';
 import { class9ExtraProjects, class10ExtraProjects, class11ExtraProjects } from './extraProjects';
 import { NEW_LESSONS, NEW_QUIZZES } from './newLessons';
 import { TEXTBOOK } from './textbook';
+import { MCQ_BANK } from './mcqBank';
 
 export { shuffle, getRandomQuiz };
 
@@ -33,7 +34,8 @@ function finalise(classId, data) {
   const extra = NEW_LESSONS[classId] || {};
   return {
     ...data,
-    quizzes: { ...(data.quizzes || {}), ...NEW_QUIZZES },
+    quizzes: Object.fromEntries([...new Set([...Object.keys(data.quizzes || {}), ...Object.keys(NEW_QUIZZES), ...Object.keys(MCQ_BANK)])]
+      .map(id => [id, [...((data.quizzes || {})[id] || []), ...(NEW_QUIZZES[id] || []), ...(MCQ_BANK[id] || [])]])),
     subjects: data.subjects.map(s => ({
       ...s,
       lessons: [...s.lessons, ...(extra[s.id] || [])].map(l => {
@@ -85,6 +87,11 @@ export function getQuizForLesson(classId, lessonId) {
     merged.push(q);
   }
   return merged;
+}
+
+// Only the hand-written questions (used for exam papers).
+export function getHandQuiz(classId, lessonId) {
+  return (curricula[classId]?.quizzes || {})[lessonId] || [];
 }
 
 export function getProjects(classId) {

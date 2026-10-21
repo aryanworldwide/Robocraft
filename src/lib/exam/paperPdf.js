@@ -13,7 +13,7 @@ export function pdfSafe(s) {
     .replace(/°/g, ' deg').replace(/⊕/g, ' XOR ')
     .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, d => '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)])
     .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, d => '^' + '0123456789'['⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d)])
-    .replace(/̅/g, "'").replace(/[✓✔]/g, 'Yes').replace(/[✗✘]/g, 'No').replace(/•/g, '-')
+    .replace(/̅/g, "'").normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[✓✔]/g, 'Yes').replace(/[✗✘]/g, 'No').replace(/•/g, '-')
     .replace(/[^\x00-\x7E\n]/g, '');
 }
 

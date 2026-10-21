@@ -1,7 +1,7 @@
 // Builds board-style practice papers from the lesson exam questions.
 // Patterns follow the CISCE written-paper totals: ICSE IX/X — 100 marks, 2 hours;
 // ISC XI Robotics theory — 70 marks, 3 hours. Section layout is a RoboCraft practice format.
-import { getAllLessons, getQuizForLesson } from '@/lib/curriculum';
+import { getAllLessons, getHandQuiz } from '@/lib/curriculum';
 import { TEXTBOOK } from '@/lib/curriculum/textbook';
 
 // Syllabus units (with board marks) → lesson ids.
@@ -76,7 +76,7 @@ export function buildPaper(classId, paperNo = 1) {
   const unitOrder = shuffled(units, r);
   for (const u of unitOrder) {
     const want = Math.max(1, Math.round((u.marks / totalUnitMarks) * pattern.A.mcq));
-    const pool = shuffled(u.ids.flatMap(id => (getQuizForLesson(classId, id) || [])
+    const pool = shuffled(u.ids.flatMap(id => getHandQuiz(classId, id)
       .filter(q => q.type === 'mcq' && Array.isArray(q.options) && q.options.length >= 2)
       .map(q => ({ ...q, lessonId: id }))), r);
     mcqs.push(...pool.slice(0, want));

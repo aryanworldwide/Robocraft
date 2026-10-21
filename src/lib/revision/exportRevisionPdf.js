@@ -248,6 +248,10 @@ export async function exportLessonRevisionPdf(classId, lesson) {
       pdf.subheading(pdfSafe(sec.h), 10.5, [40, 70, 110]);
       renderPlain(pdf, sec.b);
     });
+    if (book.glossary?.length) {
+      pdf.subheading('Key terms', 10.5, [40, 70, 110]);
+      book.glossary.forEach(([t, d]) => pdf.bullet(pdfSafe(`${t}: ${d}`), 9));
+    }
     if (book.figs?.length || book.sections.some(x => x.b.includes('[fig:'))) {
       pdf.callout('Diagrams for this chapter are in the app (Textbook Notes and the Diagram Bank). Practise drawing and labelling them.', [120, 80, 200]);
     }
