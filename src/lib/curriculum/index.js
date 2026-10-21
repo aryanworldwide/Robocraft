@@ -5,6 +5,8 @@ import { generateQuizForLesson } from './quizGenerator';
 import { shuffle, getRandomQuiz } from './helpers';
 import { LESSON_VIDEOS } from './videos';
 import { class9ExtraProjects, class10ExtraProjects, class11ExtraProjects } from './extraProjects';
+import { NEW_LESSONS, NEW_QUIZZES } from './newLessons';
+import { TEXTBOOK } from './textbook';
 
 export { shuffle, getRandomQuiz };
 
@@ -13,24 +15,41 @@ const class9Merged = { ...class9Data, projects: [...(class9Data.projects || []),
 const class10Merged = { ...class10Data, projects: [...(class10Data.projects || []), ...class10ExtraProjects] };
 const class11Merged = { ...class11Data, projects: [...(class11Data.projects || []), ...class11ExtraProjects] };
 
-// Swap in the verified lesson videos (old links that stopped working are replaced).
-function withVideos(data) {
+const TITLE_FIXES = { c9_r_12: 'Using Links and Joints to Create Specific Motion' };
+
+// Reading time from the full lesson + textbook notes (≈150 words a minute).
+function readingMinutes(l) {
+  const book = TEXTBOOK[l.id];
+  let words = (l.theory || '').split(/\s+/).length;
+  if (book) {
+    for (const s of book.sections || []) words += s.b.split(/\s+/).length;
+    for (const q of [...(book.exam?.short || []), ...(book.exam?.long || [])]) words += (q.q + ' ' + q.a).split(/\s+/).length * 0.5;
+  }
+  return Math.max(l.readingTime || 0, Math.round(words / 150));
+}
+
+// Add the new syllabus chapters, swap in verified videos, fix titles and reading times.
+function finalise(classId, data) {
+  const extra = NEW_LESSONS[classId] || {};
   return {
     ...data,
+    quizzes: { ...(data.quizzes || {}), ...NEW_QUIZZES },
     subjects: data.subjects.map(s => ({
       ...s,
-      lessons: s.lessons.map(l => {
+      lessons: [...s.lessons, ...(extra[s.id] || [])].map(l => {
         const v = LESSON_VIDEOS[l.id];
-        return v ? { ...l, videoUrl: `https://www.youtube.com/watch?v=${v.id}`, videoTitle: v.title } : l;
+        const out = { ...l, title: TITLE_FIXES[l.id] || l.title, hasTextbook: !!TEXTBOOK[l.id] };
+        out.readingTime = readingMinutes(out);
+        return v ? { ...out, videoUrl: `https://www.youtube.com/watch?v=${v.id}`, videoTitle: v.title } : out;
       }),
     })),
   };
 }
 
 export const curricula = {
-  class_9: withVideos(class9Merged),
-  class_10: withVideos(class10Merged),
-  class_11: withVideos(class11Merged)
+  class_9: finalise('class_9', class9Merged),
+  class_10: finalise('class_10', class10Merged),
+  class_11: finalise('class_11', class11Merged)
 };
 
 export function getCurriculum(classId) {
@@ -90,6 +109,7 @@ export function searchContent(classId, query) {
     l.title.toLowerCase().includes(q) ||
     l.subject.toLowerCase().includes(q) ||
     (l.theory && l.theory.toLowerCase().includes(q)) ||
+    (TEXTBOOK[l.id] && TEXTBOOK[l.id].sections.some(sec => (sec.h + ' ' + sec.b).toLowerCase().includes(q))) ||
     (l.keyConcepts && l.keyConcepts.some(c => c.toLowerCase().includes(q)))
   );
   const projects = getProjects(classId).filter(p =>

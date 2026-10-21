@@ -1,6 +1,10 @@
 // Lesson videos — every link checked to exist and allow embedding (Oct 2026).
 // Replaces old video links that no longer worked.
 export const LESSON_VIDEOS = {
+  c9_a_9: { id: "-4E2-0sxVUM", title: "Computer Vision: Crash Course Computer Science #35" },
+  c9_a_10: { id: "fOvTtapxa9c", title: "Natural Language Processing: Crash Course Computer Science #36" },
+  c9_a_11: { id: "aircAruvnKk", title: "But what is a neural network? | 3Blue1Brown" },
+  c11_m_9: { id: "AlsCUzCCc-k", title: "The Mecanum Wheel: How It Works" },
   c10_a_2: { id: "cXZtS50_gH4", title: "Automation vs. Autonomy" },
   c10_a_4: { id: "qYNweeDHiyU", title: "AI, Machine Learning, Deep Learning and Generative AI Explained" },
   c10_a_6: { id: "4aZY2MZmNBo", title: "AI Project Cycle Overview" },

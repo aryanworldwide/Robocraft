@@ -9,7 +9,7 @@ import { AvatarBadge } from '@/pages/Shop';
 import { WeeklyChallengeCard } from '@/pages/Leaderboard';
 import { equippedItems, localDay } from '@/lib/gamification';
 import { getReminderSettings } from '@/lib/reminders';
-import { Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
+import { GraduationCap, Shapes, RotateCcw, Cpu, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
 import DailyMissions from '@/components/learning/DailyMissions';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
 
@@ -251,13 +251,17 @@ export default function Home() {
       <div className="grid grid-cols-4 gap-2 animate-slide-up" style={{ animationDelay: '0.12s' }}>
         {[
           { icon: BookOpen, label: 'Learn', path: '/learn', color: '#4ADE80' },
+          { icon: GraduationCap, label: 'Exam Prep', path: '/exam', color: '#F59E0B' },
           { icon: Wrench, label: 'Build Lab', path: '/lab', color: '#F97316' },
           { icon: Bot, label: 'AI Mentor', path: '/mentor', color: '#A78BFA' },
-          { icon: Trophy, label: 'Progress', path: '/progress', color: '#FBBF24' },
           { icon: MapIcon, label: 'Story Map', path: '/story', color: '#22D3EE' },
           { icon: Terminal, label: 'Python', path: '/python', color: '#34D399' },
+          { icon: Shapes, label: 'Diagrams', path: '/diagrams', color: '#C084FC' },
+          { icon: RotateCcw, label: 'Revision', path: '/revision', color: '#2DD4BF' },
           { icon: Medal, label: 'Leaderboard', path: '/leaderboard', color: '#F472B6' },
           { icon: ShoppingBag, label: 'Shop', path: '/shop', color: '#FACC15' },
+          { icon: Trophy, label: 'Progress', path: '/progress', color: '#FBBF24' },
+          { icon: Cpu, label: 'Projects', path: '/projects', color: '#60A5FA' },
         ].map(action => {
           const Icon = action.icon;
           return (

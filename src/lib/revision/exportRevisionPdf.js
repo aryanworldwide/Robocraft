@@ -3,6 +3,18 @@
 // extracted from the existing curriculum, plus final quick revision,
 // important questions, and an exam checklist.
 import { downloadFile } from '@/lib/platform';
+import { getTextbook } from '@/lib/curriculum/textbook';
+import { toPlainText } from '@/components/lesson/RichText';
+import { pdfSafe } from '@/lib/exam/paperPdf';
+
+function renderPlain(pdf, text) {
+  for (const block of toPlainText(text).split('\n')) {
+    const t = pdfSafe(block).trim();
+    if (!t) continue;
+    if (/^(- |\d+\. )/.test(t)) pdf.bullet(t.replace(/^- /, ''), 9);
+    else pdf.body(t, 9.5);
+  }
+}
 import { getSubjects, getQuizForLesson, getAllLessons } from '@/lib/curriculum';
 import {
   getConceptIntro, getHowItWorks, getKeyPoints, getEngineeringInsight,
@@ -41,8 +53,11 @@ async function makeDoc() {
     doc.text(text, margin, y); y += size + 8;
   };
   const subheading = (text, size = 11, color = [20, 80, 120]) => {
-    ensure(size + 10); doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...color);
-    doc.text(text, margin, y); y += size + 5;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(...color);
+    doc.splitTextToSize(String(text), pageW - 2 * margin).forEach(ln => {
+      ensure(size + 10); doc.text(ln, margin, y); y += size + 4;
+    });
+    y += 1;
   };
   const label = (text) => {
     ensure(14); doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(0, 130, 100);
@@ -225,6 +240,19 @@ export async function exportLessonRevisionPdf(classId, lesson) {
   if (topic.keyPoints.length) topic.keyPoints.slice(0, 8).forEach(p => pdf.bullet(p));
   else pdf.body(topic.takeaway || '', 9.5);
 
+  // Full textbook notes for this chapter
+  const book = getTextbook(lesson.id);
+  if (book?.sections?.length) {
+    pdf.heading('Detailed Notes', 13, [0, 90, 140]);
+    book.sections.forEach(sec => {
+      pdf.subheading(pdfSafe(sec.h), 10.5, [40, 70, 110]);
+      renderPlain(pdf, sec.b);
+    });
+    if (book.figs?.length || book.sections.some(x => x.b.includes('[fig:'))) {
+      pdf.callout('Diagrams for this chapter are in the app (Textbook Notes and the Diagram Bank). Practise drawing and labelling them.', [120, 80, 200]);
+    }
+  }
+
   // 5. Real-World Application
   pdf.heading('5. Real-World Application', 13, [0, 90, 140]);
   if (topic.examples.length) topic.examples.slice(0, 2).forEach(e => pdf.body('• ' + e, 9.5));
@@ -264,6 +292,19 @@ export async function exportLessonRevisionPdf(classId, lesson) {
   if (mcqs.length) {
     pdf.heading('10. Answer Key', 13, [0, 90, 140]);
     mcqs.forEach((q, i) => pdf.bullet(`Q${i + 1}. ${String.fromCharCode(65 + q.answer)} — ${q.explanation || ''}`));
+  }
+
+  // 11. Board-style written questions with model answers
+  if (book?.exam && (book.exam.short?.length || book.exam.long?.length)) {
+    pdf.heading('11. Exam Questions with Model Answers', 13, [0, 90, 140]);
+    (book.exam.short || []).forEach((q, i) => {
+      pdf.subheading(pdfSafe(`S${i + 1}. ${q.q}  [2]`), 10, [30, 60, 100]);
+      renderPlain(pdf, q.a);
+    });
+    (book.exam.long || []).forEach((q, i) => {
+      pdf.subheading(pdfSafe(`L${i + 1}. ${q.q}  [5]`), 10, [30, 60, 100]);
+      renderPlain(pdf, q.a);
+    });
   }
 
   pdf.footer(`${classLabel} — ${lesson.title}`);

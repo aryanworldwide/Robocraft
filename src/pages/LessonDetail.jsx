@@ -24,6 +24,9 @@ import PythonRunner from '@/components/learning/PythonRunner';
 import { PYTHON_PRACTICE } from '@/lib/curriculum/pythonPractice';
 import LessonVideo from '@/components/learning/LessonVideo';
 import LessonExperience from '@/components/lesson/LessonExperience';
+import TextbookNotes from '@/components/lesson/TextbookNotes';
+import ExamCorner from '@/components/lesson/ExamCorner';
+import { getTextbook } from '@/lib/curriculum/textbook';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { toast } from '@/components/ui/use-toast';
 
@@ -34,6 +37,7 @@ export default function LessonDetail() {
   const progress = getProgressForClass(selectedClass);
   const lesson = useMemo(() => getLesson(selectedClass, id), [selectedClass, id]);
   const quizQuestions = useMemo(() => getQuizForLesson(selectedClass, id), [selectedClass, id]);
+  const book = useMemo(() => getTextbook(id), [id]);
 
   const [activeMode, setActiveMode] = useState('read');
   const [completed, setCompleted] = useState(false);
@@ -213,6 +217,7 @@ export default function LessonDetail() {
           <>
           <LessonVideo lesson={lesson} />
           <LessonExperience lesson={lesson} quizQuestions={quizQuestions} color={color} onComplete={handleComplete} onOpenFlashcards={() => { setActiveMode('interact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          <TextbookNotes book={book} color={color} />
           {PYTHON_PRACTICE[lesson.id] && (
             <PythonRunner
               initialCode={PYTHON_PRACTICE[lesson.id].code}
@@ -223,6 +228,7 @@ export default function LessonDetail() {
               onRun={() => recordActivityComplete(selectedClass, lesson.id, 'python')}
             />
           )}
+          <ExamCorner exam={book?.exam} onPracticed={() => recordActivityComplete(selectedClass, lesson.id, 'exam')} />
           </>
         )}
 

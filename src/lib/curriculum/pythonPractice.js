@@ -1,6 +1,29 @@
 // "Try it" Python exercises for the Python lessons. Each one runs in the
 // in-app Python (Pyodide). `task` is a small challenge to change the code.
 export const PYTHON_PRACTICE = {
+  c9_p_9: {
+    task: 'Type a sentence in the Input box and run. Then add a line that prints the sentence with every word capitalised (hint: title()).',
+    code: `# Strings: indexing, slicing, methods and traversal
+text = input("Type a sentence: ")
+
+print("Length:", len(text))
+print("First letter:", text[0], "| Last letter:", text[-1])
+print("First five:", text[:5])
+print("Reversed:", text[::-1])
+print("UPPER:", text.upper())
+
+vowels = 0
+for ch in text.lower():
+    if ch in "aeiou":
+        vowels += 1
+print("Vowels:", vowels)
+
+words = text.split()
+print("Words:", len(words), "->", words)
+print("Initials:", "".join(w[0].upper() for w in words))
+`,
+    input: 'robots are learning fast',
+  },
   c9_p_1: {
     task: 'Change the sensor readings and see how the average changes. Can you also print the highest reading?',
     code: `# Data -> information: turn raw sensor readings into something useful

@@ -38,6 +38,8 @@ const Mentor = lazy(() => import('@/pages/Mentor'));
 const Lab = lazy(() => import('@/pages/Lab'));
 const EngineeringChallenges = lazy(() => import('@/pages/EngineeringChallenges'));
 const RevisionMode = lazy(() => import('@/pages/RevisionMode'));
+const ExamPractice = lazy(() => import('@/pages/ExamPractice'));
+const DiagramBank = lazy(() => import('@/pages/DiagramBank'));
 
 function PageLoading() {
   return (
@@ -115,6 +117,8 @@ const AuthenticatedApp = () => {
             <Route path="/lab" element={<Lab />} />
             <Route path="/challenges" element={<EngineeringChallenges />} />
             <Route path="/revision" element={<RevisionMode />} />
+            <Route path="/exam" element={<ExamPractice />} />
+            <Route path="/diagrams" element={<DiagramBank />} />
           </Route>
         </Route>
 
