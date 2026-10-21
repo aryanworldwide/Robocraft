@@ -29,8 +29,11 @@ Built with React, Vite and Tailwind CSS, packaged for Android with Capacitor.
 
 ## Features
 
-- 94 lessons for Classes 9–11 (Robotics, Python, AI, Computing, Mechanical, Microcontrollers, Electrical & Control)
-- Quizzes (6–10 questions each), flashcards, games, revision mode and PDF notes
+- 105 chapters for Classes 9–11 covering the CISCE syllabus (ICSE IX–X Robotics & AI, ISC XI Robotics)
+- Full textbook notes in every chapter with 71 labelled diagrams, key terms and a Diagram Bank
+- Exam Corner (525 board-style questions with model answers) and timed sample papers with PDF answer keys
+- Quizzes, flashcards, games, revision mode and chapter-notes PDFs
+- Story map, reward shop, weekly leaderboard, daily reminders and in-app Python practice
 - 22 build projects with wiring tables, Arduino/ESP32 code and build sheets
 - Virtual circuit lab with simulation
 - Accounts with cloud-saved progress (or guest mode, saved on the device)
