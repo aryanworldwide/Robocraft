@@ -196,7 +196,8 @@ export default function TinkercadLab({ onExit }) {
   };
   const addComponentsList = (types) => {
     snapshot();
-    const cols = 3, gap = 260, sx = 120, sy = 120;
+    const narrowList = typeof window !== 'undefined' && window.innerWidth < 640;
+    const cols = narrowList ? 2 : 3, gap = narrowList ? 220 : 260, sx = 120, sy = 120;
     const placed = types.map((t, i) => ({ id: newId(), type: t, x: sx + (i % cols) * gap, y: sy + Math.floor(i / cols) * gap, rot: 0 }));
     setComponents(c => [...c, ...placed]);
     setShowWelcome(false);
@@ -233,7 +234,9 @@ export default function TinkercadLab({ onExit }) {
     // Starter build: place every required component and pre-wire it exactly as
     // the project's pin map specifies — one Run away from working, then the
     // student can rewire, break and rebuild it.
-    const cols = 3, gapX = 320, gapY = 260;
+    // lay the parts out to suit the screen so the fit zoom stays readable
+    const narrow = typeof window !== 'undefined' && window.innerWidth < 640;
+    const cols = narrow ? 2 : 3, gapX = narrow ? 230 : 320, gapY = narrow ? 190 : 260;
     const placed = exp.components.map((t, i) => ({
       id: t, type: t,
       x: 160 + (i % cols) * gapX,
