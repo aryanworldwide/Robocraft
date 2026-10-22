@@ -20,7 +20,7 @@ export async function buildPracticalPdf(details, items) {
       y += size + gap;
     }
   };
-  const heading = (t) => { ensure(40); y += 6; text(t, { size: 12, bold: true, color: [15, 60, 120] }); doc.setDrawColor(15, 60, 120); doc.line(M, y - 2, M + 60, y - 2); y += 6; };
+  const heading = (t) => { ensure(44); y += 8; text(t, { size: 12, bold: true, color: [15, 60, 120], gap: 2 }); doc.setDrawColor(15, 60, 120); doc.line(M, y - 1, M + 60, y - 1); y += 11; };
   const code = (src) => {
     doc.setFont('courier', 'normal'); doc.setFontSize(8.6);
     const lines = pdfSafe(src).replace(/\t/g, '  ').split('\n');

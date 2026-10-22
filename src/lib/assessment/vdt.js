@@ -16,7 +16,8 @@ const COMMON = {
   left: 'left motor speed / sensor value', right: 'right motor speed / sensor value', 
 };
 
-const describe = (name, fallback = '') => COMMON[name] || COMMON[name.toLowerCase()] || fallback;
+// Single letters are too ambiguous to guess from a name table (T, g, l…).
+const describe = (name, fallback = '') => COMMON[name] || (name.length > 2 ? COMMON[name.toLowerCase()] : undefined) || fallback;
 
 function inferPy(rhs) {
   const s = rhs.trim();
@@ -42,6 +43,7 @@ function guessDesc(name, type, rhs = '') {
   if (/input\(/.test(s)) return 'value entered by the user';
   let m = s.match(/^(\w+)\(/);
   if (m && !['int', 'float', 'str', 'list', 'dict', 'round', 'len', 'sum', 'max', 'min', 'abs'].includes(m[1])) return `result returned by ${m[1]}()`;
+  if ((m = s.match(/^(sum|max|min|len)\((\w+)\)\s*\/\s*\w/))) return `average (mean) of ${m[2]}`;
   if ((m = s.match(/^(sum|max|min|len)\((\w+)/))) return `${{ sum: 'sum', max: 'largest value', min: 'smallest value', len: 'number of elements' }[m[1]]} of ${m[2]}`;
   if (/\.count\(/.test(s)) return 'number of occurrences';
   return { list: 'list of values', dict: 'dictionary (key → value)', str: 'stores text', bool: 'true / false flag', tuple: 'tuple of values', deque: 'queue used for the search', function: 'user-defined function' }[type] || 'stores a value used in the calculation';
@@ -52,16 +54,20 @@ export function pythonVDT(code) {
   const add = (name, type, desc) => {
     if (!/^[A-Za-z_]\w*$/.test(name) || name.startsWith('__') || ['print', 'self'].includes(name)) return;
     const cur = rows.get(name);
-    if (!cur) rows.set(name, { name, type: type || '', description: desc || describe(name) });
-    else if (!cur.type && type) cur.type = type;
+    if (!cur) { rows.set(name, { name, type: type || '', description: desc || describe(name) }); }
+    else {
+      if (!cur.type && type) cur.type = type;
+      // a real assignment describes the variable better than "parameter of f()"
+      if (desc && /^parameter of/.test(cur.description) && !/^parameter of/.test(desc)) cur.description = desc;
+    }
     if (rows.get(name).type === 'NoneType') rows.get(name).type = '';
   };
   for (const raw of code.split('\n')) {
     const line = raw.replace(/#.*$/, '');
     let m;
     if ((m = line.match(/^\s*def\s+(\w+)\s*\(([^)]*)\)/))) {
-      add(m[1], 'function', describe(m[1], 'user-defined function'));
-      m[2].split(',').map(p => p.split('=')[0].trim()).filter(Boolean).forEach(p => add(p, '', describe(p, 'parameter of ' + m[1] + '()')));
+      add(m[1], 'function', 'user-defined function');
+      m[2].split(',').map(p => p.split('=')[0].trim()).filter(Boolean).forEach(p => add(p, '', 'parameter of ' + m[1] + '()'));
       continue;
     }
     if ((m = line.match(/^\s*for\s+(.+?)\s+in\s+(.+):/))) {
@@ -103,7 +109,7 @@ export function arduinoVDT(code) {
     if (fn !== 'setup' && fn !== 'loop') add(fn, `function (returns ${rt.replace(/\s+/g, ' ')})`, 'user-defined function');
     params.split(',').map(p => p.trim()).filter(p => p && p !== 'void').forEach(p => {
       const pm = p.match(/^(.*?)(\w+)\s*(\[\])?$/);
-      if (pm) add(pm[2], pm[1].trim().replace(/\s+/g, ' ') + (pm[3] ? '[]' : ''), describe(pm[2], `parameter of ${fn}()`));
+      if (pm) add(pm[2], pm[1].trim().replace(/\s+/g, ' ') + (pm[3] ? '[]' : ''), `parameter of ${fn}()`);
     });
   }
   for (const m of src.matchAll(new RegExp(`\\b(${C_TYPES})\\s+\\*?(\\w+)\\s*(\\[[^\\]]*\\])?\\s*(=\\s*([^;]*))?;`, 'g'))) {
