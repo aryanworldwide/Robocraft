@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { LAB_COMPONENTS, getDef, pinLocalPos, pinWorldPos, isBoard } from '@/lib/lab/labComponents';
+import PartArt from '@/components/lab/art/PartArt';
 
 const PIN_COLORS = { power:'#EF4444', ground:'#1F2937', digital:'#3B82F6', analog:'#22C55E', pwm:'#F97316', data:'#A78BFA', plus:'#EF4444', minus:'#1F2937', signal:'#EAB308', terminal:'#94A3B8' };
 
@@ -250,6 +251,7 @@ export default function Canvas({
 function ComponentNode({ comp, def, selected, wires, simState, running, onPointerDown, onPinDown }) {
   if (!def) return null;
   const rot = comp.rot || 0;
+  const partState = running ? { ...(simState || {}), ...((simState?.comp || {})[comp.id] || {}) } : undefined;
   const wiredPins = new Set();
   wires.forEach(w => {
     if (w.from.compId === comp.id) wiredPins.add(w.from.pinId);
@@ -258,15 +260,15 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
   return (
     <g transform={`translate(${comp.x},${comp.y}) rotate(${rot} ${def.w / 2} ${def.h / 2})`}
       onPointerDown={onPointerDown} style={{ cursor: 'grab' }}>
-      {/* body */}
-      <rect width={def.w} height={def.h} rx={10} fill="rgba(15,23,42,0.85)" stroke={selected ? '#06B6D4' : 'rgba(6,182,212,0.25)'} strokeWidth={selected ? 2.5 : 1.2} />
-      {selected && <rect x={-3} y={-3} width={def.w + 6} height={def.h + 6} rx={13} fill="none" stroke="#06B6D4" strokeWidth={1} opacity={0.4} />}
-
-      {/* inner visual */}
-      <ComponentVisual comp={comp} def={def} simState={simState} running={running} />
+      {/* shadow + realistic artwork */}
+      <rect x={4} y={6} width={def.w - 8} height={def.h - 6} rx={8} fill="rgba(15,23,42,0.18)" />
+      <PartArt type={comp.type} def={def} state={partState} running={running} />
+      {selected && <rect x={-4} y={-4} width={def.w + 8} height={def.h + 8} rx={10} fill="none" stroke="#0EA5E9" strokeWidth={2} strokeDasharray="6 4" />}
 
       {/* name tag */}
-      <text x={def.w / 2} y={def.h / 2 + (def.h > 90 ? 38 : 26)} textAnchor="middle" fontSize={11} fontWeight={700} fill="#e2e8f0">{def.name}</text>
+      <g transform={`rotate(${-rot} ${def.w / 2} ${def.h + 14})`}>
+        <text x={def.w / 2} y={def.h + 15} textAnchor="middle" fontSize={11} fontWeight={700} className="part-label">{def.name}</text>
+      </g>
 
       {/* pins */}
       {def.pins.map(pin => {
@@ -279,51 +281,13 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
         const anchor = pin.side === 'left' ? 'end' : pin.side === 'right' ? 'start' : 'middle';
         return (
           <g key={pin.id}>
-            <circle cx={lp.x} cy={lp.y} r={6} fill={color} stroke="#0a0f1c" strokeWidth={1.5} style={{ cursor: 'crosshair' }} onPointerDown={(e) => onPinDown(e, pin.id)} />
-            {wired && <circle cx={lp.x} cy={lp.y} r={9} fill="none" stroke="#22C55E" strokeWidth={1.5} opacity={0.6} />}
-            <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={600} fill="#94a3b8" textAnchor={anchor} transform={`rotate(${-rot} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
+            <circle cx={lp.x} cy={lp.y} r={7} fill="#ffffff" opacity={0.85} />
+            <circle cx={lp.x} cy={lp.y} r={5} fill={color} stroke="#0f172a" strokeWidth={1} style={{ cursor: 'crosshair' }} onPointerDown={(e) => onPinDown(e, pin.id)} />
+            {wired && <circle cx={lp.x} cy={lp.y} r={8.5} fill="none" stroke="#22C55E" strokeWidth={1.6} opacity={0.75} />}
+            <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={700} className="pin-label" textAnchor={anchor} transform={`rotate(${-rot} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
           </g>
         );
       })}
     </g>
   );
-}
-
-function ComponentVisual({ comp, def, simState: globalSim, running }) {
-  const simState = globalSim?.comp?.[comp.id] ? { ...globalSim, ...globalSim.comp[comp.id] } : globalSim;
-  const cx = def.w / 2, cy = def.h / 2;
-  switch (comp.type) {
-    case 'led': {
-      const on = running && simState?.ledOn;
-      return <g><circle cx={cx} cy={cy - 6} r={14} fill={on ? '#FBBF24' : '#1e293b'} stroke={on ? '#FDE68A' : '#334155'} strokeWidth={2} style={on ? { filter: 'drop-shadow(0 0 8px #FBBF24)' } : undefined} /></g>;
-    }
-    case 'buzzer': {
-      const on = running && simState?.buzzerOn;
-      return <g><circle cx={cx} cy={cy} r={10} fill="#1e293b" stroke="#475569" strokeWidth={2} />{on && <g stroke="#FB923C" strokeWidth={1.5} fill="none"><path d={`M ${cx + 10} ${cy} q 6 -6 0 -12`} /><path d={`M ${cx + 14} ${cy} q 8 -8 0 -16`} /></g>}</g>;
-    }
-    case 'servo': {
-      const ang = (running ? (simState?.servoAngle ?? 90) : 90) - 90;
-      return <g><rect x={cx - 14} y={cy - 14} width={28} height={28} rx={4} fill="#1e293b" stroke="#475569" /><line x1={cx} y1={cy} x2={cx} y2={cy - 22} stroke="#60A5FA" strokeWidth={3} strokeLinecap="round" transform={`rotate(${ang} ${cx} ${cy})`} /><circle cx={cx} cy={cy} r={3} fill="#60A5FA" /></g>;
-    }
-    case 'dc_motor': {
-      const rot = running ? (simState?.motorAngle ?? 0) : 0;
-      return <g transform={`rotate(${rot} ${cx} ${cy})`}><circle cx={cx} cy={cy} r={16} fill="#1e293b" stroke="#475569" strokeWidth={2} />{[0, 60, 120].map(a => <line key={a} x1={cx} y1={cy} x2={cx + 15 * Math.cos(a * Math.PI / 180)} y2={cy + 15 * Math.sin(a * Math.PI / 180)} stroke="#34D399" strokeWidth={2.5} />)}</g>;
-    }
-    case 'ir_sensor': {
-      const det = running && simState?.irDetected;
-      return <g><circle cx={cx} cy={cy} r={7} fill={det ? '#22C55E' : '#334155'} stroke="#475569" />{det && <path d={`M ${cx + 8} ${cy} h 30`} stroke="#22C55E" strokeWidth={1.5} strokeDasharray="3 3" opacity={0.7} />}</g>;
-    }
-    case 'ultrasonic': {
-      const d = running ? Math.round(simState?.distance ?? 0) : '--';
-      return <g><circle cx={cx - 12} cy={cy} r={6} fill="#0ea5e9" /><circle cx={cx + 12} cy={cy} r={6} fill="#0ea5e9" />{running && <text x={cx} y={cy + 28} textAnchor="middle" fontSize={10} fontWeight={700} fill="#7dd3fc">{d} cm</text>}</g>;
-    }
-    case 'lcd': case 'oled':
-      return <g><rect x={8} y={10} width={def.w - 16} height={def.h - 30} rx={3} fill="#0b1f2a" stroke="#334155" /><text x={16} y={28} fontSize={9} fill="#7dd3fc" fontFamily="monospace">{running ? 'RoboCraft' : '----------'}</text></g>;
-    case 'push_button':
-      return <g><circle cx={cx} cy={cy} r={16} fill="#1e293b" stroke="#FBBF24" strokeWidth={2} /></g>;
-    case 'battery':
-      return <g><rect x={8} y={10} width={def.w - 16} height={def.h - 20} rx={4} fill="#1e293b" stroke="#475569" /><text x={cx} y={cy} textAnchor="middle" fontSize={12} fill="#F87171">9V</text></g>;
-    default:
-      return <g><text x={cx} y={cy - 6} textAnchor="middle" fontSize={26}>{def.emoji}</text></g>;
-  }
 }

@@ -310,3 +310,9 @@ html, body {
 .lab-grid-line-strong { stroke: rgba(37, 99, 235, 0.26); }
 .dark .lab-grid-line { stroke: rgba(120, 150, 200, 0.10); }
 .dark .lab-grid-line-strong { stroke: rgba(120, 150, 200, 0.18); }
+
+/* Part and pin labels on the circuit workplane */
+.part-label { fill: #0f172a; }
+.pin-label { fill: #475569; }
+.dark .part-label { fill: #e2e8f0; }
+.dark .pin-label { fill: #94a3b8; }

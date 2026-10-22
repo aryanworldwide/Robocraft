@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getProject } from '@/lib/curriculum';
 import { priceOf, estimateBOM, inr } from '@/lib/prices';
-import { ArrowLeft, Clock, IndianRupee, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
+import { ArrowLeft, Clock, IndianRupee, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu, Maximize2 } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
+const CircuitDiagram = lazy(() => import('@/components/buildsheet/CircuitDiagram'));
+const FullscreenCircuit = lazy(() => import('@/components/buildsheet/FullscreenCircuit'));
 import CodeExplainer from '@/components/learning/CodeExplainer';
 import { generateBuildSheetData } from '@/lib/buildsheet/generateData';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
@@ -20,6 +22,7 @@ export default function ProjectDetail() {
   const [copied, setCopied] = useState(false);
   const [expandedStep, setExpandedStep] = useState(null);
   const [showBuildSheet, setShowBuildSheet] = useState(false);
+  const [showCircuit, setShowCircuit] = useState(false);
   const [sheetData, setSheetData] = useState(null);
   const [loadingSheet, setLoadingSheet] = useState(false);
 
@@ -116,6 +119,27 @@ export default function ProjectDetail() {
           <p className="text-[11px] text-muted-foreground mt-3">Estimated total: <b className="text-green-400">{inr(b.lo)} – {inr(b.hi)}</b> (typical online prices in India, including the microcontroller board — subtract it if you already own one; tools not included{b.unknown ? `; ${b.unknown} item${b.unknown > 1 ? 's' : ''} not priced` : ''}).</p>
         ); })()}
       </div>
+
+      {/* Wiring diagram — the picture students actually build from */}
+      {sheetData?.pinConnections?.length > 0 && (
+        <div className="glass-strong rounded-2xl p-3 mb-4 animate-slide-up" style={{ animationDelay: '0.12s' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-bold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-cyan-400" /> Wiring Diagram</h3>
+            <button onClick={() => setShowCircuit(true)} className="ml-auto text-[11px] font-bold text-cyan-500 flex items-center gap-1"><Maximize2 className="w-3.5 h-3.5" /> Full screen</button>
+          </div>
+          <button onClick={() => setShowCircuit(true)} className="w-full rounded-xl overflow-hidden bg-white">
+            <Suspense fallback={<div className="py-10 text-xs text-muted-foreground">Drawing the circuit…</div>}>
+              <CircuitDiagram pinConnections={sheetData.pinConnections} />
+            </Suspense>
+          </button>
+          <p className="text-[10px] text-muted-foreground mt-2">Every wire is coloured the same as the table below. Tap the picture to zoom in.</p>
+        </div>
+      )}
+      {showCircuit && (
+        <Suspense fallback={null}>
+          <FullscreenCircuit pinConnections={sheetData.pinConnections} projectName={project.title} onClose={() => setShowCircuit(false)} />
+        </Suspense>
+      )}
 
       {/* Pin Mapping Table */}
       {sheetData?.pinConnections?.length > 0 && (

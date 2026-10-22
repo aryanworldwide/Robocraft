@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
+const CircuitDiagram = lazy(() => import('@/components/buildsheet/CircuitDiagram'));
+const FullscreenCircuit = lazy(() => import('@/components/buildsheet/FullscreenCircuit'));
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import {
@@ -8,6 +10,7 @@ import {
 } from 'lucide-react';
 
 function CodeBlock({ code, label, color }) {
+  const [showCircuit, setShowCircuit] = useState(false);
   const [copied, setCopied] = useState(false);
   const clean = sanitizeCode(code);
   if (!clean) return null;
@@ -148,6 +151,26 @@ export default function AIGeneratedProjectView({ project, onBack }) {
           ))}
         </div>
       </div>
+
+      {/* Wiring diagram */}
+      {project.pinConnections?.length > 0 && (
+        <div className="glass-strong rounded-2xl p-3 mb-4 animate-slide-up">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-bold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-cyan-400" /> Wiring Diagram</h3>
+            <button onClick={() => setShowCircuit(true)} className="ml-auto text-[11px] font-bold text-cyan-500">Full screen</button>
+          </div>
+          <button onClick={() => setShowCircuit(true)} className="w-full rounded-xl overflow-hidden bg-white">
+            <Suspense fallback={<div className="py-10 text-xs text-muted-foreground">Drawing the circuit…</div>}>
+              <CircuitDiagram pinConnections={project.pinConnections} />
+            </Suspense>
+          </button>
+        </div>
+      )}
+      {showCircuit && (
+        <Suspense fallback={null}>
+          <FullscreenCircuit pinConnections={project.pinConnections} projectName={project.name || project.title} onClose={() => setShowCircuit(false)} />
+        </Suspense>
+      )}
 
       {/* Pin Connection Table */}
       {project.pinConnections && project.pinConnections.length > 0 && (

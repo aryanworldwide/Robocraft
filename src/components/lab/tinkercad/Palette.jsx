@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LAB_COMPONENTS, PALETTE_CATEGORIES } from '@/lib/lab/labComponents';
 import { ChevronDown, Search } from 'lucide-react';
+import { PartThumb } from '@/components/lab/art/PartArt';
 
 export default function Palette({ onAdd }) {
   const [query, setQuery] = useState('');
@@ -44,10 +45,10 @@ export default function Palette({ onAdd }) {
                     return (
                       <div key={type} draggable onDragStart={e => { e.dataTransfer.setData('lab/type', type); e.dataTransfer.effectAllowed = 'copy'; }}
                         onClick={() => onAdd?.(type)}
-                        className="glass rounded-lg p-2 cursor-grab hover:bg-cyan-500/10 active:cursor-grabbing transition-colors select-none">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-lg leading-none">{c.emoji}</span>
-                          <span className="text-[10px] font-medium leading-tight">{c.name}</span>
+                        className="glass rounded-lg p-1.5 cursor-grab hover:bg-cyan-500/10 active:cursor-grabbing transition-colors select-none border border-border">
+                        <div className="flex flex-col items-center gap-1">
+                          <PartThumb type={type} size={52} />
+                          <span className="text-[10px] font-medium leading-tight text-center">{c.name}</span>
                         </div>
                       </div>
                     );
