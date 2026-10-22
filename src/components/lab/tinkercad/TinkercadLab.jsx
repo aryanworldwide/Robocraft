@@ -189,7 +189,9 @@ export default function TinkercadLab({ onExit }) {
   // ── actions ──
   const addComponent = (type, x, y) => {
     snapshot();
-    setComponents(c => [...c, { id: newId(), type, x: Math.round(x), y: Math.round(y), rot: 0 }]);
+    const id = newId();
+    setComponents(c => [...c, { id, type, x: Math.round(x), y: Math.round(y), rot: 0 }]);
+    setSelectedId(id);
     setShowWelcome(false);
   };
   const addComponentsList = (types) => {
@@ -296,12 +298,12 @@ export default function TinkercadLab({ onExit }) {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="min-w-0">
-          <p className="text-[10px] font-bold text-cyan-500 leading-none">CIRCUIT LAB · 2D</p>
-          <p className="text-xs font-semibold truncate max-w-[8rem]">{experiment ? experiment.title : 'Free build'}</p>
+          <p className="text-[10px] font-bold text-orange-500 leading-none whitespace-nowrap">CIRCUIT · 2D</p>
+          <p className="text-xs font-semibold truncate max-w-[5.5rem] sm:max-w-[11rem]">{experiment ? experiment.title : 'Free build'}</p>
         </div>
         <button onClick={() => navigate('/design')} className="ml-1 px-2 py-1 rounded-lg glass text-[10px] font-bold text-violet-500 shrink-0" title="Switch to 3D design">3D →</button>
 
-        {aiEnabled && <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all shrink-0">
+        {aiEnabled && <button onClick={() => setShowBuildAnything(true)} className="hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all shrink-0">
           <Sparkles className="w-3.5 h-3.5" /><span className="hidden sm:inline">Build Anything</span>
         </button>}
 
@@ -316,11 +318,11 @@ export default function TinkercadLab({ onExit }) {
           <button onClick={() => setShowSerial(s => !s)} title="Serial" className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors hidden md:flex ${showSerial ? 'bg-green-500/20 text-green-400' : 'glass text-cyan-400 hover:bg-cyan-500/10'}`}><Terminal className="w-3.5 h-3.5" /><span>Serial</span></button>
           <div className="h-5 w-px bg-border mx-0.5 hidden md:block" />
           {!running
-            ? <button onClick={runSim} disabled={!canRun} title="Run" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
-            : <button onClick={() => setRunning(false)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
+            ? <button onClick={runSim} disabled={!canRun} title="Run" className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
+            : <button onClick={() => setRunning(false)} className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
           <button onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors"><RotateCcw className="w-4 h-4" /></button>
           <div className="h-5 w-px bg-border mx-0.5 hidden lg:block" />
-          <button onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')} className="flex items-center gap-1 px-2 py-1.5 rounded-lg glass text-cyan-400 text-[10px] font-bold transition-colors"><Languages className="w-3.5 h-3.5" />{lang === 'en' ? 'EN' : 'हिं'}</button>
+          <button onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')} className="hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg glass text-cyan-400 text-[10px] font-bold transition-colors"><Languages className="w-3.5 h-3.5" />{lang === 'en' ? 'EN' : 'हिं'}</button>
         </div>
       </div>
 
@@ -339,7 +341,7 @@ export default function TinkercadLab({ onExit }) {
         {showComponents ? (
           <div className="w-52 flex-shrink-0 glass border-r border-border hidden md:flex flex-col relative animate-slide-up">
             <button onClick={() => setShowComponents(false)} className="absolute -right-3 top-3 z-10 w-6 h-6 rounded-full glass-strong border border-border flex items-center justify-center text-muted-foreground hover:text-cyan-400"><PanelLeftClose className="w-3.5 h-3.5" /></button>
-            <Palette onAdd={(type) => addComponent(type, 300, 200)} />
+            <Palette onAdd={(type) => window.dispatchEvent(new CustomEvent('lab-add', { detail: { type } }))} />
           </div>
         ) : (
           <button onClick={() => setShowComponents(true)} title="Components" className="w-9 flex-shrink-0 glass border-r border-border hidden md:flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-cyan-400 transition-colors py-3">
@@ -427,7 +429,7 @@ export default function TinkercadLab({ onExit }) {
       {/* ── MOBILE BOTTOM SHEETS ── */}
       {mobileSheet === 'components' && (
         <MobSheet title="Components" onClose={() => setMobileSheet(null)}>
-          <Palette onAdd={(type) => addComponent(type, 300 + Math.random() * 200, 200 + Math.random() * 200)} />
+          <Palette onAdd={(type) => { window.dispatchEvent(new CustomEvent('lab-add', { detail: { type } })); setMobileSheet(null); }} />
         </MobSheet>
       )}
       {mobileSheet === 'inspector' && (

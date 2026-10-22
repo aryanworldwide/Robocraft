@@ -25,6 +25,27 @@ export default function Canvas({
 
   const compsRef = useRef(components);
   compsRef.current = components;
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  const dropRef = useRef(onDropComponent);
+  dropRef.current = onDropComponent;
+
+  // Parts added from the drawer land in the middle of what you are looking at.
+  useEffect(() => {
+    const add = (e) => {
+      const type = e.detail?.type;
+      const def = type && LAB_COMPONENTS[type];
+      if (!def || !svgRef.current) return;
+      const r = svgRef.current.getBoundingClientRect();
+      const v = viewRef.current;
+      const cx = (r.width / 2 - v.x) / v.scale;
+      const cy = (r.height / 2 - v.y) / v.scale;
+      const jitter = (compsRef.current?.length || 0) % 4;
+      dropRef.current(type, cx - def.w / 2 + jitter * 18, cy - def.h / 2 + jitter * 14);
+    };
+    window.addEventListener('lab-add', add);
+    return () => window.removeEventListener('lab-add', add);
+  }, []);
 
   useEffect(() => {
     const fit = () => {
@@ -48,7 +69,7 @@ export default function Canvas({
 
   const toWorld = useCallback((clientX, clientY) => {
     const rect = svgRef.current.getBoundingClientRect();
-    return { x: view.x + (clientX - rect.left) / view.scale, y: view.y + (clientY - rect.top) / view.scale };
+    return { x: (clientX - rect.left - view.x) / view.scale, y: (clientY - rect.top - view.y) / view.scale };
   }, [view]);
 
   const onWheel = (e) => {
@@ -56,9 +77,10 @@ export default function Canvas({
     const rect = svgRef.current.getBoundingClientRect();
     const factor = e.deltaY < 0 ? 1.1 : 0.9;
     const ns = Math.min(3, Math.max(0.3, view.scale * factor));
-    const wx = view.x + (e.clientX - rect.left) / view.scale;
-    const wy = view.y + (e.clientY - rect.top) / view.scale;
-    setView({ scale: ns, x: wx - (e.clientX - rect.left) / ns, y: wy - (e.clientY - rect.top) / ns });
+    const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+    // keep the point under the cursor fixed while zooming
+    const wx = (sx - view.x) / view.scale, wy = (sy - view.y) / view.scale;
+    setView({ scale: ns, x: sx - wx * ns, y: sy - wy * ns });
   };
 
   const onPointerDownBg = (e) => {
@@ -72,8 +94,8 @@ export default function Canvas({
       const rect = svgRef.current.getBoundingClientRect();
       drag.current = {
         mode: 'pinch', startDist: p.dist, startScale: view.scale,
-        wx: view.x + (p.mx - rect.left) / view.scale,
-        wy: view.y + (p.my - rect.top) / view.scale,
+        wx: (p.mx - rect.left - view.x) / view.scale,
+        wy: (p.my - rect.top - view.y) / view.scale,
       };
     }
   };
@@ -94,7 +116,7 @@ export default function Canvas({
       if (!p) return;
       const ns = Math.min(3, Math.max(0.3, drag.current.startScale * (p.dist / drag.current.startDist)));
       const rect = svgRef.current.getBoundingClientRect();
-      setView({ scale: ns, x: drag.current.wx - (p.mx - rect.left) / ns, y: drag.current.wy - (p.my - rect.top) / ns });
+      setView({ scale: ns, x: (p.mx - rect.left) - drag.current.wx * ns, y: (p.my - rect.top) - drag.current.wy * ns });
       return;
     }
     if (!drag.current) return;
