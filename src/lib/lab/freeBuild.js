@@ -103,6 +103,15 @@ export function validateFreeBuild(components, wires) {
     if (gnd && !wiredPins.has(gnd.id)) issues.push({ type: 'warn', msg: `${def.name} GND is not connected to ground.` });
   });
 
+  // Nothing wired yet → the circuit is not finished, whatever else is fine.
+  const nonBoard = components.filter(c => !isBoard(c.type));
+  const wiredComps = new Set();
+  wires.forEach(w => { wiredComps.add(w.from.compId); wiredComps.add(w.to.compId); });
+  const unwired = nonBoard.filter(c => !wiredComps.has(c.id));
+  if (nonBoard.length === 0) issues.push({ type: 'warn', msg: 'Add a part (LED, sensor, motor…) and wire it to the board.' });
+  else if (wires.length === 0) issues.push({ type: 'warn', msg: 'No wires yet — tap two pins to connect them.' });
+  else if (unwired.length) issues.push({ type: 'warn', msg: `Not connected: ${unwired.map(c => getDef(c.type)?.name || c.type).join(', ')}.` });
+
   const hasError = issues.some(i => i.type === 'error');
   const status = hasError ? 'error' : (issues.some(i => i.type === 'warn') ? 'incomplete' : 'valid');
   return { status, issues, conflicts };

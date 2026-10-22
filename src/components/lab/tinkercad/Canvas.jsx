@@ -41,10 +41,18 @@ export default function Canvas({
       if (!def || !svgRef.current) return;
       const r = svgRef.current.getBoundingClientRect();
       const v = viewRef.current;
-      const cx = (r.width / 2 - v.x) / v.scale;
-      const cy = (r.height / 2 - v.y) / v.scale;
-      const jitter = (compsRef.current?.length || 0) % 4;
-      dropRef.current(type, cx - def.w / 2 + jitter * 18, cy - def.h / 2 + jitter * 14);
+      const comps = compsRef.current || [];
+      if (!comps.length) {
+        const cx = (r.width / 2 - v.x) / v.scale, cy = (r.height / 2 - v.y) / v.scale;
+        dropRef.current(type, cx - def.w / 2, cy - def.h / 2);
+        return;
+      }
+      // put it in clear space to the right of what is already there (wrapping down)
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      comps.forEach(c => { const d = getDef(c.type); if (!d) return; minX = Math.min(minX, c.x); minY = Math.min(minY, c.y); maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h); });
+      const GAP = 40;
+      if (maxX - minX + def.w + GAP < 900) dropRef.current(type, maxX + GAP, minY);
+      else dropRef.current(type, minX, maxY + GAP + 20);
     };
     window.addEventListener('lab-add', add);
     return () => window.removeEventListener('lab-add', add);
