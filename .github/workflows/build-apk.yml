@@ -113,8 +113,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete apk-latest --yes --cleanup-tag || true
-          gh release create apk-latest RoboCraft.apk \
-            --title "RoboCraft APK (latest build)" \
-            --notes "Built from commit ${GITHUB_SHA::7}. Download RoboCraft.apk below and install it on your Android phone." \
-            --latest
+          NOTES="Built from commit ${GITHUB_SHA::7}. Download RoboCraft.apk below and install it on your Android phone."
+          # create once, then just replace the file — deleting the release races with other runs
+          gh release view apk-latest >/dev/null 2>&1 || \
+            gh release create apk-latest --title "RoboCraft APK (latest build)" --notes "$NOTES" --latest
+          gh release upload apk-latest RoboCraft.apk --clobber
+          if [ -f RoboCraft-play.aab ]; then gh release upload apk-latest RoboCraft-play.aab --clobber; fi
+          gh release edit apk-latest --notes "$NOTES" --latest
