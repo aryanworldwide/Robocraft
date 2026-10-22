@@ -8,31 +8,57 @@ export const PARTS = [
   {
     id: 'uno', name: 'Arduino Uno', note: '68.6 × 53.4 mm, M3 holes', color: '#0f766e',
     build: () => {
-      const holes = [[14, 2.5], [15.3, 50.7], [66.1, 7.6], [66.1, 35.5]].map(([x, z]) => H('cylinder', [3.2, 3.2, 6], [x - 34.3, -2, z - 26.7]));
+      const X = -34.3, Z = -26.7; // board corner → centred
       return [
-        P('box', [68.6, 53.4, 1.6], [0, 0, 0], { color: '#0f766e' }),
-        P('box', [16, 12, 11], [-34.3 + 6, 1.6, 26.7 - 38], { color: '#9ca3af' }),
-        P('box', [14, 9, 11], [-34.3 + 5, 1.6, 26.7 - 7.6], { color: '#111827' }),
-        P('box', [38, 10, 2.5], [8, 1.6, -12], { color: '#1f2937' }),
-        ...holes,
+        P('box', [68.6, 53.4, 1.6], [0, 0, 0], { color: '#0f766e' }),                 // PCB
+        P('box', [16, 12, 11], [X + 7, 1.6, Z + 12], { color: '#b9c0ca' }),            // USB-B
+        P('box', [14, 9, 11], [X + 5, 1.6, Z + 45], { color: '#15181d' }),             // barrel jack
+        P('box', [26, 2.5, 8.5], [6, 1.6, Z + 4], { color: '#1a1a1a' }),               // header row (top)
+        P('box', [20, 2.5, 8.5], [-20, 1.6, Z + 4], { color: '#1a1a1a' }),
+        P('box', [22, 2.5, 8.5], [8, 1.6, Z + 50], { color: '#1a1a1a' }),              // header row (bottom)
+        P('box', [20, 2.5, 8.5], [-18, 1.6, Z + 50], { color: '#1a1a1a' }),
+        P('box', [16, 9, 3], [2, 1.6, 0], { color: '#15181d' }),                       // ATmega328P
+        P('cylinder', [5, 5, 3], [-16, 1.6, 6], { color: '#9aa4b2' }),                 // crystal
+        P('box', [8, 5, 3], [-24, 1.6, -4], { color: '#15181d' }),                     // regulator
+        P('box', [3.5, 3.5, 3], [X + 10, 1.6, 0], { color: '#cfd6df' }),               // reset button
+        ...[[14, 2.5], [15.3, 50.7], [66.1, 7.6], [66.1, 35.5]].map(([x, z]) => H('cylinder', [3.2, 3.2, 6], [X + x, -2, Z + z])),
       ];
     },
   },
   {
+    id: 'esp32', name: 'ESP32 DevKit', note: '55 × 28 mm, 30 pins', color: '#15181d',
+    build: () => [
+      P('box', [55, 28, 1.6], [0, 0, 0], { color: '#15181d' }),
+      P('box', [26, 18, 3], [-6, 1.6, 0], { color: '#9aa4b2' }),                        // shielded module
+      P('box', [8, 12, 0.6], [14, 1.6, 0], { color: '#d4a017' }),                       // PCB antenna
+      P('box', [8, 7, 3], [-24, 1.6, 0], { color: '#b9c0ca' }),                         // micro-USB
+      P('box', [50, 2.5, 8.5], [0, 1.6, -12.5], { color: '#1a1a1a' }),
+      P('box', [50, 2.5, 8.5], [0, 1.6, 12.5], { color: '#1a1a1a' }),
+      P('box', [4.5, 3.5, 2.5], [18, 1.6, -8], { color: '#2a2f36' }),
+      P('box', [4.5, 3.5, 2.5], [18, 1.6, 8], { color: '#2a2f36' }),
+    ],
+  },
+  {
     id: 'hcsr04', name: 'Ultrasonic HC-SR04', note: '45 × 20 mm, Ø16 eyes 26 mm apart', color: '#1d4ed8',
     build: () => [
-      P('box', [45, 1.6, 20], [0, 0, 0], { color: '#1d4ed8' }),
-      P('cylinder', [16, 16, 12], [-13, 4, 6.8], { color: '#d1d5db', rot: [90, 0, 0] }),
-      P('cylinder', [16, 16, 12], [13, 4, 6.8], { color: '#d1d5db', rot: [90, 0, 0] }),
+      P('box', [45, 20, 1.6], [0, 0, 0], { color: '#1d4ed8' }),
+      P('cylinder', [16, 16, 12], [-13, 4, 1], { color: '#b9c0ca', rot: [90, 0, 0] }),
+      P('cylinder', [13, 13, 2], [-13, 4, 7], { color: '#4b5563', rot: [90, 0, 0] }),
+      P('cylinder', [16, 16, 12], [13, 4, 1], { color: '#b9c0ca', rot: [90, 0, 0] }),
+      P('cylinder', [13, 13, 2], [13, 4, 7], { color: '#4b5563', rot: [90, 0, 0] }),
+      P('box', [8, 4, 3], [0, 1.6, 2], { color: '#cbd5e1' }),                            // crystal
+      P('box', [10, 2.5, 8.5], [0, -2.5, -8], { color: '#1a1a1a' }),                      // 4-pin header
     ],
   },
   {
     id: 'sg90', name: 'Micro servo SG90', note: '22.5 × 12.2 mm body', color: '#2563eb',
     build: () => [
       P('box', [22.5, 12.2, 22.7], [0, 0, 0], { color: '#2563eb' }),
-      P('box', [32.5, 12.2, 2.5], [0, 15.9, 0], { color: '#2563eb' }),
-      P('cylinder', [11.8, 11.8, 4], [-5.4, 22.7, 0], { color: '#2563eb' }),
-      P('cylinder', [4.8, 4.8, 3.5], [-5.4, 26.7, 0], { color: '#f8fafc' }),
+      P('box', [32.5, 12.2, 2.5], [0, 15.9, 0], { color: '#1d4ed8' }),                    // mounting tabs
+      P('cylinder', [11.8, 11.8, 4], [-5.4, 22.7, 0], { color: '#1d4ed8' }),
+      P('cylinder', [4.8, 4.8, 3.5], [-5.4, 26.7, 0], { color: '#f8fafc' }),               // spline
+      P('box', [24, 3.5, 2], [-14, 28.2, 0], { color: '#f8fafc' }),                        // horn
+      P('cylinder', [10, 10, 4], [8, 6, 0], { color: '#1d4ed8', rot: [90, 0, 0] }),        // motor can
       H('cylinder', [2, 2, 6], [-13.8, 14, 0]), H('cylinder', [2, 2, 6], [13.8, 14, 0]),
     ],
   },
@@ -40,24 +66,55 @@ export const PARTS = [
     id: 'tt', name: 'TT gear motor', note: '64 × 22.5 × 18.8 mm', color: '#facc15',
     build: () => [
       P('box', [64, 22.5, 18.8], [0, 0, 0], { color: '#facc15' }),
-      P('cylinder', [5.4, 5.4, 37], [-20, 3, 0], { color: '#f8fafc', rot: [90, 0, 0] }),
+      P('cylinder', [20, 20, 25], [22, -3.1, 0], { color: '#9aa4b2', rot: [0, 0, 90] }),     // motor can
+      P('cylinder', [5.4, 5.4, 37], [-20, -8.5, 0], { color: '#e2e8f0', rot: [90, 0, 0] }),  // shaft
+      P('box', [6, 3, 3], [30, 14, 4], { color: '#ef4444' }),
+      P('box', [6, 3, 3], [30, 14, -4], { color: '#1f2937' }),
       H('cylinder', [3, 3, 30], [10, 3, 0], { rot: [90, 0, 0] }), H('cylinder', [3, 3, 30], [27, 3, 0], { rot: [90, 0, 0] }),
     ],
   },
   {
     id: 'wheel', name: 'Wheel 65 mm', note: 'fits TT motor shaft', color: '#111827',
     build: () => [
-      P('cylinder', [65, 65, 26], [0, -26 / 2 + 32.5, 0], { color: '#111827', rot: [90, 0, 0] }),
-      P('cylinder', [45, 45, 27], [0, -27 / 2 + 32.5, 0], { color: '#facc15', rot: [90, 0, 0] }),
-      H('box', [3.7, 5.4, 40], [0, 32.5 - 20, 0], { rot: [90, 0, 0] }),
+      P('cylinder', [65, 65, 26], [0, 19.5, 0], { color: '#1f2937', rot: [90, 0, 0] }),     // tyre
+      P('cylinder', [46, 46, 27], [0, 19, 0], { color: '#facc15', rot: [90, 0, 0] }),        // hub
+      P('cylinder', [16, 16, 28], [0, 18.5, 0], { color: '#eab308', rot: [90, 0, 0] }),
+      H('box', [3.7, 5.4, 40], [0, 12.5, 0], { rot: [90, 0, 0] }),
     ],
   },
   {
-    id: 'battery', name: '9 V battery', note: '48.5 × 26.5 × 17.5 mm', color: '#334155',
+    id: 'l298n', name: 'L298N motor driver', note: '43 × 43 mm with heatsink', color: '#1e40af',
     build: () => [
-      P('box', [26.5, 17.5, 48.5], [0, 0, 0], { color: '#334155' }),
-      P('cylinder', [8, 8, 4], [-6, 48.5, 0], { color: '#cbd5e1' }),
-      P('hex', [8.5, 8.5, 4], [6, 48.5, 0], { color: '#cbd5e1' }),
+      P('box', [43, 43, 1.6], [0, 0, 0], { color: '#1e40af' }),
+      P('box', [20, 16, 16], [0, 1.6, 4], { color: '#111827' }),                            // heatsink
+      P('box', [20, 2, 20], [0, 1.6, 4], { color: '#2a2f36' }),
+      P('box', [16, 10, 10], [-12, 1.6, -14], { color: '#16a34a' }),                         // screw terminals
+      P('box', [16, 10, 10], [12, 1.6, -14], { color: '#16a34a' }),
+      P('box', [24, 2.5, 8.5], [0, 1.6, 17], { color: '#1a1a1a' }),
+      ...[[-18, -18], [18, -18], [-18, 18], [18, 18]].map(([x, z]) => H('cylinder', [3.2, 3.2, 6], [x, -2, z])),
+    ],
+  },
+  {
+    id: 'battery', name: '2 × 18650 holder', note: '76 × 42 × 22 mm', color: '#1f2937',
+    build: () => [
+      P('box', [76, 42, 10], [0, 0, 0], { color: '#1f2937' }),
+      P('cylinder', [18.6, 18.6, 65], [0, -13.5, -11], { color: '#f59e0b', rot: [0, 0, 90] }),
+      P('cylinder', [18.6, 18.6, 65], [0, -13.5, 11], { color: '#f59e0b', rot: [0, 0, 90] }),
+      P('box', [3, 42, 14], [-37, 0, 0], { color: '#374151' }),
+      P('box', [3, 42, 14], [37, 0, 0], { color: '#374151' }),
+      P('box', [8, 3, 3], [40, 4, -6], { color: '#ef4444' }),
+      P('box', [8, 3, 3], [40, 4, 6], { color: '#111827' }),
+    ],
+  },
+  {
+    id: 'breadboard', name: 'Mini breadboard', note: '83 × 55 mm, 400 points', color: '#f3f4f6',
+    build: () => [
+      P('box', [83, 55, 9], [0, 0, 0], { color: '#f3f4f6' }),
+      P('box', [83, 2, 1], [0, 9, -22], { color: '#ef4444' }),
+      P('box', [83, 2, 1], [0, 9, -18], { color: '#2563eb' }),
+      P('box', [83, 2, 1], [0, 9, 18], { color: '#ef4444' }),
+      P('box', [83, 2, 1], [0, 9, 22], { color: '#2563eb' }),
+      P('box', [75, 3, 1.4], [0, 9, 0], { color: '#d1d5db' }),
     ],
   },
   {
@@ -66,6 +123,17 @@ export const PARTS = [
       P('dome', [24, 24, 10], [0, 7, 0], { color: '#64748b', mirror: [1, -1, 1] }),
       P('sphere', [15, 15, 15], [0, 0, 0], { color: '#e2e8f0' }),
       P('box', [36, 14, 2], [0, 17, 0], { color: '#64748b' }),
+      H('cylinder', [3.2, 3.2, 8], [-15, 15, 0]), H('cylinder', [3.2, 3.2, 8], [15, 15, 0]),
+    ],
+  },
+  {
+    id: 'led5', name: 'LED 5 mm', note: 'with legs', color: '#ef4444',
+    build: () => [
+      P('cylinder', [5, 5, 6], [0, 2, 0], { color: '#ef4444' }),
+      P('dome', [5, 5, 2.5], [0, 8, 0], { color: '#f87171' }),
+      P('cylinder', [6, 6, 1], [0, 1, 0], { color: '#dc2626' }),
+      P('box', [0.5, 0.5, 18], [-1.2, -18, 0], { color: '#9aa4b2' }),
+      P('box', [0.5, 0.5, 14], [1.2, -14, 0], { color: '#9aa4b2' }),
     ],
   },
   { id: 'm3', name: 'M3 screw hole', note: 'Ø3.2 × 20 mm hole', color: '#6b7280', single: () => H('cylinder', [3.2, 3.2, 20], [0, -5, 0]) },

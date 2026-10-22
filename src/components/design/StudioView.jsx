@@ -174,7 +174,43 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     }
     for (const obj of objects) {
       let rec = meshes.get(obj.id);
-      const geoKey = obj.type === 'group' ? obj.children : obj.type;
+      // A library part / group is drawn as its real sub-parts so it keeps every
+      // colour. The outer group carries the object's own transform, exactly like a
+      // primitive mesh, so the move/rotate/scale gizmo behaves the same.
+      if (obj.type === 'group') {
+        const kids = obj.children;
+        if (!rec || !rec.isAssembly || rec.geoKey !== kids) {
+          if (rec) { scene.remove(rec.mesh); rec.mesh.traverse?.(o => { o.geometry?.dispose?.(); if (o.material) o.material.dispose?.(); }); }
+          const outer = new THREE.Group();
+          const { origin, extent } = obj.frame;
+          for (const k of kids) {
+            const mat = k.hole
+              ? new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.95 })
+              : new THREE.MeshStandardMaterial({ color: k.color || obj.color || '#ef4444', roughness: 0.5, metalness: 0.08, flatShading: ['box', 'wedge', 'pyramid'].includes(k.type) });
+            const m = new THREE.Mesh(geometryFor(k), mat);
+            // child placed inside the part's unit box (x,z ∈ −0.5…0.5, y ∈ −0.5…0.5)
+            m.position.set(
+              (k.pos[0] - origin[0]) / extent[0],
+              (k.pos[1] + k.size[2] / 2 - origin[1]) / extent[1] - 0.5,
+              (k.pos[2] - origin[2]) / extent[2],
+            );
+            m.scale.set(k.size[0] / extent[0], k.size[2] / extent[1], k.size[1] / extent[2]);
+            const [rx, ry2, rz] = (k.rot || [0, 0, 0]).map(v => v * DEG);
+            m.rotation.set(rx, ry2, rz, 'YZX');
+            m.userData.id = obj.id;
+            outer.add(m);
+          }
+          outer.userData.id = obj.id;
+          scene.add(outer);
+          rec = { mesh: outer, isAssembly: true, geoKey: kids, hole: obj.hole };
+          meshes.set(obj.id, rec);
+        }
+        if (!(ctx.current.tc.dragging && ctx.current.tc.object === rec.mesh)) applyTransform(rec.mesh, obj);
+        rec.mesh.children.forEach(m => { m.material.opacity = obj.hole ? 0.45 : 1; m.material.transparent = !!obj.hole; });
+        rec.mesh.userData.obj = obj;
+        continue;
+      }
+      const geoKey = obj.type;
       if (!rec || rec.geoKey !== geoKey || rec.hole !== obj.hole) {
         if (rec) { scene.remove(rec.mesh); rec.mesh.geometry.dispose(); rec.mesh.material.dispose(); }
         const mat = obj.hole
@@ -203,7 +239,9 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     const one = selected.length === 1 ? meshes.get(selected[0]) : null;
     if (one) { tc.attach(one.mesh); tc.setMode(mode); } else tc.detach();
     meshes.forEach(({ mesh }, id) => {
-      if (mesh.material.emissive) mesh.material.emissive.setHex(selected.includes(id) ? 0x0c4a6e : 0x000000);
+      const hex = selected.includes(id) ? 0x0c4a6e : 0x000000;
+      if (mesh.material?.emissive) mesh.material.emissive.setHex(hex);
+      mesh.children?.forEach(c => c.material?.emissive?.setHex(hex));
     });
     if (selected.length) {
       const box = new THREE.Box3();
