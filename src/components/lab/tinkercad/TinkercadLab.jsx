@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { aiEnabled } from '@/lib/features';
 import { useNavigate } from 'react-router-dom';
 import {
-  Undo2, Redo2, Trash2, ChevronLeft, Code2, Play, Pause, RotateCcw, Languages,
+  Undo2, Redo2, Trash2, ChevronLeft, Code2, Play, Pause, RotateCcw,
   PanelLeftClose, PanelLeftOpen, X, Save, FolderOpen, Blocks, Cpu, Sparkles, Wrench, Terminal, Maximize2, LayoutGrid,
 } from 'lucide-react';
 import { LAB_EXPERIMENTS, getExperiment, generateCode } from '@/lib/lab/labExperiments';
@@ -42,7 +42,6 @@ export default function TinkercadLab({ onExit }) {
   const [wires, setWires] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [pendingWire, setPendingWire] = useState(null);
-  const [lang, setLang] = useState('en');
 
   const [running, setRunning] = useState(false);
   const [simState, setSimState] = useState(free ? createFreeSimState() : createSimState());
@@ -326,8 +325,6 @@ export default function TinkercadLab({ onExit }) {
             ? <button onClick={runSim} disabled={!canRun} title="Run" className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
             : <button onClick={() => setRunning(false)} className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
           <button onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors"><RotateCcw className="w-4 h-4" /></button>
-          <div className="h-5 w-px bg-border mx-0.5 hidden lg:block" />
-          <button onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')} className="hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg glass text-cyan-400 text-[10px] font-bold transition-colors"><Languages className="w-3.5 h-3.5" />{lang === 'en' ? 'EN' : 'हिं'}</button>
         </div>
       </div>
 
