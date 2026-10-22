@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ROBOT, ROBOT_PINS } from '@/lib/arena/world';
 
 const PX = 4; // texture pixels per cm
+// Cheap phones: skip shadows and render a little softer so the simulation stays smooth.
+const LOW_END = typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4;
 
 function floorTexture(map) {
   const [W, H] = map.size;
@@ -112,8 +114,8 @@ export default function ArenaView({ boardRef, cameraMode = 'chase', height = 320
     const map = b0.map;
     const [W, H] = map.size;
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(Math.min(LOW_END ? 1.5 : 2, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = !LOW_END;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
@@ -125,8 +127,8 @@ export default function ArenaView({ boardRef, cameraMode = 'chase', height = 320
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x334155, 1.4));
     const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-    sun.position.set(-120, 260, 140); sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
+    sun.position.set(-120, 260, 140); sun.castShadow = !LOW_END;
+    sun.shadow.mapSize.set(LOW_END ? 512 : 1024, LOW_END ? 512 : 1024);
     Object.assign(sun.shadow.camera, { left: -W, right: W, top: H, bottom: -H, near: 10, far: 800 });
     scene.add(sun);
 

@@ -53,7 +53,10 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     mount.appendChild(renderer.domElement);
     renderer.domElement.style.touchAction = 'none';
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xeef2f7);
+    const isDark = () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    const THEME = { light: { bg: 0xeef2f7, plane: 0xdbeafe, grid: 0x60a5fa, grid2: 0x93c5fd, fine: 0xbfdbfe }, dark: { bg: 0x0a0f1c, plane: 0x12213d, grid: 0x2563eb, grid2: 0x1e3a8a, fine: 0x1e40af } };
+    let theme = THEME[isDark() ? 'dark' : 'light'];
+    scene.background = new THREE.Color(theme.bg);
     const camera = new THREE.PerspectiveCamera(40, 1, 1, 5000);
     const orbit = new OrbitControls(camera, renderer.domElement);
     orbit.enableDamping = true; orbit.target.set(0, 0, 0); orbit.maxPolarAngle = Math.PI * 0.95;
@@ -62,10 +65,20 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     const back = new THREE.DirectionalLight(0xffffff, 0.5); back.position.set(-200, 100, -150); scene.add(back);
 
     // workplane 200×200 mm, 10 mm grid like Tinkercad
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({ color: 0xdbeafe, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({ color: theme.plane, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
     plane.rotation.x = -Math.PI / 2; plane.position.y = -0.05; scene.add(plane);
-    const grid = new THREE.GridHelper(200, 20, 0x60a5fa, 0x93c5fd); grid.position.y = 0.01; scene.add(grid);
-    const fine = new THREE.GridHelper(200, 200, 0xbfdbfe, 0xbfdbfe); fine.material.transparent = true; fine.material.opacity = 0.35; scene.add(fine);
+    const grid = new THREE.GridHelper(200, 20, theme.grid, theme.grid2); grid.position.y = 0.01; scene.add(grid);
+    const fine = new THREE.GridHelper(200, 200, theme.fine, theme.fine); fine.material.transparent = true; fine.material.opacity = 0.35; scene.add(fine);
+    // follow the app's light/dark setting
+    const applyTheme = () => {
+      theme = THEME[isDark() ? 'dark' : 'light'];
+      scene.background.setHex(theme.bg);
+      plane.material.color.setHex(theme.plane);
+      grid.material.color?.setHex?.(theme.grid);
+      fine.material.color?.setHex?.(theme.fine);
+    };
+    const themeWatch = new MutationObserver(applyTheme);
+    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     const axes = new THREE.AxesHelper(30); axes.position.set(-100, 0.1, 100); scene.add(axes);
 
     const tc = new TransformControls(camera, renderer.domElement);
@@ -142,7 +155,7 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
 
     ctx.current = { renderer, scene, camera, orbit, tc, meshes, holeTex, selBox, fit };
     return () => {
-      cancelAnimationFrame(raf); ro.disconnect();
+      cancelAnimationFrame(raf); ro.disconnect(); themeWatch.disconnect();
       renderer.domElement.removeEventListener('pointerdown', onDown);
       renderer.domElement.removeEventListener('pointerup', onUp);
       tc.detach(); tc.dispose?.(); orbit.dispose();
