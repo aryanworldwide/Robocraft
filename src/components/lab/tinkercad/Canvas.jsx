@@ -62,9 +62,11 @@ export default function Canvas({
       if (minX === Infinity) { setView({ x: 40, y: 40, scale: 0.7 }); return; }
       const rect = svgRef.current.getBoundingClientRect();
       const vh = Math.max(120, rect.height - insetRef.current); // the part not hidden by the serial drawer
+      const PAD_L = 42, PAD_R = 56, PAD_Y = 20; // room for pin labels and the zoom buttons
+      const vw = Math.max(120, rect.width - PAD_L - PAD_R);
       const w = maxX - minX, h = maxY - minY;
-      const s = Math.min(1.4, Math.max(0.3, Math.min((rect.width - 24) / w, (vh - 24) / h) * 0.9));
-      setView({ scale: s, x: (rect.width - w * s) / 2 - minX * s, y: (vh - h * s) / 2 - minY * s });
+      const s = Math.min(1.4, Math.max(0.3, Math.min(vw / w, (vh - 2 * PAD_Y) / h) * 0.95));
+      setView({ scale: s, x: PAD_L + (vw - w * s) / 2 - minX * s, y: (vh - h * s) / 2 - minY * s });
     };
     window.addEventListener('lab-fit', fit);
     return () => window.removeEventListener('lab-fit', fit);

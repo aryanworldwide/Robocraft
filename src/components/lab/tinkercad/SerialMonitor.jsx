@@ -11,7 +11,7 @@ export default function SerialMonitor({ lines, running }) {
         <Terminal className="w-3.5 h-3.5 text-green-400" />
         <span className="text-[11px] font-bold text-green-400">Serial Monitor</span>
         <span className="text-[10px] text-muted-foreground">9600 baud</span>
-        <span className={`ml-auto text-[10px] ${running ? 'text-green-400' : 'text-muted-foreground'}`}>{running ? '● running' : '○ idle'}</span>
+        <span className={`ml-auto mr-6 text-[10px] ${running ? 'text-green-400' : 'text-muted-foreground'}`}>{running ? '● running' : '○ idle'}</span>
       </div>
       <div ref={ref} className="flex-1 overflow-y-auto p-2 font-mono text-[10px] leading-relaxed terminal-surface">
         {lines.length === 0 ? (
