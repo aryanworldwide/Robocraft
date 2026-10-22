@@ -13,6 +13,9 @@ import {
   generateFreeCode, createFreeSimState, stepFreeSim, freeSimInputs, nextWiringStep,
 } from '@/lib/lab/freeBuild';
 import { getDef } from '@/lib/lab/labComponents';
+import { CircuitBoard } from '@/lib/lab/circuitBoard';
+import { runSketch } from '@/lib/arduino/runtime';
+import { transpile } from '@/lib/arduino/transpile';
 import Palette from './Palette';
 import Canvas from './Canvas';
 import PropertiesPanel from './PropertiesPanel';
@@ -44,7 +47,10 @@ export default function TinkercadLab({ onExit }) {
   const [running, setRunning] = useState(false);
   const [simState, setSimState] = useState(free ? createFreeSimState() : createSimState());
   const [serial, setSerial] = useState([]);
-  const [inputs, setInputs] = useState({ buttonPressed: false, objectCm: 30, motorSpeed: 200 });
+  const [inputs, setInputs] = useState({ buttonPressed: false, objectCm: 30, motorSpeed: 200, knob: 50 });
+  const [userCode, setUserCode] = useState(null); // student's edited sketch (null = generated code)
+  const [engine, setEngine] = useState('code');   // 'code' = run the sketch, 'script' = fallback animation
+  const [codeError, setCodeError] = useState(null);
 
   const [past, setPast] = useState([]);
   const [future, setFuture] = useState([]);
@@ -115,7 +121,8 @@ export default function TinkercadLab({ onExit }) {
     return freeCheck ? freeWireStatuses(components, wires) : [];
   }, [experiment, templateValidation, freeCheck, components, wires]);
 
-  const needsInput = experiment ? simInputsFor(experiment) : freeSimInputs(components);
+  const activeCode = userCode ?? code;
+  const needsInput = experiment ? { ...simInputsFor(experiment), ...freeSimInputs(components), motor: false } : { ...freeSimInputs(components), motor: engine === 'script' && freeSimInputs(components).motor };
   const canRun = experiment ? !!templateValidation?.valid : (freeCheck?.status !== 'error' && components.length > 0 && !!detectBoard(components));
 
   const status = running ? 'running' : components.length === 0 ? 'empty'
@@ -133,7 +140,7 @@ export default function TinkercadLab({ onExit }) {
   useEffect(() => { inputsRef.current = inputs; }, [inputs]);
   useEffect(() => { componentsRef.current = components; }, [components]);
   useEffect(() => {
-    if (!running) return;
+    if (!running || engine !== 'script') return;
     lastRef.current = performance.now();
     const loop = (now) => {
       const dt = now - lastRef.current; lastRef.current = now;
@@ -146,7 +153,38 @@ export default function TinkercadLab({ onExit }) {
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [running, experiment, pins]);
+  }, [running, experiment, pins, engine]);
+
+  // ── real code execution: the sketch drives the wired circuit ──
+  const wiresRef = useRef(wires);
+  const codeRef = useRef(activeCode);
+  useEffect(() => { wiresRef.current = wires; }, [wires]);
+  useEffect(() => { codeRef.current = activeCode; }, [activeCode]);
+  useEffect(() => {
+    if (!running || engine !== 'code') return;
+    const comps = componentsRef.current;
+    const board = new CircuitBoard(comps, resolveFreePins(comps, wiresRef.current), () => inputsRef.current);
+    let buf = [];
+    const stamp = (ms) => `[${(ms / 1000).toFixed(1)}s]`;
+    board.onSerial = (line) => buf.push(`${stamp(board.t)} ${line}`);
+    const h = runSketch(codeRef.current, board, {
+      onError: (e) => { buf.push(`⚠ ${e.line ? `Line ${e.line}: ` : ''}${e.message}`); setCodeError(e.message); },
+    });
+    let raf;
+    const frame = () => {
+      setSimState({ ...board.snapshot(), t: h.time });
+      if (buf.length) { const add = buf; buf = []; setSerial(arr => [...arr, ...add].slice(-200)); }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    h.done.then((res) => {
+      if (res?.error) {
+        if (buf.length) { const add = buf; buf = []; setSerial(arr => [...arr, ...add].slice(-200)); }
+        setRunning(false);
+      }
+    });
+    return () => { h.stop(); cancelAnimationFrame(raf); };
+  }, [running, engine]);
 
   // ── actions ──
   const addComponent = (type, x, y) => {
@@ -170,7 +208,7 @@ export default function TinkercadLab({ onExit }) {
     setWires(w => w.filter(x => x.from.compId !== selectedId && x.to.compId !== selectedId));
     setSelectedId(null);
   };
-  const clearAll = () => { snapshot(); setComponents([]); setWires([]); setSelectedId(null); setPendingWire(null); setWiringGuide(null); pendingRef.current = null; setShowWelcome(true); setRunning(false); };
+  const clearAll = () => { snapshot(); setUserCode(null); setComponents([]); setWires([]); setSelectedId(null); setPendingWire(null); setWiringGuide(null); pendingRef.current = null; setShowWelcome(true); setRunning(false); };
 
   const onPinDown = (compId, pinId) => {
     setSelectedId(compId);
@@ -186,7 +224,7 @@ export default function TinkercadLab({ onExit }) {
 
   const chooseExperiment = (id) => {
     const exp = getExperiment(id);
-    setExperimentId(id); setSelectedId(null); setPendingWire(null); pendingRef.current = null;
+    setExperimentId(id); setUserCode(null); setCodeError(null); setSelectedId(null); setPendingWire(null); pendingRef.current = null;
     setWiringGuide(null); setRunning(false); setSerial([]); setSimState(createSimState()); setShowWelcome(false); setShowTemplates(false);
     setShowComponents(false); setInspectorOpen(false);
     if (!exp) return;
@@ -219,20 +257,30 @@ export default function TinkercadLab({ onExit }) {
   };
 
   const resetSim = () => { setRunning(false); setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); };
-  const runSim = () => { setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); setRunning(true); setShowSerial(true); };
+  const runSim = () => {
+    setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); setCodeError(null);
+    let eng = 'code';
+    try { transpile(activeCode); } catch (e) {
+      if (userCode != null) { // the student's own code has an error — show it instead of faking a run
+        setCodeError(e.message); setSerial([`⚠ ${e.line ? `Line ${e.line}: ` : ''}${e.message}`]); setShowSerial(true); return;
+      }
+      eng = 'script'; // generated code uses a library the simulator doesn't model — animate instead
+    }
+    setEngine(eng); setRunning(true); setShowSerial(true);
+  };
 
   // ── save / load ──
   const saveBuild = () => {
     const name = window.prompt('Name this build:', `Build ${new Date().toLocaleDateString()}`);
     if (!name) return;
     const builds = JSON.parse(localStorage.getItem(BUILDS_KEY) || '[]');
-    builds.push({ id: `b${Date.now()}`, name, components, wires, boardType });
+    builds.push({ id: `b${Date.now()}`, name, components, wires, boardType, code: userCode });
     localStorage.setItem(BUILDS_KEY, JSON.stringify(builds));
   };
   const loadBuild = (b) => {
     snapshot();
     setComponents(b.components); setWires(b.wires); setSelectedId(null); setPendingWire(null); pendingRef.current = null;
-    setExperimentId(null); setWiringGuide(null); setRunning(false); setSimState(createFreeSimState()); setSerial([]);
+    setExperimentId(null); setUserCode(b.code ?? null); setWiringGuide(null); setRunning(false); setSimState(createFreeSimState()); setSerial([]);
     setShowSaves(false); setShowWelcome(false);
   };
   const savedBuilds = JSON.parse(localStorage.getItem(BUILDS_KEY) || '[]');
@@ -354,7 +402,9 @@ export default function TinkercadLab({ onExit }) {
               <button onClick={() => setShowCode(false)} className="p-1.5 rounded-lg glass text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
             </div>
             <div className="flex-1 min-h-0">
-              <CodePanel code={code} pins={pins} experiment={experiment || { id: 'free', title: 'Free Build' }} canProgram={canRun} onKnowCode={() => { setShowCode(false); setShowSerial(true); }} />
+              <CodePanel code={code} pins={pins} experiment={experiment || { id: 'free', title: 'Free Build' }} canProgram={canRun}
+                userCode={userCode} onEdit={(v) => { setUserCode(v); setCodeError(null); }} onResetCode={() => { setUserCode(null); setCodeError(null); }} error={codeError}
+                onKnowCode={() => { setShowCode(false); setShowSerial(true); }} />
             </div>
           </div>
         </div>
@@ -385,7 +435,7 @@ export default function TinkercadLab({ onExit }) {
       )}
 
       {/* ── floating AI help ── */}
-      <HelpMeBuild components={components} wires={wires} code={code} status={status} />
+      <HelpMeBuild components={components} wires={wires} code={activeCode} status={status} />
 
       {/* ── MODALS ── */}
       {showBuildAnything && (

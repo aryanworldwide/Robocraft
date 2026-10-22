@@ -44,6 +44,7 @@ const ExamPractice = lazy(() => import('@/pages/ExamPractice'));
 const DiagramBank = lazy(() => import('@/pages/DiagramBank'));
 const Problems = lazy(() => import('@/pages/Problems'));
 const Tools = lazy(() => import('@/pages/Tools'));
+const Arena = lazy(() => import('@/pages/Arena'));
 
 function PageLoading() {
   return (
@@ -132,6 +133,7 @@ const AuthenticatedApp = () => {
             <Route path="/diagrams" element={<DiagramBank />} />
             <Route path="/problems" element={<Problems />} />
             <Route path="/tools" element={<Tools />} />
+            <Route path="/arena" element={<Arena />} />
           </Route>
         </Route>
 

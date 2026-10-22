@@ -233,7 +233,8 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
   );
 }
 
-function ComponentVisual({ comp, def, simState, running }) {
+function ComponentVisual({ comp, def, simState: globalSim, running }) {
+  const simState = globalSim?.comp?.[comp.id] ? { ...globalSim, ...globalSim.comp[comp.id] } : globalSim;
   const cx = def.w / 2, cy = def.h / 2;
   switch (comp.type) {
     case 'led': {

@@ -253,6 +253,7 @@ export default function Home() {
           { icon: BookOpen, label: 'Learn', path: '/learn', color: '#4ADE80' },
           { icon: GraduationCap, label: 'Exam Prep', path: '/exam', color: '#F59E0B' },
           { icon: Wrench, label: 'Build Lab', path: '/lab', color: '#F97316' },
+          { icon: Rocket, label: 'Robot Arena', path: '/arena', color: '#38BDF8' },
           { icon: Bot, label: 'AI Mentor', path: '/mentor', color: '#A78BFA' },
           { icon: MapIcon, label: 'Story Map', path: '/story', color: '#22D3EE' },
           { icon: Terminal, label: 'Python', path: '/python', color: '#34D399' },

@@ -225,6 +225,7 @@ export default function EngineeringHome() {
           { icon: Sigma, label: 'Numericals', path: '/problems', color: '#22D3EE' },
           { icon: Calculator, label: 'Tools', path: '/tools', color: '#C084FC' },
           { icon: Wrench, label: 'Lab', path: '/lab', color: '#F97316' },
+          { icon: Cpu, label: 'Robot Arena', path: '/arena', color: '#38BDF8' },
           { icon: Activity, label: 'Challenges', path: '/challenges', color: '#A78BFA' },
           { icon: Shapes, label: 'Diagrams', path: '/diagrams', color: '#F472B6' },
           { icon: Terminal, label: 'Python', path: '/python', color: '#34D399' },

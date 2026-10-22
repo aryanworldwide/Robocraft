@@ -179,6 +179,7 @@ export function freeSimInputs(components) {
   if (has('push_button')) inputs.button = true;
   if (has('ultrasonic') || has('ir_sensor')) inputs.object = true;
   if (has('dc_motor')) inputs.motor = true;
+  if (has('potentiometer') || has('ldr')) inputs.knob = true;
   return inputs;
 }
 
