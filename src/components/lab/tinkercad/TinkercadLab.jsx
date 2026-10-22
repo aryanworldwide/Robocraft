@@ -235,7 +235,7 @@ export default function TinkercadLab({ onExit }) {
     // student can rewire, break and rebuild it.
     // lay the parts out to suit the screen so the fit zoom stays readable
     const narrow = typeof window !== 'undefined' && window.innerWidth < 640;
-    const cols = narrow ? 2 : 3, gapX = narrow ? 230 : 320, gapY = narrow ? 190 : 260;
+    const cols = narrow ? 2 : 3, gapX = narrow ? 300 : 340, gapY = narrow ? 230 : 280;
     const placed = exp.components.map((t, i) => ({
       id: t, type: t,
       x: 160 + (i % cols) * gapX,

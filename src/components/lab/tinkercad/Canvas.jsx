@@ -58,7 +58,7 @@ export default function Canvas({
       comps.forEach(c => {
         const d = getDef(c.type); if (!d) return;
         minX = Math.min(minX, c.x); minY = Math.min(minY, c.y);
-        maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h);
+        maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h + 20);
       });
       if (minX === Infinity) { setView({ x: 40, y: 40, scale: 0.7 }); return; }
       const rect = svgRef.current.getBoundingClientRect();

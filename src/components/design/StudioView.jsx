@@ -2,9 +2,19 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
-import { unitShape, groupSoup } from '@/lib/design/shapes';
+import { unitShape, groupSoup, ungroup } from '@/lib/design/shapes';
 
 const DEG = Math.PI / 180;
+
+function disposeTree(root) {
+  root?.traverse?.(o => { o.geometry?.dispose?.(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose?.()); });
+}
+
+/** Place a part's coloured sub-parts in world space for the given transform. */
+function layoutAssembly(rec, obj) {
+  const kids = ungroup(obj);
+  kids.forEach((k, i) => { const m = rec.assembly.children[i]; if (m) applyTransform(m, k); });
+}
 
 function geometryFor(obj) {
   const base = obj.type === 'group' ? groupSoup(obj) : unitShape(obj.type);
@@ -23,6 +33,18 @@ function holeTexture() {
   x.strokeStyle = '#64748b'; x.lineWidth = 6;
   for (let i = -64; i < 128; i += 16) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 64, 64); x.stroke(); }
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+}
+
+/** Read a live transform back off a mesh (the gizmo writes into the mesh). */
+function readTransform(mesh, obj) {
+  const size = [Math.abs(mesh.scale.x), Math.abs(mesh.scale.z), Math.abs(mesh.scale.y)];
+  const e = new THREE.Euler().setFromQuaternion(mesh.quaternion, 'YZX');
+  return {
+    ...obj,
+    size,
+    rot: [e.x / DEG, e.y / DEG, e.z / DEG],
+    pos: [mesh.position.x, mesh.position.y - size[2] / 2, mesh.position.z],
+  };
 }
 
 function applyTransform(mesh, obj) {
@@ -136,13 +158,20 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     renderer.domElement.addEventListener('pointerup', onUp);
 
     let raf;
-    const loop = () => { raf = requestAnimationFrame(loop); orbit.update(); renderer.render(scene, camera); };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      if (tc.dragging && tc.object) {
+        const r = meshes.get(tc.object.userData.id);
+        if (r?.isAssembly) layoutAssembly(r, readTransform(tc.object, tc.object.userData.obj));
+      }
+      orbit.update(); renderer.render(scene, camera);
+    };
     loop();
 
     // frame everything on the workplane (or the whole plane when it is empty)
     const fit = () => {
       const box = new THREE.Box3();
-      meshes.forEach(({ mesh }) => box.expandByObject(mesh));
+      meshes.forEach(({ mesh, assembly }) => box.expandByObject(assembly || mesh));
       const empty = box.isEmpty();
       const c = empty ? new THREE.Vector3(0, 0, 0) : box.getCenter(new THREE.Vector3());
       const size = empty ? 120 : Math.max(20, box.getSize(new THREE.Vector3()).length());
@@ -159,7 +188,7 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
       renderer.domElement.removeEventListener('pointerdown', onDown);
       renderer.domElement.removeEventListener('pointerup', onUp);
       tc.detach(); tc.dispose?.(); orbit.dispose();
-      meshes.forEach(({ mesh }) => { mesh.geometry.dispose(); mesh.material.dispose(); });
+      meshes.forEach(({ mesh, assembly }) => { disposeTree(mesh); disposeTree(assembly); });
       holeTex.dispose(); renderer.dispose(); renderer.domElement.remove();
     };
   }, []);
@@ -170,43 +199,35 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     if (!scene) return;
     const ids = new Set(objects.map(o => o.id));
     for (const [id, rec] of meshes) {
-      if (!ids.has(id)) { scene.remove(rec.mesh); rec.mesh.geometry.dispose(); rec.mesh.material.dispose(); meshes.delete(id); }
+      if (!ids.has(id)) { scene.remove(rec.mesh); disposeTree(rec.mesh); if (rec.assembly) { scene.remove(rec.assembly); disposeTree(rec.assembly); } meshes.delete(id); }
     }
     for (const obj of objects) {
       let rec = meshes.get(obj.id);
-      // A library part / group is drawn as its real sub-parts so it keeps every
-      // colour. The outer group carries the object's own transform, exactly like a
-      // primitive mesh, so the move/rotate/scale gizmo behaves the same.
+      // A library part keeps every colour: an invisible proxy carries the object's
+      // transform (so the gizmo works) and the coloured sub-parts follow it.
       if (obj.type === 'group') {
-        const kids = obj.children;
-        if (!rec || !rec.isAssembly || rec.geoKey !== kids) {
-          if (rec) { scene.remove(rec.mesh); rec.mesh.traverse?.(o => { o.geometry?.dispose?.(); if (o.material) o.material.dispose?.(); }); }
-          const outer = new THREE.Group();
-          const { origin, extent } = obj.frame;
-          for (const k of kids) {
+        if (!rec || !rec.isAssembly || rec.geoKey !== obj.children) {
+          if (rec) { scene.remove(rec.mesh); scene.remove(rec.assembly); disposeTree(rec.mesh); disposeTree(rec.assembly); }
+          const proxy = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+          proxy.userData.id = obj.id; proxy.renderOrder = 0;
+          scene.add(proxy);
+          const assembly = new THREE.Group();
+          for (const k of ungroup(obj)) {
             const mat = k.hole
               ? new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.95 })
               : new THREE.MeshStandardMaterial({ color: k.color || obj.color || '#ef4444', roughness: 0.5, metalness: 0.08, flatShading: ['box', 'wedge', 'pyramid'].includes(k.type) });
             const m = new THREE.Mesh(geometryFor(k), mat);
-            // child placed inside the part's unit box (x,z ∈ −0.5…0.5, y ∈ −0.5…0.5)
-            m.position.set(
-              (k.pos[0] - origin[0]) / extent[0],
-              (k.pos[1] + k.size[2] / 2 - origin[1]) / extent[1] - 0.5,
-              (k.pos[2] - origin[2]) / extent[2],
-            );
-            m.scale.set(k.size[0] / extent[0], k.size[2] / extent[1], k.size[1] / extent[2]);
-            const [rx, ry2, rz] = (k.rot || [0, 0, 0]).map(v => v * DEG);
-            m.rotation.set(rx, ry2, rz, 'YZX');
             m.userData.id = obj.id;
-            outer.add(m);
+            assembly.add(m);
           }
-          outer.userData.id = obj.id;
-          scene.add(outer);
-          rec = { mesh: outer, isAssembly: true, geoKey: kids, hole: obj.hole };
+          scene.add(assembly);
+          rec = { mesh: proxy, assembly, isAssembly: true, geoKey: obj.children, hole: obj.hole };
           meshes.set(obj.id, rec);
         }
-        if (!(ctx.current.tc.dragging && ctx.current.tc.object === rec.mesh)) applyTransform(rec.mesh, obj);
-        rec.mesh.children.forEach(m => { m.material.opacity = obj.hole ? 0.45 : 1; m.material.transparent = !!obj.hole; });
+        const dragging = ctx.current.tc.dragging && ctx.current.tc.object === rec.mesh;
+        if (!dragging) applyTransform(rec.mesh, obj);
+        layoutAssembly(rec, dragging ? readTransform(rec.mesh, obj) : obj);
+        rec.assembly.children.forEach(m => { m.material.opacity = obj.hole ? 0.45 : 1; m.material.transparent = !!obj.hole; });
         rec.mesh.userData.obj = obj;
         continue;
       }
@@ -238,14 +259,14 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     if (!tc) return;
     const one = selected.length === 1 ? meshes.get(selected[0]) : null;
     if (one) { tc.attach(one.mesh); tc.setMode(mode); } else tc.detach();
-    meshes.forEach(({ mesh }, id) => {
+    meshes.forEach(({ mesh, assembly }, id) => {
       const hex = selected.includes(id) ? 0x0c4a6e : 0x000000;
       if (mesh.material?.emissive) mesh.material.emissive.setHex(hex);
-      mesh.children?.forEach(c => c.material?.emissive?.setHex(hex));
+      assembly?.children.forEach(c => c.material?.emissive?.setHex(hex));
     });
     if (selected.length) {
       const box = new THREE.Box3();
-      selected.forEach(id => { const r = meshes.get(id); if (r) box.expandByObject(r.mesh); });
+      selected.forEach(id => { const r = meshes.get(id); if (r) box.expandByObject(r.assembly || r.mesh); });
       selBox.box.copy(box); selBox.visible = true;
     } else selBox.visible = false;
   }, [selected, mode, objects]);
