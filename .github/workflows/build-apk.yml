@@ -68,15 +68,16 @@ jobs:
           grep -E "versionCode|versionName" android/app/build.gradle
 
       - name: Build test APK (debug signing)
-        if: ${{ env.HAS_KEYSTORE != 'true' }}
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
           cp app/build/outputs/apk/debug/app-debug.apk ../RoboCraft.apk
 
+      # Never let a signing problem break the normal APK release above.
       - name: Build signed APK + Play Store bundle (upload key)
         if: ${{ env.HAS_KEYSTORE == 'true' }}
+        continue-on-error: true
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -103,7 +104,7 @@ jobs:
           path: RoboCraft.apk
 
       - uses: actions/upload-artifact@v4
-        if: ${{ env.HAS_KEYSTORE == 'true' }}
+        if: ${{ hashFiles('RoboCraft-play.aab') != '' }}
         with:
           name: robocraft-play-bundle
           path: RoboCraft-play.aab
