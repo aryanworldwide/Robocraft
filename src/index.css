@@ -299,3 +299,6 @@ html, body {
 :root[data-accent="amber"] { --ac-200: 253 230 138; --ac-300: 252 211 77; --ac-400: 251 191 36; --ac-500: 245 158 11; --ac-600: 217 119 6; }
 :root[data-accent="rose"] { --ac-200: 254 205 211; --ac-300: 253 164 175; --ac-400: 251 113 133; --ac-500: 244 63 94; --ac-600: 225 29 72; }
 :root[data-accent="sky"] { --ac-200: 186 230 253; --ac-300: 125 211 252; --ac-400: 56 189 248; --ac-500: 14 165 233; --ac-600: 2 132 199; }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

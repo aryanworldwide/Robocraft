@@ -226,6 +226,8 @@ export default function EngineeringHome() {
           { icon: Calculator, label: 'Tools', path: '/tools', color: '#C084FC' },
           { icon: Wrench, label: 'Lab', path: '/lab', color: '#F97316' },
           { icon: Cpu, label: 'Robot Arena', path: '/arena', color: '#38BDF8' },
+          { icon: Shapes, label: '3D CAD', path: '/design', color: '#FB7185' },
+          { icon: Activity, label: 'Mechanisms', path: '/mechanisms', color: '#A3E635' },
           { icon: Activity, label: 'Challenges', path: '/challenges', color: '#A78BFA' },
           { icon: Shapes, label: 'Diagrams', path: '/diagrams', color: '#F472B6' },
           { icon: Terminal, label: 'Python', path: '/python', color: '#34D399' },
