@@ -27,6 +27,9 @@ import LessonExperience from '@/components/lesson/LessonExperience';
 import TextbookNotes from '@/components/lesson/TextbookNotes';
 import ExamCorner from '@/components/lesson/ExamCorner';
 import { getTextbook } from '@/lib/curriculum/textbook';
+import { isPro } from '@/lib/uiMode';
+import { topicsForLesson } from '@/lib/problems';
+import ProblemSolver from '@/components/problems/ProblemSolver';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { toast } from '@/components/ui/use-toast';
 
@@ -38,6 +41,8 @@ export default function LessonDetail() {
   const lesson = useMemo(() => getLesson(selectedClass, id), [selectedClass, id]);
   const quizQuestions = useMemo(() => getQuizForLesson(selectedClass, id), [selectedClass, id]);
   const book = useMemo(() => getTextbook(id), [id]);
+  const pro = isPro(selectedClass);
+  const problemTopics = useMemo(() => topicsForLesson(id).filter(t => t.classes.includes(selectedClass)).map(t => t.id), [id, selectedClass]);
 
   const [activeMode, setActiveMode] = useState('read');
   const [completed, setCompleted] = useState(false);
@@ -109,17 +114,17 @@ export default function LessonDetail() {
 
   // Hide the Listen tab where speech synthesis is unavailable (Android WebView).
   const modes = [
-    { id: 'read', label: 'Read', icon: BookOpen },
-    { id: 'listen', label: 'Listen', icon: Headphones, hidden: !hasSpeech },
-    { id: 'interact', label: 'Play', icon: Gamepad2 },
-    { id: 'build', label: 'Build', icon: Wrench },
+    { id: 'read', label: pro ? 'Notes' : 'Read', icon: BookOpen },
+    { id: 'listen', label: pro ? 'Audio' : 'Listen', icon: Headphones, hidden: !hasSpeech },
+    { id: 'interact', label: pro ? 'Practice' : 'Play', icon: pro ? Target : Gamepad2 },
+    { id: 'build', label: pro ? 'Lab' : 'Build', icon: Wrench },
   ].filter(m => !m.hidden);
 
   const handleComplete = () => {
     if (!completed) {
       markLessonComplete(selectedClass, lesson.id);
       setCompleted(true);
-      setShowConfetti(true);
+      if (!pro) setShowConfetti(true);
     }
   };
 
@@ -251,13 +256,19 @@ export default function LessonDetail() {
         {/* INTERACT MODE */}
         {activeMode === 'interact' && (
           <>
+            {problemTopics.length > 0 && (
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Numerical practice</p>
+                <ProblemSolver topicIds={problemTopics} compact />
+              </div>
+            )}
             <ExperimentMode lesson={lesson} onComplete={() => recordActivityComplete(selectedClass, lesson.id, 'experiment')} xpReward={40} />
 
             {flashCards.length > 0 && (
               <div className="glass-strong rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-bold text-purple-400">Flash Cards</span>
+                  <span className="text-xs font-bold text-purple-400">{pro ? 'Recall Cards' : 'Flash Cards'}</span>
                   <span className="text-[10px] text-muted-foreground ml-auto">{flashcardIdx + 1} / {flashCards.length}</span>
                 </div>
                 <FlashCardView
@@ -274,7 +285,7 @@ export default function LessonDetail() {
               </div>
             )}
 
-            {matchPairs.length >= 4 ? (
+            {pro ? null : matchPairs.length >= 4 ? (
               <div className="glass-strong rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-4 h-4 text-purple-400" />
@@ -292,7 +303,7 @@ export default function LessonDetail() {
               </div>
             )}
 
-            {fillBlankQuestions.length > 0 && (
+            {!pro && fillBlankQuestions.length > 0 && (
               <div className="glass-strong rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Trophy className="w-4 h-4 text-yellow-400" />
@@ -348,10 +359,12 @@ export default function LessonDetail() {
         onClick={handleComplete}
         disabled={completed}
         className={`w-full py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
-          completed ? 'bg-green-500/15 text-green-400 cursor-default' : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:neon-glow animate-pulse-glow'
+          completed ? 'bg-green-500/15 text-green-400 cursor-default' : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:neon-glow ' + (pro ? '' : 'animate-pulse-glow')
         }`}
       >
-        {completed ? <><CheckCircle2 className="w-5 h-5" /> Lesson Completed (+50 XP)</> : <><Trophy className="w-5 h-5" /> Complete Lesson (+50 XP)</>}
+        {pro
+          ? (completed ? <><CheckCircle2 className="w-5 h-5" /> Chapter done</> : <><CheckCircle2 className="w-5 h-5" /> Mark chapter as done</>)
+          : (completed ? <><CheckCircle2 className="w-5 h-5" /> Lesson Completed (+50 XP)</> : <><Trophy className="w-5 h-5" /> Complete Lesson (+50 XP)</>)}
       </button>
 
       {/* Chapter Revision — per-chapter notes, quiz, flashcards */}

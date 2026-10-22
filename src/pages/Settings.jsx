@@ -8,6 +8,8 @@ import { localDay } from '@/lib/gamification';
 import { toast } from '@/components/ui/use-toast';
 import { Bell, ShoppingBag, ArrowLeft, Check, Cpu, LogOut, Settings as SettingsIcon, GraduationCap, Trash2, AlertTriangle, X, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeContext';
+import { getUiMode, setUiMode } from '@/lib/uiMode';
+import { Gamepad2, Briefcase } from 'lucide-react';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ export default function Settings() {
   };
   const { theme, setTheme } = useTheme();
   const [changingClass, setChangingClass] = useState(false);
+  const [uiMode, setUiModeState] = useState(() => getUiMode(selectedClass));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -140,6 +143,22 @@ export default function Settings() {
               className="bg-transparent font-bold text-cyan-400 outline-none" />
           </label>
         )}
+      </div>
+
+      {/* Display style */}
+      <div className="glass-strong rounded-2xl p-4 animate-slide-up">
+        <h3 className="font-bold text-sm">Display style</h3>
+        <p className="text-xs text-muted-foreground mb-3">For {formatClass(selectedClass)}. Pro is calmer and exam-focused; Fun adds games, confetti and rewards.</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[['fun', 'Fun', 'Games, coins, story map', Gamepad2], ['pro', 'Pro', 'Numericals, tools, tracker', Briefcase]].map(([id, label, sub, Icon]) => (
+            <button key={id} onClick={() => { setUiMode(selectedClass, id); setUiModeState(id); toast({ title: `${label} style on`, description: id === 'pro' ? 'Home, lessons and the tracker are now in Pro style.' : 'Games and rewards are back on.' }); }}
+              className={`rounded-xl p-3 text-left transition-all ${uiMode === id ? 'bg-cyan-500/15 ring-1 ring-cyan-500' : 'glass'}`}>
+              <Icon className={`w-4 h-4 mb-1 ${uiMode === id ? 'text-cyan-500' : 'text-muted-foreground'}`} />
+              <p className="text-sm font-bold">{label}</p>
+              <p className="text-[10px] text-muted-foreground">{sub}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Reward Shop */}

@@ -5,7 +5,7 @@ import AIExplainerCard from './AIExplainerCard';
 export default function ChallengeMe({ lesson, selectedClass }) {
   return (
     <AIExplainerCard
-      title="🚀 Challenge Me"
+      title="Challenge Me"
       subtitle="Advanced problems for curious minds."
       icon={Rocket}
       color="#F97316"

@@ -13,6 +13,8 @@ import Layout from '@/components/Layout';
 import BadgePopup from '@/components/learning/BadgePopup';
 import LevelUpPopup from '@/components/learning/LevelUpPopup';
 import InstallHint from '@/components/InstallHint';
+import { isPro } from '@/lib/uiMode';
+import { toast } from '@/components/ui/use-toast';
 // Add page imports here
 import Splash from '@/pages/Splash';
 import Login from '@/pages/Login';
@@ -40,6 +42,8 @@ const EngineeringChallenges = lazy(() => import('@/pages/EngineeringChallenges')
 const RevisionMode = lazy(() => import('@/pages/RevisionMode'));
 const ExamPractice = lazy(() => import('@/pages/ExamPractice'));
 const DiagramBank = lazy(() => import('@/pages/DiagramBank'));
+const Problems = lazy(() => import('@/pages/Problems'));
+const Tools = lazy(() => import('@/pages/Tools'));
 
 function PageLoading() {
   return (
@@ -51,7 +55,14 @@ function PageLoading() {
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const { badgePopup, setBadgePopup, levelPopup, setLevelPopup } = useApp();
+  const { badgePopup, setBadgePopup, levelPopup, setLevelPopup, selectedClass } = useApp();
+  const pro = isPro(selectedClass);
+  // Pro mode: no full-screen celebrations, just a quiet note.
+  useEffect(() => {
+    if (!pro) return;
+    if (badgePopup) { toast({ title: 'Milestone reached', description: badgePopup.map(b => b.name).join(', ') }); setBadgePopup(null); }
+    if (levelPopup) setLevelPopup(null);
+  }, [pro, badgePopup, levelPopup]); // eslint-disable-line react-hooks/exhaustive-deps
   const [offline, setOffline] = useState(typeof navigator !== 'undefined' && !navigator.onLine);
 
   useEffect(() => {
@@ -119,14 +130,16 @@ const AuthenticatedApp = () => {
             <Route path="/revision" element={<RevisionMode />} />
             <Route path="/exam" element={<ExamPractice />} />
             <Route path="/diagrams" element={<DiagramBank />} />
+            <Route path="/problems" element={<Problems />} />
+            <Route path="/tools" element={<Tools />} />
           </Route>
         </Route>
 
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       </Suspense>
-      {badgePopup && <BadgePopup badges={badgePopup} onClose={() => setBadgePopup(null)} />}
-      {levelPopup && <LevelUpPopup level={levelPopup} onClose={() => setLevelPopup(null)} />}
+      {!pro && badgePopup && <BadgePopup badges={badgePopup} onClose={() => setBadgePopup(null)} />}
+      {!pro && levelPopup && <LevelUpPopup level={levelPopup} onClose={() => setLevelPopup(null)} />}
       <InstallHint />
     </div>
   );

@@ -3,11 +3,12 @@
 // and computes mastery / weak areas / exam readiness / challenge difficulty locally.
 
 import { getSubjects, getQuizForLesson } from '@/lib/curriculum';
+import { getUiMode } from '@/lib/uiMode';
 
+// "engineering" = Pro display style (default for Class 11; anyone can switch in Settings).
 export function getMode(classId) {
   if (!classId) return 'gamified';
-  const n = parseInt(String(classId).replace(/[^0-9]/g, ''), 10);
-  return n >= 11 ? 'engineering' : 'gamified';
+  return getUiMode(classId) === 'pro' ? 'engineering' : 'gamified';
 }
 
 // ── Per-lesson mastery (0..1) from completion + quiz + flashcards ────────────

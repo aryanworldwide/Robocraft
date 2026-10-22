@@ -1,3 +1,4 @@
+import { isPro } from '@/lib/uiMode';
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
@@ -74,6 +75,53 @@ function World({ subject, index, progress, avatar, onOpen, currentRef }) {
   );
 }
 
+function SyllabusTracker({ subjects, progress, onOpen }) {
+  const done = new Set(progress.completedLessons || []);
+  const best = (id) => {
+    const sc = (progress.quizScores || {})[id] || [];
+    return sc.length ? Math.max(...sc.map(x => x.percentage || 0)) : null;
+  };
+  const acts = new Set(progress.activitiesCompleted || []);
+  const total = subjects.reduce((n, s) => n + s.lessons.length, 0);
+  const doneN = subjects.reduce((n, s) => n + s.lessons.filter(l => done.has(l.id)).length, 0);
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-4 pb-28">
+      <BackButton className="mb-3" />
+      <h1 className="text-xl font-bold">Syllabus Tracker</h1>
+      <p className="text-xs text-muted-foreground mb-4">{doneN}/{total} chapters done · tick off each chapter, its quiz and its exam questions.</p>
+      <div className="h-2 rounded-full bg-muted overflow-hidden mb-5"><div className="h-full bg-cyan-500" style={{ width: `${total ? (doneN / total) * 100 : 0}%` }} /></div>
+      {subjects.map(s => {
+        const n = s.lessons.filter(l => done.has(l.id)).length;
+        return (
+          <section key={s.id} className="glass-strong rounded-2xl p-4 mb-3">
+            <div className="flex items-center mb-2">
+              <h2 className="text-sm font-bold flex-1" style={{ color: s.color }}>{s.name}</h2>
+              <span className="text-[11px] text-muted-foreground tabular-nums">{n}/{s.lessons.length}</span>
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 gap-y-1.5 items-center text-xs">
+              <span className="text-[10px] uppercase text-muted-foreground">Chapter</span>
+              <span className="text-[10px] uppercase text-muted-foreground text-center">Done</span>
+              <span className="text-[10px] uppercase text-muted-foreground text-center">Quiz</span>
+              <span className="text-[10px] uppercase text-muted-foreground text-center">Exam Qs</span>
+              {s.lessons.map(l => {
+                const q = best(l.id);
+                return (
+                  <React.Fragment key={l.id}>
+                    <button onClick={() => onOpen(l.id)} className="text-left truncate hover:text-cyan-500">{l.title}</button>
+                    <span className={`text-center ${done.has(l.id) ? 'text-green-500' : 'text-muted-foreground'}`}>{done.has(l.id) ? '✓' : '·'}</span>
+                    <span className={`text-center tabular-nums ${q === null ? 'text-muted-foreground' : q >= 70 ? 'text-green-500' : 'text-amber-500'}`}>{q === null ? '—' : `${q}%`}</span>
+                    <span className={`text-center ${acts.has(`${l.id}_exam`) ? 'text-green-500' : 'text-muted-foreground'}`}>{acts.has(`${l.id}_exam`) ? '✓' : '·'}</span>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function StoryMap() {
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass } = useApp();
@@ -88,6 +136,8 @@ export default function StoryMap() {
     const t = setTimeout(() => currentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
     return () => clearTimeout(t);
   }, [selectedClass]);
+
+  if (isPro(selectedClass)) return <SyllabusTracker subjects={subjects} progress={progress} onOpen={(id) => navigate(`/lesson/${id}`)} />;
 
   return (
     <div className="max-w-md mx-auto px-4 py-4 pb-28">

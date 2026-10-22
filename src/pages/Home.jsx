@@ -9,7 +9,7 @@ import { AvatarBadge } from '@/pages/Shop';
 import { WeeklyChallengeCard } from '@/pages/Leaderboard';
 import { equippedItems, localDay } from '@/lib/gamification';
 import { getReminderSettings } from '@/lib/reminders';
-import { GraduationCap, Shapes, RotateCcw, Cpu, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
+import { GraduationCap, Shapes, RotateCcw, Cpu, Sigma, Calculator, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
 import DailyMissions from '@/components/learning/DailyMissions';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
 
@@ -260,8 +260,8 @@ export default function Home() {
           { icon: RotateCcw, label: 'Revision', path: '/revision', color: '#2DD4BF' },
           { icon: Medal, label: 'Leaderboard', path: '/leaderboard', color: '#F472B6' },
           { icon: ShoppingBag, label: 'Shop', path: '/shop', color: '#FACC15' },
-          { icon: Trophy, label: 'Progress', path: '/progress', color: '#FBBF24' },
-          { icon: Cpu, label: 'Projects', path: '/projects', color: '#60A5FA' },
+          { icon: Sigma, label: 'Numericals', path: '/problems', color: '#60A5FA' },
+          { icon: Calculator, label: 'Tools', path: '/tools', color: '#FBBF24' },
         ].map(action => {
           const Icon = action.icon;
           return (

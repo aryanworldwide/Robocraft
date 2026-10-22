@@ -5,6 +5,7 @@ import { getQuizForLesson, shuffle } from '@/lib/curriculum';
 import { XP_REWARDS } from '@/lib/gamification';
 import { ArrowLeft, Check, X, Trophy, RotateCcw, ChevronRight, Target, Coins, Zap } from 'lucide-react';
 import Confetti from '@/components/learning/Confetti';
+import { isPro } from '@/lib/uiMode';
 
 // Typo-tolerant fill-in-the-blank matching: exact after normalization, or a
 // Levenshtein distance within a small length-based tolerance.
@@ -102,7 +103,7 @@ export default function Quiz() {
       const score = answers.filter(a => a.correct).length;
       if (!practiceMode) recordQuizScore(selectedClass, id, score, quizQuestions.length);
       setShowSummary(true);
-      if (score / quizQuestions.length >= 0.6) setShowConfetti(true);
+      if (score / quizQuestions.length >= 0.6 && !isPro(selectedClass)) setShowConfetti(true);
     } else {
       setCurrentIdx(currentIdx + 1);
       setSelectedAnswer(null);

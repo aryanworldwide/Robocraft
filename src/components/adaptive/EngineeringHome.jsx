@@ -7,7 +7,10 @@ import { computeMastery, weakAreas, examReadiness, challengeLevel, recentProgres
 import { ENGINEERING_CHALLENGES } from '@/lib/curriculum/engineeringChallenges';
 import { exportFullRevisionPdf, exportRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import MasteryRing from '@/components/adaptive/MasteryRing';
-import { Activity, AlertTriangle, ArrowRight, BookOpen, Cpu, Download, FileText, Lightbulb, Target, TrendingUp, Wrench, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, BookOpen, Cpu, Download, FileText, Lightbulb, Target, TrendingUp, Wrench, Zap, GraduationCap, Sigma, Calculator, Shapes, Terminal, Medal } from 'lucide-react';
+import { rankFor } from '@/lib/uiMode';
+import { getAllLessons } from '@/lib/curriculum';
+import { topicsForClass } from '@/lib/problems';
 
 export default function EngineeringHome() {
   const navigate = useNavigate();
@@ -19,6 +22,14 @@ export default function EngineeringHome() {
   const level = challengeLevel(selectedClass, progress);
   const recent = recentProgress(selectedClass, progress, 4);
   const levelInfo = getLevel(progress.xp || 0);
+  const allLessons = getAllLessons(selectedClass);
+  const done = (progress.completedLessons || []).filter(id => allLessons.some(l => l.id === id)).length;
+  const coverage = allLessons.length ? Math.round((done / allLessons.length) * 100) : 0;
+  const pstats = progress.problemStats || {};
+  const ptopics = topicsForClass(selectedClass);
+  const pTries = ptopics.reduce((n, t) => n + (pstats[t.id]?.tries || 0), 0);
+  const pRight = ptopics.reduce((n, t) => n + (pstats[t.id]?.correct || 0), 0);
+  const lastPaper = (progress.examHistory || [])[0];
 
   const solved = new Set(progress.engineering?.solved || []);
   const nextChallenge = ENGINEERING_CHALLENGES.find(c => !solved.has(c.id)) || ENGINEERING_CHALLENGES[0];
@@ -37,20 +48,20 @@ export default function EngineeringHome() {
           <p className="text-[11px] text-muted-foreground mt-0.5">System analysis • Mastery • Diagnostics</p>
         </div>
         <div className="glass rounded-xl px-3 py-1.5 text-right">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Level</p>
-          <p className="text-sm font-bold text-cyan-400">{levelInfo.levelNumber} <span className="text-[10px] text-muted-foreground font-normal">· {(progress.xp || 0)} XP</span></p>
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Syllabus</p>
+          <p className="text-sm font-bold text-cyan-400">{coverage}% <span className="text-[10px] text-muted-foreground font-normal">· {done}/{allLessons.length}</span></p>
         </div>
       </div>
 
       {/* Overall mastery + domain bars */}
       <div className="glass-strong rounded-2xl p-4 animate-slide-up grid grid-cols-[auto_1fr] gap-4 items-center" style={{ animationDelay: '0.03s' }}>
-        <MasteryRing value={overall} size={118} label="Overall" color="#00D2FF" sublabel={`${levelInfo.current?.title}`} />
+        <MasteryRing value={overall} size={118} label="Mastery" color="#00D2FF" sublabel={rankFor(overall).name} />
         <div className="space-y-2.5">
           {domains.map(d => (
             <div key={d.id}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] font-medium" style={{ color: d.color }}>{d.name}</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums">{d.mastery}%</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums"><span style={{ color: rankFor(d.mastery).color }}>{rankFor(d.mastery).name}</span> · {d.mastery}%</span>
               </div>
               <div className="h-1.5 glass rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${d.mastery}%`, background: d.color }} />
@@ -58,6 +69,25 @@ export default function EngineeringHome() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Practice snapshot */}
+      <div className="grid grid-cols-3 gap-2 animate-slide-up">
+        <button onClick={() => navigate('/problems')} className="glass-strong rounded-2xl p-3 text-left">
+          <Sigma className="w-4 h-4 text-cyan-400 mb-1" />
+          <p className="text-sm font-bold tabular-nums">{pTries ? `${Math.round((pRight / pTries) * 100)}%` : '—'}</p>
+          <p className="text-[10px] text-muted-foreground">Numericals{pTries ? ` · ${pTries} solved` : ''}</p>
+        </button>
+        <button onClick={() => navigate('/exam')} className="glass-strong rounded-2xl p-3 text-left">
+          <GraduationCap className="w-4 h-4 text-amber-400 mb-1" />
+          <p className="text-sm font-bold tabular-nums">{lastPaper ? `${lastPaper.total}/${lastPaper.max}` : '—'}</p>
+          <p className="text-[10px] text-muted-foreground">Last sample paper</p>
+        </button>
+        <button onClick={() => navigate('/tools')} className="glass-strong rounded-2xl p-3 text-left">
+          <Calculator className="w-4 h-4 text-purple-400 mb-1" />
+          <p className="text-sm font-bold">12</p>
+          <p className="text-[10px] text-muted-foreground">Engineering tools</p>
+        </button>
       </div>
 
       {/* Featured domain — engineering focus */}
@@ -190,10 +220,18 @@ export default function EngineeringHome() {
       {/* Quick nav */}
       <div className="grid grid-cols-4 gap-2 animate-slide-up" style={{ animationDelay: '0.15s' }}>
         {[
-          { icon: BookOpen, label: 'Learn', path: '/learn', color: '#4ADE80' },
+          { icon: BookOpen, label: 'Chapters', path: '/learn', color: '#4ADE80' },
+          { icon: GraduationCap, label: 'Exam Prep', path: '/exam', color: '#F59E0B' },
+          { icon: Sigma, label: 'Numericals', path: '/problems', color: '#22D3EE' },
+          { icon: Calculator, label: 'Tools', path: '/tools', color: '#C084FC' },
           { icon: Wrench, label: 'Lab', path: '/lab', color: '#F97316' },
           { icon: Activity, label: 'Challenges', path: '/challenges', color: '#A78BFA' },
-          { icon: Target, label: 'Progress', path: '/progress', color: '#FBBF24' },
+          { icon: Shapes, label: 'Diagrams', path: '/diagrams', color: '#F472B6' },
+          { icon: Terminal, label: 'Python', path: '/python', color: '#34D399' },
+          { icon: Target, label: 'Syllabus', path: '/story', color: '#60A5FA' },
+          { icon: Medal, label: 'Leaderboard', path: '/leaderboard', color: '#FB7185' },
+          { icon: FileText, label: 'Revision', path: '/revision', color: '#2DD4BF' },
+          { icon: TrendingUp, label: 'Progress', path: '/progress', color: '#FBBF24' },
         ].map(a => {
           const Icon = a.icon;
           return (
