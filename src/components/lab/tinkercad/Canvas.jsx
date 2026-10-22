@@ -5,7 +5,7 @@ const PIN_COLORS = { power:'#EF4444', ground:'#1F2937', digital:'#3B82F6', analo
 
 export default function Canvas({
   components, wires, selectedId, pendingWire, simState, running, wireStatuses,
-  onSelect, onMove, onMoveStart, onPinDown, onBackgroundDown, onDropComponent,
+  onSelect, onMove, onMoveStart, onPinDown, onBackgroundDown, onDropComponent, bottomInset = 0,
 }) {
   const svgRef = useRef(null);
   const [view, setView] = useState({ x: 40, y: 40, scale: 0.7 });
@@ -25,6 +25,8 @@ export default function Canvas({
 
   const compsRef = useRef(components);
   compsRef.current = components;
+  const insetRef = useRef(bottomInset);
+  insetRef.current = bottomInset;
   const viewRef = useRef(view);
   viewRef.current = view;
   const dropRef = useRef(onDropComponent);
@@ -59,9 +61,10 @@ export default function Canvas({
       });
       if (minX === Infinity) { setView({ x: 40, y: 40, scale: 0.7 }); return; }
       const rect = svgRef.current.getBoundingClientRect();
+      const vh = Math.max(120, rect.height - insetRef.current); // the part not hidden by the serial drawer
       const w = maxX - minX, h = maxY - minY;
-      const s = Math.min(1.2, Math.max(0.3, Math.min(rect.width / w, rect.height / h) * 0.85));
-      setView({ scale: s, x: (rect.width - w * s) / 2 - minX * s, y: (rect.height - h * s) / 2 - minY * s });
+      const s = Math.min(1.2, Math.max(0.3, Math.min((rect.width - 24) / w, (vh - 24) / h) * 0.9));
+      setView({ scale: s, x: (rect.width - w * s) / 2 - minX * s, y: (vh - h * s) / 2 - minY * s });
     };
     window.addEventListener('lab-fit', fit);
     return () => window.removeEventListener('lab-fit', fit);
@@ -145,11 +148,27 @@ export default function Canvas({
     onDropComponent(type, w.x - def.w / 2, w.y - def.h / 2);
   };
 
-  const wireColor = (idx) => {
-    const s = wireStatuses?.[idx];
-    if (s === 'correct') return '#22C55E';
-    if (s === 'incorrect') return '#EF4444';
-    return '#06B6D4';
+  // Real wiring colours: red for 5V, black for ground, and a colour per signal type.
+  const wireColor = (w, idx) => {
+    if (wireStatuses?.[idx] === 'incorrect') return '#EF4444';
+    const typeOf = (end) => {
+      const c = components.find(x => x.id === end.compId);
+      const d = c && getDef(c.type);
+      return d?.pins.find(p => p.id === end.pinId)?.type;
+    };
+    const t = [typeOf(w.from), typeOf(w.to)];
+    if (t.includes('power') || t.includes('plus')) return '#EF4444';
+    if (t.includes('ground') || t.includes('minus')) return '#334155';
+    if (t.includes('analog')) return '#22C55E';
+    if (t.includes('pwm')) return '#F97316';
+    if (t.includes('data')) return '#A78BFA';
+    if (t.includes('digital')) return '#2563EB';
+    return '#0EA5E9';
+  };
+  const cable = (a, b) => {
+    const dx = Math.max(24, Math.abs(b.x - a.x) * 0.45);
+    const sag = Math.min(26, Math.abs(b.x - a.x) * 0.08 + 8);
+    return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y + sag}, ${b.x - dx} ${b.y + sag}, ${b.x} ${b.y}`;
   };
 
   return (
@@ -187,11 +206,14 @@ export default function Canvas({
             const fd = getDef(fc.type), td = getDef(tc.type);
             const a = pinWorldPos(fc, fd, w.from.pinId), b = pinWorldPos(tc, td, w.to.pinId);
             if (!a || !b) return null;
-            const col = wireColor(i);
+            const col = wireColor(w, i);
+            const d = cable(a, b);
             return (
               <g key={w.id || i}>
-                <path d={`M ${a.x} ${a.y} L ${b.x} ${b.y}`} stroke={col} strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.95} />
-                {running && <path d={`M ${a.x} ${a.y} L ${b.x} ${b.y}`} stroke="#fff" strokeWidth={1.5} strokeDasharray="4 6" className="wire-current" fill="none" />}
+                <path d={d} stroke="rgba(15,23,42,0.18)" strokeWidth={6} strokeLinecap="round" fill="none" />
+                <path d={d} stroke={col} strokeWidth={4} strokeLinecap="round" fill="none" />
+                <path d={d} stroke="rgba(255,255,255,0.35)" strokeWidth={1} strokeLinecap="round" fill="none" />
+                {running && <path d={d} stroke="#fff" strokeWidth={1.6} strokeDasharray="4 7" className="wire-current" fill="none" />}
               </g>
             );
           })}
@@ -202,7 +224,7 @@ export default function Canvas({
             const def = comp && getDef(comp.type);
             const a = comp && pinWorldPos(comp, def, pendingWire.pinId);
             if (!a) return null;
-            return <path d={`M ${a.x} ${a.y} L ${cursor.x} ${cursor.y}`} stroke="#06B6D4" strokeWidth={2} strokeDasharray="5 4" fill="none" opacity={0.8} />;
+            return <path d={cable(a, cursor)} stroke="#0EA5E9" strokeWidth={2.5} strokeDasharray="6 5" fill="none" opacity={0.9} />;
           })()}
 
           {/* components */}

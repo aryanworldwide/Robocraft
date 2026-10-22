@@ -258,6 +258,8 @@ export default function TinkercadLab({ onExit }) {
     setTimeout(() => window.dispatchEvent(new CustomEvent('lab-fit')), 80);
   };
 
+  useEffect(() => { const t = setTimeout(() => window.dispatchEvent(new CustomEvent('lab-fit')), 120); return () => clearTimeout(t); }, [showSerial]);
+
   const resetSim = () => { setRunning(false); setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); };
   const runSim = () => {
     setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); setCodeError(null);
@@ -358,6 +360,7 @@ export default function TinkercadLab({ onExit }) {
             onSelect={setSelectedId} onMove={moveComponent} onMoveStart={snapshot}
             onPinDown={onPinDown} onBackgroundDown={() => { setSelectedId(null); setPendingWire(null); pendingRef.current = null; }}
             onDropComponent={addComponent}
+            bottomInset={showSerial ? 208 : 0}
           />
           {showWelcome && components.length === 0 && (
             <LabWelcome
@@ -375,11 +378,10 @@ export default function TinkercadLab({ onExit }) {
           {/* Serial + sim-input drawer — canvas stays visible above; appears on demand */}
           {showSerial && (
             <div className="absolute left-0 right-0 bottom-0 h-52 glass-strong border-t border-border flex flex-col animate-slide-up md:left-52 z-20">
-              <div className="flex items-center justify-between px-3 py-1 border-b border-border">
-                <span className="text-[11px] font-bold text-green-400 flex items-center gap-1.5"><Terminal className="w-3.5 h-3.5" /> Serial Monitor</span>
-                <button onClick={() => setShowSerial(false)} className="p-1 rounded text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
+              <div className="flex-1 min-h-0 relative">
+                <button onClick={() => setShowSerial(false)} className="absolute right-1 top-1 z-10 p-1 rounded text-muted-foreground hover:text-red-400" aria-label="Close serial monitor"><X className="w-4 h-4" /></button>
+                <SerialMonitor lines={serial} running={running} />
               </div>
-              <div className="flex-1 min-h-0"><SerialMonitor lines={serial} running={running} /></div>
               <SimControls running={running} onRun={runSim} onStop={() => setRunning(false)} onReset={resetSim}
                 inputs={inputs} setInputs={setInputs} needsInput={needsInput} canRun={canRun} />
             </div>
