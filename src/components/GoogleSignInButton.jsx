@@ -3,18 +3,19 @@ import { Button } from '@/components/ui/button';
 import GoogleIcon from '@/components/GoogleIcon';
 import { backend } from '@/api/client';
 import { accountsEnabled } from '@/lib/features';
-import { isNative, isInApp } from '@/lib/platform';
+import { isNative, isInApp, nativeGoogle } from '@/lib/platform';
 import { appUrl } from '@/lib/utils';
 
-// "Continue with Google" — web and iPhone only (Google blocks sign-in popups
-// inside Android in-app web views; the Android app uses email + password).
+// "Continue with Google" — web and iPhone use the Firebase popup. Google blocks
+// popups inside Android web views, so the Android app shows the button only when
+// it was built with native Google sign-in (android-config/google-services.json).
 export default function GoogleSignInButton({ onError }) {
   const [busy, setBusy] = useState(false);
-  if (!accountsEnabled || isNative || isInApp) return null;
+  if (!accountsEnabled || (!nativeGoogle && (isNative || isInApp))) return null;
   const go = async () => {
     setBusy(true);
     try { await backend.auth.loginWithGoogle(); window.location.href = appUrl('/'); }
-    catch (e) { onError?.(e.message); }
+    catch (e) { if (!e?.cancelled) onError?.(e.message); }
     finally { setBusy(false); }
   };
   return (

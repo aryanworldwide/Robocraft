@@ -7,6 +7,7 @@ import { downloadPaperPdf } from '@/lib/exam/paperPdf';
 import ExamCorner from '@/components/lesson/ExamCorner';
 import RichText from '@/components/lesson/RichText';
 import AnswerChecker from '@/components/exam/AnswerChecker';
+import ShareScoreButton from '@/components/share/ShareScoreButton';
 import BackButton from '@/components/BackButton';
 import { formatClass } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
@@ -101,6 +102,12 @@ function PaperView({ paper, onFinish }) {
           <p className="text-2xl font-bold">{score.total} / {score.max}</p>
           <p className="text-sm text-muted-foreground">{Math.round((score.total / score.max) * 100)}% · Section A {score.mcq + score.short}/{score.aMax} · Section B {score.bestB}/{score.bMax}</p>
           <p className="text-xs text-muted-foreground mt-2">Section B counts your best {p.B.attempt} questions. Written answers are self-marked — be honest with yourself!</p>
+          <ShareScoreButton className="mt-3 w-full" card={() => ({
+            title: p.title, subtitle: `${p.board} pattern · practice paper`,
+            value: `${score.total}/${score.max}`, outOf: `${Math.round((score.total / score.max) * 100)}%`,
+            percent: Math.round((score.total / score.max) * 100),
+            stats: [['Section A', `${score.mcq + score.short}/${score.aMax}`], ['Section B', `${score.bestB}/${score.bMax}`], ['Time', fmt(p.minutes * 60 - secs)]],
+          })} />
         </div>
       )}
 

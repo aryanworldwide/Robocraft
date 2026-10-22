@@ -11,6 +11,7 @@ import { equippedItems, localDay } from '@/lib/gamification';
 import { getReminderSettings } from '@/lib/reminders';
 import { GraduationCap, Shapes, RotateCcw, Cpu, Sigma, Calculator, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench, FileText } from 'lucide-react';
 import DailyMissions from '@/components/learning/DailyMissions';
+import ExamSeasonCard from '@/components/ExamSeasonCard';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
 
 export default function Home() {
@@ -238,6 +239,9 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Exam-season plan */}
+      <ExamSeasonCard />
 
       {/* Daily Missions */}
       <DailyMissions />

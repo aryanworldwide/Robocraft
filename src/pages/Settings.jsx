@@ -1,3 +1,4 @@
+import ReportButton from '@/components/ReportButton';
 import React, { useState } from 'react';
 import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -222,12 +223,16 @@ export default function Settings() {
           </div>
           <div>
             <h3 className="font-bold text-sm">About RoboCraft</h3>
-            <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+            <p className="text-xs text-muted-foreground">Version {import.meta.env.VITE_APP_VERSION || '1.0.0'}</p>
           </div>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          RoboCraft is a premium robotics education platform for students. Learn Robotics. Build Robots. Control Them.
+          RoboCraft helps ICSE/ISC students learn Robotics &amp; AI: chapters, board-style practice, a circuit lab, a 3-D robot arena, a 3-D design studio and a practical file.
         </p>
+        <div className="flex flex-wrap gap-3 mt-3 text-xs">
+          <a href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener" className="text-cyan-500 font-semibold">Privacy policy</a>
+          <ReportButton label="Report a problem" className="!text-xs" />
+        </div>
       </div>
 
       {/* Account Deletion */}

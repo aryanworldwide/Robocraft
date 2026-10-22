@@ -1,5 +1,10 @@
-# Builds the RoboCraft Android APK in the cloud on every push (or manually).
-# Download it from: GitHub repo -> Actions -> latest run -> Artifacts -> robocraft-apk
+# Builds the RoboCraft Android app in the cloud on every push (or manually).
+#  • RoboCraft.apk  → GitHub release "apk-latest" (easy download link for testing)
+#  • RoboCraft-play.aab → run Artifacts, for uploading to Google Play
+# Optional extras switch on automatically when you add them (see PLAY_STORE.md):
+#  • ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD
+#    secrets → APK and AAB are signed with your upload key
+#  • android-config/google-services.json → native "Continue with Google" in the app
 name: Build Android APK
 
 on:
@@ -13,6 +18,8 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-24.04
+    env:
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -28,6 +35,16 @@ jobs:
       - name: Install packages
         run: npm install --no-audit --no-fund
 
+      - name: Native Google sign-in (only if google-services.json is present)
+        run: |
+          if [ -f android-config/google-services.json ]; then
+            npm install --no-save --no-audit --no-fund --legacy-peer-deps @capacitor-firebase/authentication@^7
+            echo "VITE_NATIVE_GOOGLE=1" >> "$GITHUB_ENV"
+            echo "Native Google sign-in: ON"
+          else
+            echo "Native Google sign-in: off (no android-config/google-services.json)"
+          fi
+
       - name: Build web app
         run: npm run build
 
@@ -35,23 +52,66 @@ jobs:
         run: |
           [ -d android ] || npx cap add android
           npx cap sync android
+          if [ -f android-config/google-services.json ]; then
+            cp android-config/google-services.json android/app/google-services.json
+            sed -i 's/^ext {/ext {\n    rgcfaIncludeGoogle = true/' android/variables.gradle
+          fi
 
-      - name: Build APK
+      # Google Play requires apps to target Android 16 (API 36) from 31 Aug 2026.
+      # Every build gets a higher versionCode so Play accepts updates.
+      - name: Set SDK levels and version
+        run: |
+          sed -i -E 's/compileSdkVersion = [0-9]+/compileSdkVersion = 36/; s/targetSdkVersion = [0-9]+/targetSdkVersion = 36/' android/variables.gradle
+          VERSION_NAME=$(node -p "require('./package.json').version")
+          sed -i -E "s/versionCode [0-9]+/versionCode $((100 + ${{ github.run_number }}))/; s/versionName \"[^\"]*\"/versionName \"$VERSION_NAME\"/" android/app/build.gradle
+          grep -E "SdkVersion|rgcfa" android/variables.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
+
+      - name: Build test APK (debug signing)
+        if: ${{ env.HAS_KEYSTORE != 'true' }}
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../RoboCraft.apk
+
+      - name: Build signed APK + Play Store bundle (upload key)
+        if: ${{ env.HAS_KEYSTORE == 'true' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          ./gradlew assembleRelease bundleRelease --no-daemon
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" sign --ks "$RUNNER_TEMP/upload.jks" --ks-pass env:KEYSTORE_PASSWORD \
+            --ks-key-alias "$KEY_ALIAS" --key-pass env:KEY_PASSWORD --out ../RoboCraft.apk "$RUNNER_TEMP/aligned.apk"
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore "$RUNNER_TEMP/upload.jks" -storepass "$KEYSTORE_PASSWORD" -keypass "$KEY_PASSWORD" \
+            app/build/outputs/bundle/release/app-release.aab "$KEY_ALIAS"
+          cp app/build/outputs/bundle/release/app-release.aab ../RoboCraft-play.aab
+          rm -f "$RUNNER_TEMP/upload.jks"
 
       - uses: actions/upload-artifact@v4
         with:
           name: robocraft-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: RoboCraft.apk
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ env.HAS_KEYSTORE == 'true' }}
+        with:
+          name: robocraft-play-bundle
+          path: RoboCraft-play.aab
 
       - name: Publish APK as a release (easy download link)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk RoboCraft.apk
           gh release delete apk-latest --yes --cleanup-tag || true
           gh release create apk-latest RoboCraft.apk \
             --title "RoboCraft APK (latest build)" \

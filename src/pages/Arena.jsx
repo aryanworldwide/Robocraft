@@ -5,6 +5,7 @@ import { TASKS, getTask } from '@/lib/arena/tasks';
 import { ArenaBoard, ROBOT_PINS } from '@/lib/arena/world';
 import { runSketch } from '@/lib/arduino/runtime';
 import BackButton from '@/components/BackButton';
+import ShareScoreButton from '@/components/share/ShareScoreButton';
 import { Play, Square, RotateCcw, Bot, Eye, Code2, Terminal, Cpu, CheckCircle2, XCircle, Lightbulb, Video, Map as MapIcon } from 'lucide-react';
 
 const ArenaView = lazy(() => import('@/components/arena/ArenaView'));
@@ -210,8 +211,15 @@ function TaskScreen({ task, results, onBack, onPass }) {
 
       <div className={`mt-2.5 rounded-xl border px-3 py-2 text-xs font-medium flex items-center gap-2 ${statusColor}`}>
         {status.state === 'pass' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : status.state === 'fail' ? <XCircle className="w-4 h-4 shrink-0" /> : <Bot className="w-4 h-4 shrink-0" />}
-        <span>{status.msg}{status.state === 'pass' && usedSolution ? ' (sample solution — try writing your own for XP!)' : ''}</span>
+        <span className="flex-1">{status.msg}{status.state === 'pass' && usedSolution ? ' (sample solution — try writing your own for XP!)' : ''}</span>
       </div>
+      {status.state === 'pass' && (
+        <ShareScoreButton className="w-full mt-2" label="Share this win" card={() => ({
+          title: task.title, subtitle: 'Robot Arena 3D · my own Arduino code',
+          value: `${(time / 1000).toFixed(1)}s`, outOf: 'completed', percent: 100,
+          stats: [['Task', task.badge.split('—')[0].trim()], ['Lines of code', String(code.split('\n').filter(l => l.trim()).length)], ['Time', `${(time / 1000).toFixed(1)}s`]],
+        })} />
+      )}
 
       <div className="flex items-center gap-2 mt-2.5">
         {running

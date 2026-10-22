@@ -7,6 +7,7 @@ import { computeMastery, weakAreas, examReadiness, challengeLevel, recentProgres
 import { ENGINEERING_CHALLENGES } from '@/lib/curriculum/engineeringChallenges';
 import { exportFullRevisionPdf, exportRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import MasteryRing from '@/components/adaptive/MasteryRing';
+import ExamSeasonCard from '@/components/ExamSeasonCard';
 import { Activity, AlertTriangle, ArrowRight, BookOpen, Cpu, Download, FileText, Lightbulb, Target, TrendingUp, Wrench, Zap, GraduationCap, Sigma, Calculator, Shapes, Terminal, Medal } from 'lucide-react';
 import { rankFor } from '@/lib/uiMode';
 import { getAllLessons } from '@/lib/curriculum';
@@ -89,6 +90,9 @@ export default function EngineeringHome() {
           <p className="text-[10px] text-muted-foreground">Engineering tools</p>
         </button>
       </div>
+
+      <ExamSeasonCard />
+
 
       {/* Featured domain — engineering focus */}
       {featured && (

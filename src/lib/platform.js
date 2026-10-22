@@ -11,6 +11,10 @@ export const canShareFiles = typeof navigator !== 'undefined' &&
 // True inside the Capacitor Android app (built from this repo).
 export const isNative = typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.();
 
+// Native Google sign-in is compiled into the Android app only when the build has
+// android-config/google-services.json (see .github/workflows/build-apk.yml).
+export const nativeGoogle = isNative && import.meta.env.VITE_NATIVE_GOOGLE === '1';
+
 // True in browsers, on iPhone and (via lib/speechPolyfill.js) in the Android app.
 export const hasSpeech = typeof window !== 'undefined' && ('speechSynthesis' in window || !!window.Capacitor?.isNativePlatform?.());
 

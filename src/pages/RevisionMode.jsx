@@ -7,6 +7,8 @@ import { getConceptIntro, getTakeaway, getThinkingQuestion } from '@/lib/lesson/
 import { exportFullRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { Clock, Target, CheckCircle2, XCircle, ArrowRight, RotateCcw, Download, Brain, AlertTriangle, Trophy, ChevronRight } from 'lucide-react';
 import BackButton from '@/components/BackButton';
+import SpacedReview, { useDueCount } from '@/components/revision/SpacedReview';
+import { Layers } from 'lucide-react';
 
 const DURATIONS = [
   { id: 15, label: '15 min', count: 6, icon: Clock, desc: 'Quick weak-area sweep' },
@@ -33,6 +35,7 @@ export default function RevisionMode() {
   const { selectedClass, getProgressForClass } = useApp();
   const progress = getProgressForClass(selectedClass);
   const engineering = getMode(selectedClass) === 'engineering';
+  const dueCount = useDueCount();
 
   const [phase, setPhase] = useState('select'); // select | review | question | result | complete
   const [queue, setQueue] = useState([]);
@@ -94,11 +97,28 @@ export default function RevisionMode() {
   const subjectColor = { Robotics: '#00D2FF', 'Mechanical Systems': '#F97316', Computing: '#F59E0B', Microcontrollers: '#22D3EE', 'Electrical & Control Systems': '#EAB308', Applications: '#EC4899', 'Python Programming': '#4ADE80', 'Artificial Intelligence': '#A78BFA', 'Computing Fundamentals': '#F59E0B' };
   const color = current ? (subjectColor[current.lesson.subject] || '#00D2FF') : '#00D2FF';
 
+  if (phase === 'srs') {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="mb-4 flex items-center gap-2"><BackButton onClick={() => setPhase('select')} /><h1 className="text-lg font-bold">Daily spaced review</h1></div>
+        <SpacedReview onExit={() => setPhase('select')} />
+      </div>
+    );
+  }
+
   // ── Selection screen ──
   if (phase === 'select') {
     return (
       <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="mb-4 flex items-center gap-2 animate-slide-up"><BackButton /><h1 className="text-lg font-bold">Revision Mode</h1></div>
+        <button onClick={() => setPhase('srs')} className="w-full glass-strong rounded-2xl p-4 mb-4 flex items-center gap-3 text-left border border-cyan-500/30 animate-slide-up">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center"><Layers className="w-5 h-5 text-cyan-400" /></div>
+          <div className="flex-1">
+            <p className="text-sm font-bold">Daily spaced review {dueCount > 0 && <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-cyan-500 text-white">{dueCount} due</span>}</p>
+            <p className="text-[11px] text-muted-foreground">5 minutes a day. Questions you get wrong come back sooner — the proven way to remember for the board exam.</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
         <div className="glass-strong rounded-2xl p-4 mb-4 animate-slide-up" style={{ animationDelay: '0.03s' }}>
           <div className="flex items-center gap-2 mb-2"><Brain className="w-5 h-5 text-cyan-400" /><h2 className="text-sm font-bold">Smart, prioritized revision</h2></div>
           <p className="text-xs text-muted-foreground leading-relaxed">We prioritize your weak areas first. Flow: review a concept → answer a question → check your understanding → move on. You'll get a full report at the end.</p>

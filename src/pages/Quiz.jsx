@@ -1,7 +1,8 @@
+import ShareScoreButton from '@/components/share/ShareScoreButton';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
-import { getQuizForLesson, shuffle } from '@/lib/curriculum';
+import { getQuizForLesson, getLesson, shuffle } from '@/lib/curriculum';
 import { XP_REWARDS } from '@/lib/gamification';
 import { ArrowLeft, Check, X, Trophy, RotateCcw, ChevronRight, Target, Coins, Zap } from 'lucide-react';
 import Confetti from '@/components/learning/Confetti';
@@ -39,6 +40,7 @@ export default function Quiz() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { selectedClass, recordQuizScore } = useApp();
+  const lessonTitleForShare = getLesson(selectedClass, id)?.title || 'Chapter quiz';
   const allQuestions = useMemo(() => getQuizForLesson(selectedClass, id), [selectedClass, id]);
 
   // Generate a randomized quiz once per mount
@@ -240,6 +242,11 @@ export default function Quiz() {
                 <Target className="w-4 h-4" /> Retry {wrongCount} Wrong {wrongCount === 1 ? 'Answer' : 'Answers'}
               </button>
             )}
+            <ShareScoreButton className="w-full !py-3 !text-sm" card={() => ({
+              title: lessonTitleForShare, subtitle: 'Chapter quiz',
+              value: `${score}/${quizQuestions.length}`, outOf: `${percentage}%`, percent: percentage,
+              stats: [['Correct', score], ['Wrong', quizQuestions.length - score], ['Score', `${percentage}%`]],
+            })} />
             <div className="flex gap-3">
               <button onClick={handleRestart} className="flex-1 py-3 rounded-xl glass text-cyan-400 font-medium hover:bg-cyan-500/15 transition-colors flex items-center justify-center gap-2">
                 <RotateCcw className="w-4 h-4" /> Full Retry

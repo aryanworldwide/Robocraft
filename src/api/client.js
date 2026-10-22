@@ -7,6 +7,7 @@
 import { aiServerUrl } from '@/config/services';
 import { accountsEnabled, aiEnabled } from '@/lib/features';
 import { fb, currentFirebaseUser, authError } from '@/api/firebase';
+import { nativeGoogle } from '@/lib/platform';
 
 const unavailable = (what) => Promise.reject(Object.assign(new Error(`${what} aren't available yet.`), { status: 503, offline: true }));
 
@@ -53,6 +54,20 @@ const auth = {
   async loginWithGoogle() {
     if (!accountsEnabled) return unavailable('Accounts');
     const { auth: a, A } = await fb();
+    if (nativeGoogle) {
+      // Android app: native Google account picker, then hand the token to Firebase JS.
+      const { registerPlugin } = await import('@capacitor/core');
+      const FA = registerPlugin('FirebaseAuthentication');
+      let res;
+      try { res = await FA.signInWithGoogle({ skipNativeAuth: true }); }
+      catch (e) {
+        if (/cancel/i.test(e?.message || '')) throw Object.assign(new Error('Sign-in cancelled.'), { cancelled: true });
+        throw Object.assign(new Error('Google sign-in failed. Try email and password.'), { cause: e });
+      }
+      const cred = A.GoogleAuthProvider.credential(res?.credential?.idToken || null, res?.credential?.accessToken || null);
+      try { await A.signInWithCredential(a, cred); } catch (e) { throw authError(e); }
+      return;
+    }
     try { await A.signInWithPopup(a, new A.GoogleAuthProvider()); }
     catch (e) { throw authError(e); }
   },
@@ -76,6 +91,7 @@ const auth = {
     const { db, F, auth: a, A } = await fb();
     const u = a.currentUser; if (!u) return;
     try { await F.deleteDoc(F.doc(db, 'users', u.uid)); } catch {}
+    try { await F.deleteDoc(F.doc(db, 'leaderboard', u.uid)); } catch {}
     try { await A.deleteUser(u); } catch (e) { throw authError(e); }
   },
   async logout() {
