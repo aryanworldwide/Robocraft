@@ -70,7 +70,10 @@ export function runSketch(code, board, opts = {}) {
       board.step?.(dt, clock.t);
       clock.t += dt; left -= dt;
       sinceYield += dt;
-      if (sinceYield >= 20) {
+      // Give the browser a turn about every 20 ms of real time. At higher speeds
+      // we simulate a bigger slice per turn, otherwise the browser's minimum
+      // timer delay (~4 ms) would cap how fast the simulation can actually run.
+      if (sinceYield >= 20 * Math.max(1, speed)) {
         opts.onTime?.(clock.t);
         await sleep(Math.max(0, sinceYield / speed));
         sinceYield = 0;

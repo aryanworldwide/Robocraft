@@ -32,7 +32,10 @@ export class CircuitBoard extends SimBoard {
   readDigital(pin) {
     const inp = this.getInputs();
     for (const p of this.partsOn(pin)) {
-      if (p.type === 'push_button') return inp.buttonPressed ? 0 : (this.mode[pin] === 2 ? 1 : 0);
+      if (p.type === 'push_button') {
+        // INPUT_PULLUP: idle HIGH, pressed LOW. Plain INPUT (pull-down wiring): pressed HIGH.
+        return this.mode[pin] === 2 ? (inp.buttonPressed ? 0 : 1) : (inp.buttonPressed ? 1 : 0);
+      }
       if (p.type === 'ir_sensor' && p.map.OUT === pin) return (inp.objectCm ?? 30) < 5 ? 0 : 1; // active LOW module
       if (p.type === 'ultrasonic' && p.map.ECHO === pin) return 0;
     }

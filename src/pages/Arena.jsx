@@ -227,7 +227,7 @@ function TaskScreen({ task, results, onBack, onPass }) {
           : <button onClick={run} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-1.5"><Play className="w-4 h-4" /> Run code</button>}
         <button onClick={reset} className="px-3 py-2.5 rounded-xl glass-strong text-sm" aria-label="Reset"><RotateCcw className="w-4 h-4" /></button>
         <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="px-2 py-2.5 rounded-xl glass-strong text-xs bg-transparent">
-          {[0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}× speed</option>)}
+          {[0.5, 1, 2, 4, 8, 16].map(s => <option key={s} value={s}>{s}× speed</option>)}
         </select>
       </div>
 
