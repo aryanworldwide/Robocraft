@@ -55,7 +55,6 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xeef2f7);
     const camera = new THREE.PerspectiveCamera(40, 1, 1, 5000);
-    camera.position.set(160, 170, 220);
     const orbit = new OrbitControls(camera, renderer.domElement);
     orbit.enableDamping = true; orbit.target.set(0, 0, 0); orbit.maxPolarAngle = Math.PI * 0.95;
     scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.6));
@@ -127,7 +126,21 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     const loop = () => { raf = requestAnimationFrame(loop); orbit.update(); renderer.render(scene, camera); };
     loop();
 
-    ctx.current = { renderer, scene, camera, orbit, tc, meshes, holeTex, selBox };
+    // frame everything on the workplane (or the whole plane when it is empty)
+    const fit = () => {
+      const box = new THREE.Box3();
+      meshes.forEach(({ mesh }) => box.expandByObject(mesh));
+      const empty = box.isEmpty();
+      const c = empty ? new THREE.Vector3(0, 0, 0) : box.getCenter(new THREE.Vector3());
+      const size = empty ? 120 : Math.max(20, box.getSize(new THREE.Vector3()).length());
+      const d = size / (2 * Math.tan((camera.fov * Math.PI) / 360)) * 1.5;
+      orbit.target.copy(c);
+      camera.position.copy(c).add(new THREE.Vector3(0.55, 0.62, 0.78).multiplyScalar(d));
+      orbit.update();
+    };
+    fit();
+
+    ctx.current = { renderer, scene, camera, orbit, tc, meshes, holeTex, selBox, fit };
     return () => {
       cancelAnimationFrame(raf); ro.disconnect();
       renderer.domElement.removeEventListener('pointerdown', onDown);
@@ -166,6 +179,8 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
       if (!(ctx.current.tc.dragging && ctx.current.tc.object === rec.mesh)) applyTransform(rec.mesh, obj);
       rec.mesh.userData.obj = obj;
     }
+    if (!ctx.current.framed && objects.length) { ctx.current.framed = true; ctx.current.fit?.(); }
+    if (!objects.length) ctx.current.framed = false;
   }, [objects]);
 
   // ── selection + gizmo ──
@@ -194,8 +209,8 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     if (!viewCmd) return;
     const { camera, orbit } = ctx.current;
     const t = orbit.target;
-    const d = 300;
-    if (viewCmd.name === 'home') { camera.position.set(160, 170, 220); t.set(0, 0, 0); }
+    const d = Math.max(50, camera.position.distanceTo(t)); // keep the current zoom level
+    if (viewCmd.name === 'home') ctx.current.fit?.();
     if (viewCmd.name === 'top') { camera.position.set(t.x, d, t.z + 0.01); }
     if (viewCmd.name === 'front') { camera.position.set(t.x, t.y + 20, t.z + d); }
     if (viewCmd.name === 'side') { camera.position.set(t.x + d, t.y + 20, t.z); }
