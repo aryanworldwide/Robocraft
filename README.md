@@ -34,11 +34,22 @@ Built with React, Vite and Tailwind CSS, packaged for Android with Capacitor.
 - Exam Corner (525 board-style questions with model answers) and timed sample papers with PDF answer keys
 - Quizzes, flashcards, games, revision mode and chapter-notes PDFs
 - Story map, reward shop, weekly leaderboard, daily reminders and in-app Python practice
-- 22 build projects with wiring tables, Arduino/ESP32 code and build sheets
-- Virtual circuit lab with simulation
+- 22 build projects with wiring tables, Arduino/ESP32 code, build sheets and ₹ part-by-part cost estimates
+- **Circuit Lab** — wire an Arduino circuit, then edit the sketch and run *your* code on the simulated board
+- **Robot Arena 3D** — a real Arduino C interpreter drives a robot car in a three.js arena: line follower,
+  obstacle avoider, edge detector, smart waste bin, maze game and PID tuning (syllabus lab experiments)
+- **3D Design Studio** — Tinkercad-style solid modelling (shapes, holes, group, mirror, align, snap),
+  real robot parts in true millimetre sizes, STL export for 3-D printing and guided design projects
+- **Mechanism Lab** — four-bar linkages with Grashof classification, slider-crank, 2R arm forward/inverse
+  kinematics, gear trains and Grübler degrees of freedom
+- **Internal assessment** — CISCE-format assignment bank, automatic Variable Description Table,
+  printable practical file (cover, certificate, index, programs, outputs) and a practical-exam rehearsal
+- AI answer marking out of the paper's marks, plus an offline keyword check
+- Exam-season mode (countdown + daily plan) and daily spaced repetition
 - Accounts with cloud-saved progress (or guest mode, saved on the device)
 - AI: RoboMentor chat, "explain simpler", AI podcast, AI project creator, lab helper — with study-only safety rules
-- Works offline for lessons, quizzes and the lab
+- A Report button on every chapter and every AI reply
+- Works offline for lessons, quizzes, both labs, the 3-D studio and the arena
 
 ## How it runs (all free)
 
@@ -58,7 +69,7 @@ npm run dev
 npm run build                # web build → dist/
 ```
 
-Android APK: see [BUILD_APK.md](BUILD_APK.md). Pushing to `main` also builds the
+Android APK: see [BUILD_APK.md](BUILD_APK.md). Publishing on Google Play: see [PLAY_STORE.md](PLAY_STORE.md). Pushing to `main` also builds the
 APK automatically with GitHub Actions (Actions tab → Artifacts).
 
 ## Project layout
@@ -67,4 +78,9 @@ APK automatically with GitHub Actions (Actions tab → Artifacts).
 - `src/components` — UI, lab, lesson, learning and splash components
 - `src/lib/curriculum` — all lesson, quiz and project content (works offline)
 - `src/lib/lab`, `src/lib/circuit`, `src/lib/buildsheet` — circuit lab, wiring and build sheets
+- `src/lib/arduino` — Arduino C → JavaScript transpiler and the virtual-time runtime
+- `src/lib/arena` — robot physics, sensors and the arena tasks · `src/components/arena` — the 3-D view
+- `src/lib/design` — CSG solid modelling, primitives, parts library, STL export
+- `src/lib/assessment` — assignment bank, VDT generator, practical-file PDF
+- `src/lib/mechanisms.js`, `src/lib/srs.js`, `src/lib/examPlan.js`, `src/lib/prices.js`
 - `backend-schema` — data model for the hosted backend

@@ -5,7 +5,7 @@ import { equippedItems, weekId, weeklyChallengeStatus } from '@/lib/gamification
 import { formatClass } from '@/lib/utils';
 import BackButton from '@/components/BackButton';
 import { toast } from '@/components/ui/use-toast';
-import { Medal, Pencil, EyeOff, Eye, Users, Loader2, Coins, Check, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Medal, Pencil, EyeOff, Eye, Users, Loader2, Coins, Check, ShieldCheck, RefreshCw, Share2 } from 'lucide-react';
 
 export function WeeklyChallengeCard({ compact = false }) {
   const { selectedClass, getProgressForClass, claimWeeklyChallenge } = useApp();
@@ -165,6 +165,28 @@ export default function Leaderboard() {
                 {me.hidden ? <><Eye className="w-3.5 h-3.5" /> Show me on the leaderboard</> : <><EyeOff className="w-3.5 h-3.5" /> Hide me from the leaderboard</>}
               </button>
             </div>
+          )}
+
+          {me && !me.group && !editing && (
+            <button onClick={() => { setNick(me.nickname); setGroup(''); setEditing(true); }} className="w-full glass-strong rounded-2xl p-3 flex items-center gap-3 text-left">
+              <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center"><Users className="w-4 h-4 text-violet-400" /></div>
+              <div className="flex-1">
+                <p className="text-xs font-bold">Study with your class</p>
+                <p className="text-[10px] text-muted-foreground">Agree one group code with your classmates or teacher (e.g. CMS11A) to get a class-only board.</p>
+              </div>
+            </button>
+          )}
+
+          {me?.group && !editing && (
+            <button onClick={async () => {
+              const text = `Join my RoboCraft class group: ${me.group}\nOpen RoboCraft → Leaderboard → edit → Group code → type ${me.group}`;
+              try {
+                if (navigator.share) await navigator.share({ title: 'RoboCraft class group', text });
+                else { await navigator.clipboard.writeText(text); toast({ title: 'Copied', description: 'Group invite copied — paste it in your class group.' }); }
+              } catch { /* cancelled */ }
+            }} className="w-full glass rounded-xl py-2.5 text-[11px] font-bold text-violet-400 flex items-center justify-center gap-1.5">
+              <Share2 className="w-3.5 h-3.5" /> Invite classmates to group {me.group}
+            </button>
           )}
 
           {me?.group && (
