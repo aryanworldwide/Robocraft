@@ -8,13 +8,13 @@ const FEATURED = ['push_button', 'ultrasonic', 'ir_sensor', 'servo_sweep'];
 export default function LabWelcome({ onBuildAnything, onScratch, onPickExperiment }) {
   const featured = FEATURED.map(id => LAB_EXPERIMENTS.find(e => e.id === id)).filter(Boolean);
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center p-5 overflow-y-auto">
-      <div className="max-w-md w-full text-center my-auto">
+    <div className="absolute inset-0 z-20 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="max-w-md w-full text-center my-auto glass-strong rounded-3xl p-5 shadow-xl">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center mx-auto mb-3">
           <Wrench className="w-7 h-7 text-cyan-400" />
         </div>
-        <h2 className="text-lg font-bold mb-1">Robotics Lab</h2>
-        <p className="text-xs text-muted-foreground mb-5">Build a robot, wire it, code it, and run it — all in your browser.</p>
+        <h2 className="text-lg font-bold mb-1">Circuit Lab · 2D</h2>
+        <p className="text-xs text-muted-foreground mb-5">Place parts, wire them pin to pin, write the Arduino code and press Run — exactly like a real breadboard.</p>
 
         {/* Build Anything — large featured */}
         {aiEnabled && <button onClick={onBuildAnything}
@@ -29,7 +29,7 @@ export default function LabWelcome({ onBuildAnything, onScratch, onPickExperimen
         <div className="grid grid-cols-2 gap-2 mb-3">
           {featured.map(ex => (
             <button key={ex.id} onClick={() => onPickExperiment(ex.id)}
-              className="flex items-center gap-2 p-3 rounded-2xl glass text-left hover:bg-cyan-500/10 transition-colors">
+              className="flex items-center gap-2 p-3 rounded-2xl glass border border-border text-left hover:bg-cyan-500/10 transition-colors">
               <span className="text-xl">{ex.icon}</span>
               <div className="min-w-0">
                 <div className="text-xs font-bold truncate">{ex.title}</div>
@@ -40,7 +40,7 @@ export default function LabWelcome({ onBuildAnything, onScratch, onPickExperimen
         </div>
 
         <button onClick={onScratch}
-          className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl glass text-cyan-400 text-xs font-bold hover:bg-cyan-500/10 transition-colors">
+          className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl glass border border-border text-cyan-500 text-xs font-bold hover:bg-cyan-500/10 transition-colors">
           <Wrench className="w-4 h-4" /> Start From Scratch
         </button>
       </div>

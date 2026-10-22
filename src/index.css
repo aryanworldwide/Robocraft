@@ -302,3 +302,11 @@ html, body {
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Circuit-lab workplane (light like Tinkercad, dark in dark mode) ── */
+.lab-workplane { background: #eef2f7; }
+.dark .lab-workplane { background: #0a0f1c; }
+.lab-grid-line { stroke: rgba(37, 99, 235, 0.13); }
+.lab-grid-line-strong { stroke: rgba(37, 99, 235, 0.26); }
+.dark .lab-grid-line { stroke: rgba(120, 150, 200, 0.10); }
+.dark .lab-grid-line-strong { stroke: rgba(120, 150, 200, 0.18); }

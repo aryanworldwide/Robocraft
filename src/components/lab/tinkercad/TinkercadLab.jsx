@@ -3,7 +3,7 @@ import { aiEnabled } from '@/lib/features';
 import { useNavigate } from 'react-router-dom';
 import {
   Undo2, Redo2, Trash2, ChevronLeft, Code2, Play, Pause, RotateCcw, Languages,
-  PanelLeftClose, PanelLeftOpen, X, Save, FolderOpen, Blocks, Cpu, Sparkles, Wrench, Terminal, Maximize2,
+  PanelLeftClose, PanelLeftOpen, X, Save, FolderOpen, Blocks, Cpu, Sparkles, Wrench, Terminal, Maximize2, LayoutGrid,
 } from 'lucide-react';
 import { LAB_EXPERIMENTS, getExperiment, generateCode } from '@/lib/lab/labExperiments';
 import { validateCircuit, resolvePins } from '@/lib/lab/validateLab';
@@ -292,19 +292,26 @@ export default function TinkercadLab({ onExit }) {
     <div className="fixed inset-x-0 flex flex-col z-50" style={{ top: 'calc(4rem + env(safe-area-inset-top))', bottom: '0' }}>
       {/* ── TOP TOOLBAR ── */}
       <div className="glass-strong border-b border-border flex items-center gap-1 px-2 py-2">
-        <button onClick={onExit || (() => navigate(-1))} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-cyan-400 transition-colors px-1">
-          <ChevronLeft className="w-4 h-4" />
+        <button onClick={onExit || (() => navigate(-1))} className="p-1 text-muted-foreground hover:text-cyan-400 transition-colors" aria-label="Back">
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <span className="text-xs font-bold text-cyan-400 hidden sm:inline">LAB</span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold text-cyan-500 leading-none">CIRCUIT LAB · 2D</p>
+          <p className="text-xs font-semibold truncate max-w-[8rem]">{experiment ? experiment.title : 'Free build'}</p>
+        </div>
+        <button onClick={() => navigate('/design')} className="ml-1 px-2 py-1 rounded-lg glass text-[10px] font-bold text-violet-500 shrink-0" title="Switch to 3D design">3D →</button>
 
-        {aiEnabled && <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all">
+        {aiEnabled && <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold hover:neon-glow transition-all shrink-0">
           <Sparkles className="w-3.5 h-3.5" /><span className="hidden sm:inline">Build Anything</span>
         </button>}
 
         <div className="ml-auto flex items-center gap-1">
-          <button onClick={undo} disabled={!past.length} title="Undo" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 disabled:opacity-30 transition-colors hidden sm:block"><Undo2 className="w-4 h-4" /></button>
-          <button onClick={redo} disabled={!future.length} title="Redo" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 disabled:opacity-30 transition-colors hidden sm:block"><Redo2 className="w-4 h-4" /></button>
-          <button onClick={clearAll} title="Clear" className="p-1.5 rounded-lg glass text-red-400 hover:bg-red-500/10 transition-colors hidden sm:block"><Trash2 className="w-4 h-4" /></button>
+          <button onClick={undo} disabled={!past.length} title="Undo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30"><Undo2 className="w-4 h-4" /></button>
+          <button onClick={redo} disabled={!future.length} title="Redo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30 hidden sm:block"><Redo2 className="w-4 h-4" /></button>
+          <button onClick={saveBuild} title="Save build" className="p-1.5 rounded-lg glass text-cyan-500"><Save className="w-4 h-4" /></button>
+          <button onClick={() => setShowSaves(true)} title="My builds" className="p-1.5 rounded-lg glass text-cyan-500"><FolderOpen className="w-4 h-4" /></button>
+          <button onClick={clearAll} title="Clear" className="p-1.5 rounded-lg glass text-red-400 hidden sm:block"><Trash2 className="w-4 h-4" /></button>
+          <button onClick={() => setShowTemplates(true)} title="Projects" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg glass text-cyan-500 text-[11px] font-bold hover:bg-cyan-500/10 transition-colors hidden md:flex"><LayoutGrid className="w-3.5 h-3.5" /><span>Projects</span></button>
           <button onClick={() => setShowCode(true)} title="Code" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg glass text-cyan-400 text-[11px] font-bold hover:bg-cyan-500/10 transition-colors hidden md:flex"><Code2 className="w-3.5 h-3.5" /><span>Code</span></button>
           <button onClick={() => setShowSerial(s => !s)} title="Serial" className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors hidden md:flex ${showSerial ? 'bg-green-500/20 text-green-400' : 'glass text-cyan-400 hover:bg-cyan-500/10'}`}><Terminal className="w-3.5 h-3.5" /><span>Serial</span></button>
           <div className="h-5 w-px bg-border mx-0.5 hidden md:block" />
@@ -313,8 +320,6 @@ export default function TinkercadLab({ onExit }) {
             : <button onClick={() => setRunning(false)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
           <button onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors"><RotateCcw className="w-4 h-4" /></button>
           <div className="h-5 w-px bg-border mx-0.5 hidden lg:block" />
-          <button onClick={saveBuild} title="Save build" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors hidden lg:block"><Save className="w-4 h-4" /></button>
-          <button onClick={() => setShowSaves(true)} title="My builds" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors hidden lg:block"><FolderOpen className="w-4 h-4" /></button>
           <button onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')} className="flex items-center gap-1 px-2 py-1.5 rounded-lg glass text-cyan-400 text-[10px] font-bold transition-colors"><Languages className="w-3.5 h-3.5" />{lang === 'en' ? 'EN' : 'हिं'}</button>
         </div>
       </div>
@@ -411,8 +416,9 @@ export default function TinkercadLab({ onExit }) {
       )}
 
       {/* ── MOBILE BOTTOM BAR ── */}
-      <div className="md:hidden glass-strong border-t border-border grid grid-cols-4 safe-area-bottom">
-        <MobTab icon={Blocks} label="Components" active={mobileSheet === 'components'} onClick={() => setMobileSheet(mobileSheet === 'components' ? null : 'components')} />
+      <div className="md:hidden glass-strong border-t border-border grid grid-cols-5 safe-area-bottom">
+        <MobTab icon={Blocks} label="Parts" active={mobileSheet === 'components'} onClick={() => setMobileSheet(mobileSheet === 'components' ? null : 'components')} />
+        <MobTab icon={LayoutGrid} label="Projects" active={showTemplates} onClick={() => { setShowTemplates(true); setMobileSheet(null); }} />
         <MobTab icon={Cpu} label="Inspect" active={mobileSheet === 'inspector'} onClick={() => setMobileSheet(mobileSheet === 'inspector' ? null : 'inspector')} />
         <MobTab icon={Code2} label="Code" active={showCode} onClick={() => { setShowCode(true); setMobileSheet(null); }} />
         <MobTab icon={running ? Pause : Play} label={running ? 'Stop' : 'Run'} active={running} onClick={() => running ? setRunning(false) : runSim()} />
@@ -486,7 +492,7 @@ function TemplatePicker({ onPick, onClose }) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div className="relative z-10 w-full max-w-md glass-strong rounded-2xl p-5 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold">Start With Template</h2>
+          <h2 className="text-sm font-bold">Projects ({LAB_EXPERIMENTS.length})</h2>
           <button onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
         </div>
         <div className="space-y-2">

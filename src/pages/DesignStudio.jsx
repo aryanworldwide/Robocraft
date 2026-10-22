@@ -194,9 +194,10 @@ export default function DesignStudio() {
       <div className="glass-strong border-b border-border flex items-center gap-1 px-2 py-1.5">
         <button onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/'))} className="p-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></button>
         <div className="min-w-0">
-          <p className="text-[10px] font-bold text-cyan-400 leading-none">3D DESIGN STUDIO</p>
-          <p className="text-xs font-semibold truncate max-w-[9rem]">{design.name}</p>
+          <p className="text-[10px] font-bold text-rose-400 leading-none">3D DESIGN STUDIO</p>
+          <p className="text-xs font-semibold truncate max-w-[7.5rem]">{design.name}</p>
         </div>
+        <button onClick={() => navigate('/lab')} className="ml-1 px-2 py-1 rounded-lg glass text-[10px] font-bold text-orange-500 shrink-0" title="Switch to the 2D circuit lab">2D →</button>
         <div className="ml-auto flex items-center gap-1">
           <IconBtn onClick={undo} disabled={!past.length} title="Undo"><Undo2 className="w-4 h-4" /></IconBtn>
           <IconBtn onClick={redo} disabled={!future.length} title="Redo"><Redo2 className="w-4 h-4" /></IconBtn>

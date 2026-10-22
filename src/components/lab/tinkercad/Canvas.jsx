@@ -131,12 +131,12 @@ export default function Canvas({
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[#0a0f1c] grid-pattern">
+    <div className="relative w-full h-full overflow-hidden lab-workplane">
       {/* zoom controls */}
-      <div className="absolute right-3 top-3 z-10 flex flex-col gap-1">
-        <button onClick={() => setView(v => ({ ...v, scale: Math.min(3, v.scale * 1.2) }))} className="w-7 h-7 rounded-lg glass text-cyan-400 text-sm font-bold">+</button>
-        <button onClick={() => setView(v => ({ ...v, scale: Math.max(0.3, v.scale / 1.2) }))} className="w-7 h-7 rounded-lg glass text-cyan-400 text-sm font-bold">−</button>
-        <button onClick={() => setView({ x: 40, y: 40, scale: 0.7 })} className="w-7 h-7 rounded-lg glass text-cyan-400 text-[10px]">⌂</button>
+      <div className="absolute right-2 top-2 z-10 flex flex-col gap-1">
+        <button onClick={() => setView(v => ({ ...v, scale: Math.min(3, v.scale * 1.2) }))} className="w-9 h-8 rounded-lg bg-white/85 dark:bg-slate-800/80 text-slate-700 dark:text-cyan-300 text-sm font-bold shadow" aria-label="Zoom in">+</button>
+        <button onClick={() => setView(v => ({ ...v, scale: Math.max(0.3, v.scale / 1.2) }))} className="w-9 h-8 rounded-lg bg-white/85 dark:bg-slate-800/80 text-slate-700 dark:text-cyan-300 text-sm font-bold shadow" aria-label="Zoom out">−</button>
+        <button onClick={() => window.dispatchEvent(new CustomEvent('lab-fit'))} className="w-9 h-8 rounded-lg bg-white/85 dark:bg-slate-800/80 text-slate-700 dark:text-cyan-300 text-[9px] font-bold shadow" aria-label="Fit">FIT</button>
       </div>
 
       <svg ref={svgRef} className="w-full h-full touch-none"
@@ -146,6 +146,16 @@ export default function Canvas({
         onPointerUp={onPointerUp}
         onDrop={onDrop}
         onDragOver={e => e.preventDefault()}>
+        <defs>
+          <pattern id="labGridSmall" width={20 * view.scale} height={20 * view.scale} patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x * 1},${view.y * 1})`}>
+            <path d={`M ${20 * view.scale} 0 L 0 0 0 ${20 * view.scale}`} fill="none" className="lab-grid-line" strokeWidth="1" />
+          </pattern>
+          <pattern id="labGridBig" width={100 * view.scale} height={100 * view.scale} patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x * 1},${view.y * 1})`}>
+            <path d={`M ${100 * view.scale} 0 L 0 0 0 ${100 * view.scale}`} fill="none" className="lab-grid-line-strong" strokeWidth="1.2" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#labGridSmall)" />
+        <rect width="100%" height="100%" fill="url(#labGridBig)" />
         <g transform={`translate(${view.x},${view.y}) scale(${view.scale})`}>
           {/* wires */}
           {wires.map((w, i) => {
@@ -182,10 +192,10 @@ export default function Canvas({
         </g>
       </svg>
 
-      <div className="absolute left-3 bottom-3 text-[10px] text-muted-foreground/70 glass px-2 py-1 rounded-lg pointer-events-none">
+      <div className="absolute left-2 bottom-2 text-[10px] bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-lg pointer-events-none shadow-sm">
         {typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
-          ? 'Tap 2 pins to wire · Drag a part to move it · Pinch or +/− to zoom'
-          : 'Drag from left · Click 2 pins to wire · Drag to move · Scroll to zoom'}
+          ? 'Tap a part to add · tap 2 pins to wire · pinch to zoom'
+          : 'Drag parts in · click 2 pins to wire · scroll to zoom'}
       </div>
     </div>
   );
