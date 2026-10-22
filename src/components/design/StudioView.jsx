@@ -215,7 +215,7 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
           for (const k of ungroup(obj)) {
             const mat = k.hole
               ? new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.95 })
-              : new THREE.MeshStandardMaterial({ color: k.color || obj.color || '#ef4444', roughness: 0.5, metalness: 0.08, flatShading: ['box', 'wedge', 'pyramid'].includes(k.type) });
+              : new THREE.MeshStandardMaterial({ color: k.color || obj.color || '#ef4444', roughness: 0.5, metalness: 0.08, emissive: 0x0c4a6e, emissiveIntensity: 0, flatShading: ['box', 'wedge', 'pyramid'].includes(k.type) });
             const m = new THREE.Mesh(geometryFor(k), mat);
             m.userData.id = obj.id;
             assembly.add(m);
@@ -260,9 +260,10 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
     const one = selected.length === 1 ? meshes.get(selected[0]) : null;
     if (one) { tc.attach(one.mesh); tc.setMode(mode); } else tc.detach();
     meshes.forEach(({ mesh, assembly }, id) => {
-      const hex = selected.includes(id) ? 0x0c4a6e : 0x000000;
-      if (mesh.material?.emissive) mesh.material.emissive.setHex(hex);
-      assembly?.children.forEach(c => c.material?.emissive?.setHex(hex));
+      const on = selected.includes(id);
+      if (mesh.material?.emissive) mesh.material.emissive.setHex(on ? 0x0c4a6e : 0x000000);
+      // parts keep their real colours when selected — only a gentle tint
+      assembly?.children.forEach(c => { if (c.material) c.material.emissiveIntensity = on ? 0.22 : 0; });
     });
     if (selected.length) {
       const box = new THREE.Box3();

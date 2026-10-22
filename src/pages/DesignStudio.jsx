@@ -56,17 +56,24 @@ export default function DesignStudio() {
   const one = sel.length === 1 ? sel[0] : null;
 
   // ── add ──
-  const dropSpot = () => { const n = objects.length; return [((n % 5) - 2) * 12, 0, (Math.floor(n / 5) % 5 - 2) * 12]; };
+  // new objects land beside what is already on the workplane, never inside it
+  const dropSpot = (size = [20, 20, 20]) => {
+    const b = designBounds(objects);
+    if (!b) return [0, 0, 0];
+    const x = b.max[0] + 10 + size[0] / 2;
+    if (x + size[0] / 2 > 95) return [b.min[0] + size[0] / 2, 0, b.max[2] + 10 + size[1] / 2]; // next row
+    return [x, 0, (b.min[2] + b.max[2]) / 2];
+  };
   const addShape = (type) => {
     const [w, d, h] = SHAPES[type].size;
-    const o = { id: newObjId(), type, size: [w, d, h], pos: dropSpot(), rot: [0, 0, 0], hole: asHole, color: COLORS[objects.length % 6] };
+    const o = { id: newObjId(), type, size: [w, d, h], pos: dropSpot([w, d, h]), rot: [0, 0, 0], hole: asHole, color: COLORS[objects.length % 6] };
     commit([...objects, o]); setSelected([o.id]);
   };
   const addPart = (part) => {
     setBusy(true);
     setTimeout(() => {
       const g = buildPart(part);
-      const [x, , z] = dropSpot();
+      const [x, , z] = dropSpot(g.size);
       const o = { ...g, id: newObjId(), pos: [x, g.pos[1], z] };
       commit([...objRef.current, o]); setSelected([o.id]); setBusy(false);
     }, 20);
