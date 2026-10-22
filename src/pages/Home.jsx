@@ -9,7 +9,7 @@ import { AvatarBadge } from '@/pages/Shop';
 import { WeeklyChallengeCard } from '@/pages/Leaderboard';
 import { equippedItems, localDay } from '@/lib/gamification';
 import { getReminderSettings } from '@/lib/reminders';
-import { GraduationCap, Shapes, RotateCcw, Cpu, Sigma, Calculator, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench } from 'lucide-react';
+import { GraduationCap, Shapes, RotateCcw, Cpu, Sigma, Calculator, Terminal, Medal, ShoppingBag, Map as MapIcon, Bell, Flame, Trophy, Target, Zap, BookOpen, ArrowRight, Lightbulb, TrendingUp, Clock, Coins, Star, Bot, Award, ChevronRight, Calendar, Rocket, Wrench, FileText } from 'lucide-react';
 import DailyMissions from '@/components/learning/DailyMissions';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
 
@@ -252,7 +252,8 @@ export default function Home() {
         {[
           { icon: BookOpen, label: 'Learn', path: '/learn', color: '#4ADE80' },
           { icon: GraduationCap, label: 'Exam Prep', path: '/exam', color: '#F59E0B' },
-          { icon: Wrench, label: 'Build Lab', path: '/lab', color: '#F97316' },
+          { icon: FileText, label: 'Practical File', path: '/assessment', color: '#34D399' },
+          { icon: Wrench, label: 'Circuit Lab', path: '/lab', color: '#F97316' },
           { icon: Rocket, label: 'Robot Arena', path: '/arena', color: '#38BDF8' },
           { icon: Shapes, label: '3D Design', path: '/design', color: '#FB7185' },
           { icon: Cpu, label: 'Mechanisms', path: '/mechanisms', color: '#A3E635' },

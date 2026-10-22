@@ -47,6 +47,8 @@ const Tools = lazy(() => import('@/pages/Tools'));
 const Arena = lazy(() => import('@/pages/Arena'));
 const DesignStudio = lazy(() => import('@/pages/DesignStudio'));
 const MechanismLab = lazy(() => import('@/pages/MechanismLab'));
+const Assessment = lazy(() => import('@/pages/Assessment'));
+const BuildHub = lazy(() => import('@/pages/BuildHub'));
 
 function PageLoading() {
   return (
@@ -138,6 +140,8 @@ const AuthenticatedApp = () => {
             <Route path="/arena" element={<Arena />} />
             <Route path="/design" element={<DesignStudio />} />
             <Route path="/mechanisms" element={<MechanismLab />} />
+            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/build" element={<BuildHub />} />
           </Route>
         </Route>
 

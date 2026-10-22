@@ -222,6 +222,7 @@ export default function EngineeringHome() {
         {[
           { icon: BookOpen, label: 'Chapters', path: '/learn', color: '#4ADE80' },
           { icon: GraduationCap, label: 'Exam Prep', path: '/exam', color: '#F59E0B' },
+          { icon: FileText, label: 'Practical File', path: '/assessment', color: '#34D399' },
           { icon: Sigma, label: 'Numericals', path: '/problems', color: '#22D3EE' },
           { icon: Calculator, label: 'Tools', path: '/tools', color: '#C084FC' },
           { icon: Wrench, label: 'Lab', path: '/lab', color: '#F97316' },

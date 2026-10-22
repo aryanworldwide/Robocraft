@@ -332,6 +332,7 @@ export default function LessonDetail() {
         {/* BUILD MODE */}
         {activeMode === 'build' && (
           <>
+            <LessonLabLinks lessonId={lesson.id} />
             {buildChallengeId ? (
               <BuildWithMe
                 challengeId={buildChallengeId}
@@ -384,6 +385,31 @@ export default function LessonDetail() {
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-3 text-center">Downloads only this chapter — not the full syllabus.</p>
+      </div>
+    </div>
+  );
+}
+
+const LAB_LINKS = {
+  c9_r_11: [['/arena?task=free', 'Drive a robot in the 3D arena']], c9_r_12: [['/mechanisms', 'Play with linkages & joints']],
+  c9_proj_1: [['/arena?task=line', 'Code a line follower (3D arena)']], c9_proj_2: [['/arena?task=obstacle', 'Code an obstacle avoider (3D arena)']],
+  c10_r_7: [['/arena?task=edge', 'Edge-detector robot'], ['/lab', 'Wire sensors in Circuit Lab']], c10_r_9: [['/arena?task=line', 'Program a controller: line follower']],
+  c10_r_10: [['/arena?task=obstacle', 'Sensors + motors: obstacle avoider'], ['/arena?task=bin', 'Smart waste bin']],
+  c10_r_11: [['/design', 'Model parts in the 3D Design Studio']], c10_r_12: [['/mechanisms', 'Mechanism Lab: gears & linkages']],
+  c11_m_4: [['/mechanisms', 'Four-bar & slider-crank simulator']], c11_m_5: [['/design', 'Build a 3D model']], c11_m_6: [['/mechanisms', '2R arm: forward & inverse kinematics']],
+  c11_e_1: [['/mechanisms', 'Gear trains: speed vs torque']], c11_e_2: [['/arena?task=edge', 'Sensors on a real robot (3D arena)']], c11_e_6: [['/arena?task=pid', 'Tune a PID line follower']],
+};
+function LessonLabLinks({ lessonId }) {
+  const navigate = useNavigate();
+  const links = LAB_LINKS[lessonId];
+  if (!links) return null;
+  return (
+    <div className="glass-strong rounded-2xl p-3 mb-3">
+      <p className="text-[11px] font-bold text-cyan-400 mb-2">Try it yourself</p>
+      <div className="flex flex-wrap gap-2">
+        {links.map(([to, label]) => (
+          <button key={to + label} onClick={() => navigate(to)} className="px-3 py-1.5 rounded-xl bg-cyan-500/15 text-cyan-400 text-xs font-semibold">{label} →</button>
+        ))}
       </div>
     </div>
   );

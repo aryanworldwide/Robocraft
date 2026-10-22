@@ -22,14 +22,14 @@ export default function Layout() {
   const getActiveTab = (pathname) => {
     if (pathname.startsWith('/learn') || pathname.startsWith('/lesson') || pathname.startsWith('/quiz')) return '/learn';
     if (pathname.startsWith('/project')) return '/projects';
-    if (pathname.startsWith('/lab')) return '/lab';
+    if (['/build', '/lab', '/arena', '/design', '/mechanisms', '/challenges', '/assessment'].some(x => pathname.startsWith(x))) return '/build';
     if (pathname.startsWith('/progress')) return '/progress';
     if (pathname === '/') return '/';
     return null; // settings, mentor, revision, search, challenges: no tab highlighted
   };
 
   const activeTab = useMemo(() => getActiveTab(location.pathname), [location.pathname]);
-  const inLab = location.pathname.startsWith('/lab');
+  const inLab = location.pathname.startsWith('/lab') || location.pathname.startsWith('/design');
 
   useEffect(() => {
     if (!activeTab) return;
@@ -68,7 +68,7 @@ export default function Layout() {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/learn', label: 'Learn', icon: BookOpen },
-    { path: '/lab', label: 'Build', icon: Wrench },
+    { path: '/build', label: 'Build', icon: Wrench },
     { path: '/projects', label: 'Projects', icon: FolderGit2 },
     { path: '/progress', label: 'Progress', icon: BarChart3 },
   ];
