@@ -344,7 +344,7 @@ export const class9Data = {
     }
   ],
   projects: [
-    { id:"c9_proj_1", title:"Line Following Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"$25-35",
+    { id:"c9_proj_1", title:"Line Following Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"₹1,200-1,600",
       description:"Build a robot that follows a black line using IR sensors and Arduino.",
       components:["Arduino Uno","2x IR Sensors (TCRT5000)","2x DC Motors","L298N Motor Driver","Robot Chassis Kit","Battery Pack (4xAA)","Jumper Wires","Black Tape"],
       steps:["Assemble the robot chassis with motors and wheels","Mount the Arduino Uno on the chassis","Connect the L298N motor driver to the Arduino","Wire the DC motors to the motor driver","Mount IR sensors at the front, facing downward","Connect IR sensors to Arduino analog pins A0 and A1","Upload the line-following code","Create a track using black tape on white paper","Calibrate sensor thresholds","Test and adjust motor speeds"],
@@ -388,7 +388,7 @@ void stopMotors() {
 }`,
       troubleshooting:["Robot not following line → Adjust sensor threshold values","Robot moving erratically → Check sensor alignment","Motors not spinning → Verify motor driver connections","Robot going in circles → Swap motor wires"],
       testingChecklist:["Sensors detect black vs white","Robot moves forward on white surface","Robot turns left when left sensor detects line","Robot turns right when right sensor detects line","Speed is consistent on straight sections"] },
-    { id:"c9_proj_2", title:"Obstacle Avoiding Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"$30-40",
+    { id:"c9_proj_2", title:"Obstacle Avoiding Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"₹1,300-1,800",
       description:"Build a robot that detects obstacles using an ultrasonic sensor and navigates around them.",
       components:["Arduino Uno","HC-SR04 Ultrasonic Sensor","SG90 Servo Motor","2x DC Motors","L298N Motor Driver","Robot Chassis Kit","Battery Pack","Jumper Wires"],
       steps:["Assemble chassis with DC motors","Mount Arduino and motor driver","Attach servo motor at the front","Mount ultrasonic sensor on servo","Wire ultrasonic sensor (Trig→pin 2, Echo→pin 3)","Wire servo to pin 4","Connect motor driver to Arduino and motors","Upload obstacle avoidance code","Test with various obstacles","Adjust thresholds and turning angles"],
@@ -433,7 +433,7 @@ void turnLeft() { digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH); digitalWrite(
 void stopMotors() { analogWrite(ENA, 0); analogWrite(ENB, 0); }`,
       troubleshooting:["Sensor wrong readings → Check wiring","Servo not rotating → Verify power supply","Robot not turning enough → Increase turn delay","Inconsistent detection → Add delay between readings"],
       testingChecklist:["Ultrasonic sensor reads distances","Servo sweeps left and right","Robot moves forward when clear","Robot stops when obstacle within 25cm","Robot looks left and right to choose path"] },
-    { id:"c9_proj_3", title:"Smart Traffic Light System", subject:"Computing Fundamentals", difficulty:"Beginner", estimatedTime:"1-2 hours", estimatedCost:"$10-15",
+    { id:"c9_proj_3", title:"Smart Traffic Light System", subject:"Computing Fundamentals", difficulty:"Beginner", estimatedTime:"1-2 hours", estimatedCost:"₹550-750",
       description:"Build a traffic light system using LEDs and Arduino with pedestrian crossing.",
       components:["Arduino Uno","3x Red LEDs","3x Yellow LEDs","3x Green LEDs","9x 220Ω Resistors","1x Push Button","Breadboard","Jumper Wires"],
       steps:["Set up breadboard with LED groups","Connect resistors to each LED","Wire LEDs to Arduino digital pins","Add push button for pedestrian crossing","Write traffic light sequence code","Test each LED individually","Run full traffic light cycle","Add pedestrian crossing interrupt","Test complete system"],

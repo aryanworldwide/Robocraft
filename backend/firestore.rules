@@ -21,6 +21,14 @@ service cloud.firestore {
         && request.resource.data.hidden is bool
         && request.resource.data.updated is string;
     }
+    // "Report a problem" (content mistakes, AI replies). Write-only for students.
+    match /reports/{id} {
+      allow read, update, delete: if false;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['kind', 'message', 'page', 'lessonId', 'excerpt', 'classId', 'app', 'created', 'uid'])
+        && request.resource.data.message is string && request.resource.data.message.size() <= 1000
+        && request.resource.data.excerpt is string && request.resource.data.excerpt.size() <= 1500;
+    }
     // AI-generated projects: anyone can read (shared cache); signed-in users can
     // add new ones and update only their own.
     match /generatedProjects/{id} {

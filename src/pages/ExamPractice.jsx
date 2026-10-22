@@ -6,6 +6,7 @@ import { buildPaper, scorePaper, PATTERNS, UNITS } from '@/lib/exam/paper';
 import { downloadPaperPdf } from '@/lib/exam/paperPdf';
 import ExamCorner from '@/components/lesson/ExamCorner';
 import RichText from '@/components/lesson/RichText';
+import AnswerChecker from '@/components/exam/AnswerChecker';
 import BackButton from '@/components/BackButton';
 import { formatClass } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
@@ -35,6 +36,7 @@ function WrittenQuestion({ label, q, marks, value, onMark, lessonTitle }) {
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">[{marks}]</span>
       </div>
       {lessonTitle && <p className="text-[10px] text-muted-foreground mt-1 ml-6">Chapter: {lessonTitle}</p>}
+      <AnswerChecker question={q.q} model={q.a} marks={marks} onMarks={onMark} lessonId={q.lessonId} />
       <button onClick={() => setShow(!show)} className="mt-2 text-xs font-semibold text-cyan-500 flex items-center gap-1">
         {show ? <><EyeOff className="w-3.5 h-3.5" /> Hide model answer</> : <><Eye className="w-3.5 h-3.5" /> Check with model answer</>}
       </button>

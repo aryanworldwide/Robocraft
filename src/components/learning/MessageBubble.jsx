@@ -1,4 +1,5 @@
 import React from 'react';
+import ReportButton from '@/components/ReportButton';
 
 export default function MessageBubble({ msg }) {
   const isUser = msg.role === 'user';
@@ -13,6 +14,7 @@ export default function MessageBubble({ msg }) {
         {msg.suggestion && (
           <p className="text-[10px] text-cyan-400 mt-1">💡 {msg.suggestion}</p>
         )}
+        {!isUser && msg.ai !== false && <div className="mt-1 text-right"><ReportButton ai context={{ excerpt: msg.content }} /></div>}
       </div>
     </div>
   );

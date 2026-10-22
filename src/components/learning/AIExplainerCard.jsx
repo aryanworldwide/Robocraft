@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReportButton from '@/components/ReportButton';
 import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
 import { Loader2, ChevronUp, ChevronDown } from 'lucide-react';
@@ -44,8 +45,11 @@ function AIExplainerCardInner({ title, subtitle, icon: Icon, color = '#00D2FF', 
               <Loader2 className="w-4 h-4 animate-spin" style={{ color }} />
               <span className="text-xs text-muted-foreground">AI is writing...</span>
             </div>
-          ) : renderResponse ? renderResponse(content) : (
-            <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{content}</p>
+          ) : (
+            <>
+              {renderResponse ? renderResponse(content) : <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{content}</p>}
+              <div className="text-right mt-1"><ReportButton ai context={{ excerpt: typeof content === 'string' ? content : '' }} /></div>
+            </>
           )}
         </div>
       )}

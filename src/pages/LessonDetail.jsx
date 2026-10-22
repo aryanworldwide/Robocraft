@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReportButton from '@/components/ReportButton';
 import { useApp } from '@/lib/AppContext';
 import { getLesson, getQuizForLesson } from '@/lib/curriculum';
 import { generateFlashCards, generateMatchGame, generateArrangeSteps, generateFillBlank, generateDidYouKnow } from '@/lib/curriculum/flashcardData';
@@ -176,6 +177,7 @@ export default function LessonDetail() {
             </span>
           </div>
           <h1 className="text-xl font-bold mb-2">{lesson.title}</h1>
+          <div className="-mt-1 mb-1"><ReportButton label="Report a mistake in this chapter" context={{ lessonId: lesson.id, classId: selectedClass }} /></div>
           {lesson.objectives && lesson.objectives.length > 0 && (
             <div className="text-left mt-3">
               <h3 className="text-[10px] font-bold mb-1.5 flex items-center gap-1 text-muted-foreground"><Target className="w-3 h-3" /> What you'll learn</h3>

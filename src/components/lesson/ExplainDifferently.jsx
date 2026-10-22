@@ -1,3 +1,4 @@
+import ReportButton from '@/components/ReportButton';
 import React, { useState } from 'react';
 import { aiEnabled } from '@/lib/features';
 import { Wand2, Lightbulb, HelpCircle, Swords, Loader2, Bot } from 'lucide-react';
@@ -61,7 +62,10 @@ function ExplainDifferentlyInner({ lesson }) {
           {loading ? (
             <div className="flex items-center gap-2 py-3"><Loader2 className="w-4 h-4 text-violet-400 animate-spin" /><span className="text-xs text-muted-foreground">Thinking…</span></div>
           ) : (
-            <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{result}</p>
+            <>
+              <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{result}</p>
+              <div className="text-right mt-1"><ReportButton ai context={{ excerpt: result }} /></div>
+            </>
           )}
         </div>
       )}

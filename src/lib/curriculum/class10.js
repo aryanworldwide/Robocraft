@@ -270,7 +270,7 @@ export const class10Data = {
     }
   ],
   projects: [
-    { id:"c10_proj_1", title:"Bluetooth-Controlled Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"4-5 hours", estimatedCost:"$35-45",
+    { id:"c10_proj_1", title:"Bluetooth-Controlled Robot", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"4-5 hours", estimatedCost:"₹1,400-1,900",
       description:"Build a robot controlled via Bluetooth from a smartphone using HC-05 module and Arduino.",
       components:["Arduino Uno","HC-05 Bluetooth Module","L298N Motor Driver","2x DC Motors","Robot Chassis Kit","Battery Pack","Jumper Wires","Smartphone with Bluetooth RC app"],
       steps:["Assemble chassis with motors","Mount Arduino and motor driver","Connect HC-05 (TX→RX, RX→TX via voltage divider)","Wire motor driver to Arduino","Upload Bluetooth control code","Pair phone with HC-05","Install Bluetooth RC Controller app","Test all directions","Adjust motor speeds","Add features (horn, lights)"],
@@ -307,7 +307,7 @@ void loop() {
 }`,
       troubleshooting:["Bluetooth not pairing → Default PIN is 1234 or 0000","Commands not working → Verify TX/RX are crossed","Robot not responding → Check baud rate (9600)","Jerky movement → Ensure sufficient battery voltage"],
       testingChecklist:["HC-05 LED blinks (discoverable)","Phone pairs successfully","All direction commands work","Speed control works","Stop command halts all motors"] },
-    { id:"c10_proj_2", title:"Smart Weather Station (ESP32)", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"$25-35",
+    { id:"c10_proj_2", title:"Smart Weather Station (ESP32)", subject:"Robotics", difficulty:"Intermediate", estimatedTime:"3-4 hours", estimatedCost:"₹1,000-1,400",
       description:"Build an IoT weather station using ESP32 that monitors temperature, humidity, and pressure with web dashboard.",
       components:["ESP32 Dev Board","DHT22 Temperature/Humidity Sensor","BMP280 Pressure Sensor","0.96\" OLED Display (SSD1306)","Breadboard","Jumper Wires","USB Cable"],
       steps:["Wire DHT22 to ESP32 (data to GPIO 4)","Wire BMP280 via I2C (SDA→GPIO 21, SCL→GPIO 22)","Wire OLED via I2C (same bus)","Install required libraries","Upload weather station code","Connect ESP32 to WiFi","Access web dashboard","Calibrate sensors","Set up data logging","Design enclosure"],

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getProject } from '@/lib/curriculum';
-import { ArrowLeft, Clock, DollarSign, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
+import { priceOf, estimateBOM, inr } from '@/lib/prices';
+import { ArrowLeft, Clock, IndianRupee, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import CodeExplainer from '@/components/learning/CodeExplainer';
@@ -80,7 +81,7 @@ export default function ProjectDetail() {
         <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
         <div className="flex items-center gap-2 text-xs mb-4">
           <span className="glass px-3 py-1.5 rounded-full text-cyan-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {project.estimatedTime}</span>
-          <span className="glass px-3 py-1.5 rounded-full text-green-400 flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {project.estimatedCost}</span>
+          <span className="glass px-3 py-1.5 rounded-full text-green-400 flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5" /> {String(project.estimatedCost || '').replace(/^₹\s*/, '')}</span>
         </div>
 
         {/* Build Sheet buttons */}
@@ -100,13 +101,20 @@ export default function ProjectDetail() {
       <div className="glass-strong rounded-2xl p-4 mb-4 animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <h3 className="font-bold text-sm mb-3 flex items-center gap-2"><Cpu className="w-4 h-4 text-cyan-400" /> Components Required</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {project.components.map((comp, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm glass rounded-lg px-3 py-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
-              {comp}
-            </div>
-          ))}
+          {project.components.map((comp, i) => {
+            const pr = priceOf(comp);
+            return (
+              <div key={i} className="flex items-center gap-2 text-sm glass rounded-lg px-3 py-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
+                <span className="flex-1">{comp}</span>
+                {pr && <span className="text-[11px] text-green-400 tabular-nums whitespace-nowrap">{inr(pr.lo)}–{inr(pr.hi)}</span>}
+              </div>
+            );
+          })}
         </div>
+        {(() => { const b = estimateBOM(project.components); return b.hi > 0 && (
+          <p className="text-[11px] text-muted-foreground mt-3">Estimated total: <b className="text-green-400">{inr(b.lo)} – {inr(b.hi)}</b> (typical online prices in India, including the microcontroller board — subtract it if you already own one; tools not included{b.unknown ? `; ${b.unknown} item${b.unknown > 1 ? 's' : ''} not priced` : ''}).</p>
+        ); })()}
       </div>
 
       {/* Pin Mapping Table */}

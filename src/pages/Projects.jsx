@@ -9,7 +9,7 @@ import AIGeneratedProjectView from '@/components/projects/AIGeneratedProjectView
 import { generateOrRetrieveProject } from '@/lib/buildsheet/aiProjectSearch';
 import { aiEnabled } from '@/lib/features';
 import { toast } from '@/components/ui/use-toast';
-import { Clock, DollarSign, ChevronRight, Wrench, Filter, Bot, Loader2, Cpu } from 'lucide-react';
+import { Clock, IndianRupee, ChevronRight, Wrench, Filter, Bot, Loader2, Cpu } from 'lucide-react';
 
 export default function Projects() {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ export default function Projects() {
               <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{project.description}</p>
               <div className="flex items-center gap-2 text-[10px]">
                 <span className="glass px-2 py-1 rounded-full text-cyan-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {project.estimatedTime}</span>
-                <span className="glass px-2 py-1 rounded-full text-green-400 flex items-center gap-1"><DollarSign className="w-3 h-3" /> {project.estimatedCost}</span>
+                <span className="glass px-2 py-1 rounded-full text-green-400 flex items-center gap-1"><IndianRupee className="w-3 h-3" /> {String(project.estimatedCost || '').replace(/^₹\s*/, '')}</span>
               </div>
               <div className="mt-3 flex items-center justify-between">
                 <span className="text-[10px] text-muted-foreground flex items-center gap-1">

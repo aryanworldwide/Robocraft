@@ -1,3 +1,4 @@
+import ReportButton from '@/components/ReportButton';
 import React, { useState } from 'react';
 import { aiEnabled } from '@/lib/features';
 import { backend } from '@/api/client';
@@ -67,6 +68,7 @@ Use simple English. Use short sentences. Use bullet points. Do NOT use HTML tags
           ) : explanation ? (
             <div className="glass rounded-xl p-3 border border-purple-500/15">
               <p className="text-xs text-foreground/90 leading-relaxed whitespace-pre-line">{explanation}</p>
+              <div className="text-right mt-1"><ReportButton ai context={{ excerpt: explanation }} /></div>
             </div>
           ) : null}
         </div>

@@ -303,7 +303,7 @@ export const class11Data = {
     }
   ],
   projects: [
-    { id:"c11_proj_1", title:"Self-Balancing Robot", subject:"Electrical & Control Systems", difficulty:"Advanced", estimatedTime:"6-8 hours", estimatedCost:"$50-70",
+    { id:"c11_proj_1", title:"Self-Balancing Robot", subject:"Electrical & Control Systems", difficulty:"Advanced", estimatedTime:"6-8 hours", estimatedCost:"₹2,000-3,000",
       description:"Build a two-wheeled self-balancing robot using MPU6050 IMU, Arduino, and PID control.",
       components:["Arduino Uno/Nano","MPU6050 IMU (6-axis)","2x NEMA 17 Stepper Motors","2x A4988 Stepper Drivers","12V Power Supply","Robot Chassis","Jumper Wires","Breadboard"],
       steps:["Design and build a compact chassis with two wheels","Mount stepper motors as the two wheels","Attach MPU6050 IMU at the center of mass","Wire A4988 stepper drivers to Arduino","Wire MPU6050 via I2C","Upload self-balancing code","Tune PID parameters (start with Kp)","Test on flat surface","Gradually increase Kd and Ki","Fine-tune for stability"],
@@ -355,7 +355,7 @@ void loop() {
 }`,
       troubleshooting:["Robot falls immediately → Check IMU orientation and mounting","Oscillates wildly → Reduce Kp, increase Kd","Drifts in one direction → Adjust setpoint offset","Motors stuttering → Check power supply adequacy"],
       testingChecklist:["IMU reads angle correctly","Motors respond to angle changes","Robot balances for 5+ seconds","PID responds to disturbances","No motor stuttering at speed"] },
-    { id:"c11_proj_2", title:"WiFi Robot Arm (ESP32)", subject:"Microcontrollers", difficulty:"Advanced", estimatedTime:"5-6 hours", estimatedCost:"$40-55",
+    { id:"c11_proj_2", title:"WiFi Robot Arm (ESP32)", subject:"Microcontrollers", difficulty:"Advanced", estimatedTime:"5-6 hours", estimatedCost:"₹2,200-3,200",
       description:"Build a 4-DOF robot arm controlled via WiFi web interface using ESP32 and servo motors.",
       components:["ESP32 Dev Board","4x SG90 Servo Motors","Robot Arm Kit (acrylic)","External 5V Power Supply","Breadboard","Jumper Wires"],
       steps:["Assemble robot arm kit with 4 servos","Wire servos to ESP32 (GPIO 13,12,14,27)","Power servos from external 5V supply (common ground)","Upload WiFi web server code","Connect ESP32 to WiFi","Access web interface from browser","Test individual joint control","Create preset positions (home, grab, release)","Add smooth motion between positions","Test full pick-and-place sequence"],

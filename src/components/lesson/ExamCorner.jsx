@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { GraduationCap, Eye, EyeOff, Check } from 'lucide-react';
 import RichText from '@/components/lesson/RichText';
+import AnswerChecker from '@/components/exam/AnswerChecker';
 
 function ExamQuestion({ q, n, marks, onMarked }) {
   const [show, setShow] = useState(false);
-  const [draft, setDraft] = useState('');
   const [got, setGot] = useState(null);
   const pick = (m) => { setGot(m); onMarked?.(m); };
   return (
@@ -14,17 +14,12 @@ function ExamQuestion({ q, n, marks, onMarked }) {
         <p className="text-sm font-medium flex-1">{q.q}</p>
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground whitespace-nowrap">[{marks}]</span>
       </div>
-      {!show && (
-        <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={marks > 2 ? 4 : 2}
-          placeholder="Write your answer here first (optional), then check it…"
-          className="mt-2 w-full text-sm rounded-lg bg-background/60 border border-border p-2 outline-none focus:border-cyan-500" />
-      )}
+      <AnswerChecker question={q.q} model={q.a} marks={marks} onMarks={pick} />
       <button onClick={() => setShow(!show)} className="mt-2 text-xs font-semibold text-cyan-500 flex items-center gap-1">
         {show ? <><EyeOff className="w-3.5 h-3.5" /> Hide model answer</> : <><Eye className="w-3.5 h-3.5" /> Show model answer</>}
       </button>
       {show && (
         <div className="mt-2 border-l-2 border-green-500 pl-3 animate-fade-in">
-          {draft.trim() && <p className="text-[11px] text-muted-foreground mb-2"><span className="font-semibold">Your answer:</span> {draft}</p>}
           <RichText text={q.a} className="text-[13px]" />
           <div className="mt-3 flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] text-muted-foreground mr-1">Mark yourself:</span>

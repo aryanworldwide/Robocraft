@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import {
-  ArrowLeft, Clock, DollarSign, Cpu, AlertTriangle, Copy, Check, Download,
+  ArrowLeft, Clock, IndianRupee, Cpu, AlertTriangle, Copy, Check, Download,
   ChevronDown, ChevronUp, FileText, Eye, Shield, Globe, Lightbulb, CheckCircle2,
   Bot, Wrench, Layers, Beaker, Sparkles, AlertCircle
 } from 'lucide-react';
@@ -97,7 +97,7 @@ export default function AIGeneratedProjectView({ project, onBack }) {
         <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
         <div className="flex items-center gap-2 text-xs mb-4 flex-wrap">
           <span className="glass px-3 py-1.5 rounded-full text-cyan-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {project.estimatedTime}</span>
-          <span className="glass px-3 py-1.5 rounded-full text-green-400 flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {project.estimatedCost}</span>
+          <span className="glass px-3 py-1.5 rounded-full text-green-400 flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5" /> {String(project.estimatedCost || '').replace(/^₹\s*/, '')}</span>
           <span className="glass px-3 py-1.5 rounded-full text-purple-400 flex items-center gap-1"><Cpu className="w-3.5 h-3.5" /> {project.controller || 'Arduino Uno'}</span>
         </div>
       </div>
