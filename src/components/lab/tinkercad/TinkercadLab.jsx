@@ -273,14 +273,26 @@ export default function TinkercadLab({ onExit }) {
 
   const resetSim = () => { setRunning(false); setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); };
   const runSim = () => {
-    // Pressing Run on an empty breadboard used to do nothing at all, which
-    // reads as a broken button. Say what is missing instead.
+    // Run used to be greyed out with only a desktop tooltip to explain why, so
+    // on a phone it read as a dead button. It is always pressable now and says
+    // what is missing.
     if (components.length === 0) {
       toast({ title: 'Nothing to run yet', description: 'Drag a board and a part onto the workbench first.' });
       return;
     }
+    if (!detectBoard(components)) {
+      toast({ title: 'Add a board', description: 'An Arduino or ESP32 runs the code — drag one in from Components.' });
+      return;
+    }
     if (wires.length === 0) {
       toast({ title: 'Wire the parts first', description: 'Connect your parts to the board — tap one pin, then the other, to draw a wire.' });
+      return;
+    }
+    if (!canRun) {
+      const problem = experiment
+        ? 'Finish the wiring shown in the guide, then press Run.'
+        : (freeCheck?.issues || []).find(i => i.type === 'error')?.msg || 'Fix the wiring problem shown in the check panel.';
+      toast({ title: 'Check the wiring', description: problem });
       return;
     }
     setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); setCodeError(null);
@@ -342,7 +354,7 @@ export default function TinkercadLab({ onExit }) {
           <button onClick={() => setShowSerial(s => !s)} title="Serial" className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors hidden md:flex ${showSerial ? 'bg-green-500/20 text-green-400' : 'glass text-cyan-400 hover:bg-cyan-500/10'}`}><Terminal className="w-3.5 h-3.5" /><span>Serial</span></button>
           <div className="h-5 w-px bg-border mx-0.5 hidden md:block" />
           {!running
-            ? <button onClick={runSim} disabled={!canRun} title="Run" className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
+            ? <button onClick={runSim} title="Run" className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
             : <button onClick={() => setRunning(false)} className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
           <button aria-label="Reset" onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors tap-target"><RotateCcw className="w-4 h-4" /></button>
         </div>

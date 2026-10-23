@@ -81,6 +81,7 @@ function AIMentorInner({ lessonContext, compact }) {
     return (
       <>
         <button
+          aria-label="Ask the AI mentor"
           onClick={() => setOpen(true)}
           className="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center neon-glow hover:scale-110 transition-transform"
         >
