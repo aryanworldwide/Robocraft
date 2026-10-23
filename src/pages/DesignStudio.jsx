@@ -76,6 +76,8 @@ export default function DesignStudio() {
       const [x, , z] = dropSpot(g.size);
       const o = { ...g, id: newObjId(), pos: [x, g.pos[1], z] };
       commit([...objRef.current, o]); setSelected([o.id]); setBusy(false);
+      // a library part is big — show the whole model again
+      setTimeout(() => setViewCmd({ name: 'home', t: Date.now() }), 60);
     }, 20);
   };
 

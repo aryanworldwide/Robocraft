@@ -164,16 +164,17 @@ function wirePath(s, t) {
 }
 
 /** A small coloured label at a wire end, naming the pin it connects to. */
-function PinTag({ p, text, color, dim }) {
+function PinTag({ p, text, color, dim, nudge = 0 }) {
   if (!p || !text) return null;
-  const w = Math.max(22, String(text).length * 7.2 + 10);
+  const short = String(text).replace(/\s*\(.*\)$/, '').slice(0, 12);
+  const w = Math.max(22, short.length * 7.2 + 10);
   const off = 15;
   const x = p.side === 'left' ? p.x - off - w : p.side === 'right' ? p.x + off : p.x - w / 2;
-  const y = p.side === 'top' ? p.y - off - 16 : p.side === 'bottom' ? p.y + off : p.y - 8;
+  const y = (p.side === 'top' ? p.y - off - 16 : p.side === 'bottom' ? p.y + off : p.y - 8) + nudge;
   return (
     <g opacity={dim ? 0.25 : 1} style={{ pointerEvents: 'none' }}>
       <rect x={x} y={y} width={w} height={16} rx={4} fill="#fff" stroke={color} strokeWidth="1.4" />
-      <text x={x + w / 2} y={y + 11.5} textAnchor="middle" fontSize="9.5" fontWeight="800" fill={color} fontFamily="'Inter',sans-serif">{text}</text>
+      <text x={x + w / 2} y={y + 11.5} textAnchor="middle" fontSize="9.5" fontWeight="800" fill={color} fontFamily="'Inter',sans-serif">{short}</text>
     </g>
   );
 }
@@ -469,10 +470,19 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
 
       {/* ── Pin tags: which pin each wire lands on ── */}
       <g>
-        {wires.map(w => [
-          w.sTag && <PinTag key={`${w.key}s`} p={w.s} text={w.sTag} color={w.color} dim={w.dimmed} />,
-          w.tTag && <PinTag key={`${w.key}t`} p={w.t} text={w.tTag} color={w.color} dim={w.dimmed} />,
-        ])}
+        {(() => {
+          const seen = new Map();
+          const slot = (pt) => {
+            const k = `${Math.round(pt.x)},${Math.round(pt.y)}`;
+            const n = seen.get(k) || 0;
+            seen.set(k, n + 1);
+            return n * 17;
+          };
+          return wires.flatMap(w => [
+            w.sTag ? <PinTag key={`${w.key}s`} p={w.s} text={w.sTag} color={w.color} dim={w.dimmed} nudge={slot(w.s)} /> : null,
+            w.tTag ? <PinTag key={`${w.key}t`} p={w.t} text={w.tTag} color={w.color} dim={w.dimmed} nudge={slot(w.t)} /> : null,
+          ]);
+        })()}
       </g>
 
       {/* ── Components ── */}

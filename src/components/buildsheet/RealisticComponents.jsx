@@ -39,37 +39,82 @@ export const REALISTIC_SIZES = {
 // Pin positions relative to component top-left (x, y)
 export const REALISTIC_PINS = {
   arduino_uno: [
-    { id: 'D2', label: 'D2', type: 'digital', x: 0, y: 60 },
-    { id: 'D9', label: 'D9', type: 'pwm', x: 0, y: 90 },
-    { id: 'D10', label: 'D10', type: 'pwm', x: 0, y: 120 },
-    { id: 'D11', label: 'D11', type: 'pwm', x: 0, y: 150 },
-    { id: 'D13', label: 'D13', type: 'digital', x: 0, y: 180 },
-    { id: 'A0', label: 'A0', type: 'analog', x: 0, y: 210 },
-    { id: '5V', label: '5V', type: 'power', x: 180, y: 60 },
-    { id: '3V3', label: '3.3V', type: 'power', x: 180, y: 90 },
-    { id: 'GND', label: 'GND', type: 'ground', x: 180, y: 120 },
-    { id: 'A4', label: 'SDA', type: 'analog', x: 180, y: 150 },
-    { id: 'A5', label: 'SCL', type: 'analog', x: 180, y: 180 },
+    { id: 'D0', label: 'D0', type: 'digital', x: 0, y: 22 },
+    { id: 'D1', label: 'D1', type: 'digital', x: 0, y: 38 },
+    { id: 'D2', label: 'D2', type: 'digital', x: 0, y: 54 },
+    { id: 'D3', label: 'D3', type: 'pwm', x: 0, y: 70 },
+    { id: 'D4', label: 'D4', type: 'digital', x: 0, y: 86 },
+    { id: 'D5', label: 'D5', type: 'pwm', x: 0, y: 102 },
+    { id: 'D6', label: 'D6', type: 'pwm', x: 0, y: 118 },
+    { id: 'D7', label: 'D7', type: 'digital', x: 0, y: 134 },
+    { id: 'D8', label: 'D8', type: 'digital', x: 0, y: 150 },
+    { id: 'D9', label: 'D9', type: 'pwm', x: 0, y: 166 },
+    { id: 'D10', label: 'D10', type: 'pwm', x: 0, y: 182 },
+    { id: 'D11', label: 'D11', type: 'pwm', x: 0, y: 198 },
+    { id: 'D12', label: 'D12', type: 'digital', x: 0, y: 214 },
+    { id: 'D13', label: 'D13', type: 'digital', x: 0, y: 230 },
+    { id: '5V', label: '5V', type: 'power', x: 180, y: 34 },
+    { id: 'VIN', label: 'VIN', type: 'power', x: 180, y: 52 },
+    { id: '3V3', label: '3.3V', type: 'power', x: 180, y: 70 },
+    { id: 'GND', label: 'GND', type: 'ground', x: 180, y: 96 },
+    { id: 'GND2', label: 'GND', type: 'ground', x: 180, y: 114 },
+    { id: 'A0', label: 'A0', type: 'analog', x: 180, y: 146 },
+    { id: 'A1', label: 'A1', type: 'analog', x: 180, y: 164 },
+    { id: 'A2', label: 'A2', type: 'analog', x: 180, y: 182 },
+    { id: 'A3', label: 'A3', type: 'analog', x: 180, y: 200 },
+    { id: 'A4', label: 'A4 (SDA)', type: 'analog', x: 180, y: 218 },
+    { id: 'A5', label: 'A5 (SCL)', type: 'analog', x: 180, y: 236 },
   ],
   arduino_nano: [
+    { id: 'D0', label: 'D0', type: 'digital', x: 0, y: 30 },
+    { id: 'D1', label: 'D1', type: 'digital', x: 0, y: 45 },
     { id: 'D2', label: 'D2', type: 'digital', x: 0, y: 60 },
-    { id: 'D9', label: 'D9', type: 'pwm', x: 0, y: 90 },
-    { id: 'D10', label: 'D10', type: 'pwm', x: 0, y: 120 },
-    { id: 'D13', label: 'D13', type: 'digital', x: 0, y: 150 },
-    { id: '5V', label: '5V', type: 'power', x: 120, y: 60 },
-    { id: 'GND', label: 'GND', type: 'ground', x: 120, y: 90 },
+    { id: 'D3', label: 'D3', type: 'pwm', x: 0, y: 75 },
+    { id: 'D4', label: 'D4', type: 'digital', x: 0, y: 90 },
+    { id: 'D5', label: 'D5', type: 'pwm', x: 0, y: 105 },
+    { id: 'D6', label: 'D6', type: 'pwm', x: 0, y: 120 },
+    { id: 'D7', label: 'D7', type: 'digital', x: 0, y: 135 },
+    { id: 'D8', label: 'D8', type: 'digital', x: 0, y: 150 },
+    { id: 'D9', label: 'D9', type: 'pwm', x: 0, y: 165 },
+    { id: 'D10', label: 'D10', type: 'pwm', x: 0, y: 180 },
+    { id: 'D11', label: 'D11', type: 'pwm', x: 0, y: 195 },
+    { id: 'D12', label: 'D12', type: 'digital', x: 0, y: 210 },
+    { id: 'D13', label: 'D13', type: 'digital', x: 0, y: 225 },
+    { id: '5V', label: '5V', type: 'power', x: 120, y: 40 },
+    { id: 'VIN', label: 'VIN', type: 'power', x: 120, y: 58 },
+    { id: 'GND', label: 'GND', type: 'ground', x: 120, y: 84 },
     { id: 'A0', label: 'A0', type: 'analog', x: 120, y: 120 },
-    { id: 'A4', label: 'SDA', type: 'analog', x: 120, y: 150 },
+    { id: 'A1', label: 'A1', type: 'analog', x: 120, y: 138 },
+    { id: 'A2', label: 'A2', type: 'analog', x: 120, y: 156 },
+    { id: 'A3', label: 'A3', type: 'analog', x: 120, y: 174 },
+    { id: 'A4', label: 'A4 (SDA)', type: 'analog', x: 120, y: 192 },
+    { id: 'A5', label: 'A5 (SCL)', type: 'analog', x: 120, y: 210 },
   ],
   esp32: [
-    { id: 'D2', label: 'GPIO2', type: 'digital', x: 0, y: 60 },
-    { id: 'D4', label: 'GPIO4', type: 'digital', x: 0, y: 90 },
-    { id: 'D5', label: 'GPIO5', type: 'pwm', x: 0, y: 120 },
-    { id: 'D13', label: 'GPIO13', type: 'digital', x: 0, y: 150 },
-    { id: '3V3', label: '3.3V', type: 'power', x: 140, y: 60 },
-    { id: 'GND', label: 'GND', type: 'ground', x: 140, y: 90 },
-    { id: 'A0', label: 'A0', type: 'analog', x: 140, y: 120 },
-    { id: 'D14', label: 'SDA', type: 'analog', x: 140, y: 150 },
+    { id: 'D2', label: 'GPIO2', type: 'digital', x: 0, y: 26 },
+    { id: 'D4', label: 'GPIO4', type: 'pwm', x: 0, y: 44 },
+    { id: 'D5', label: 'GPIO5', type: 'pwm', x: 0, y: 62 },
+    { id: 'D12', label: 'GPIO12', type: 'digital', x: 0, y: 80 },
+    { id: 'D13', label: 'GPIO13', type: 'digital', x: 0, y: 98 },
+    { id: 'D14', label: 'GPIO14', type: 'digital', x: 0, y: 116 },
+    { id: 'D15', label: 'GPIO15', type: 'digital', x: 0, y: 134 },
+    { id: 'D16', label: 'GPIO16', type: 'pwm', x: 0, y: 152 },
+    { id: 'D17', label: 'GPIO17', type: 'pwm', x: 0, y: 170 },
+    { id: 'D18', label: 'GPIO18', type: 'pwm', x: 0, y: 188 },
+    { id: 'D19', label: 'GPIO19', type: 'pwm', x: 0, y: 206 },
+    { id: 'D21', label: 'GPIO21', type: 'digital', x: 0, y: 224 },
+    { id: 'D22', label: 'GPIO22', type: 'digital', x: 0, y: 242 },
+    { id: '3V3', label: '3.3V', type: 'power', x: 140, y: 34 },
+    { id: 'VIN', label: 'VIN (5V)', type: 'power', x: 140, y: 52 },
+    { id: 'GND', label: 'GND', type: 'ground', x: 140, y: 78 },
+    { id: 'D23', label: 'GPIO23', type: 'digital', x: 140, y: 110 },
+    { id: 'D25', label: 'GPIO25', type: 'digital', x: 140, y: 128 },
+    { id: 'D26', label: 'GPIO26', type: 'digital', x: 140, y: 146 },
+    { id: 'D27', label: 'GPIO27', type: 'digital', x: 140, y: 164 },
+    { id: 'D32', label: 'GPIO32', type: 'analog', x: 140, y: 182 },
+    { id: 'D33', label: 'GPIO33', type: 'analog', x: 140, y: 200 },
+    { id: 'D34', label: 'GPIO34', type: 'analog', x: 140, y: 218 },
+    { id: 'D35', label: 'GPIO35', type: 'analog', x: 140, y: 236 },
   ],
   esp8266: [
     { id: 'D1', label: 'D1', type: 'digital', x: 0, y: 60 },
@@ -229,6 +274,29 @@ export const REALISTIC_PINS = {
   ],
 };
 
+/** Header pads drawn straight from the pin table, so wires always land on a pad. */
+function HeaderPads({ id, labels = true }) {
+  const pins = REALISTIC_PINS[id] || [];
+  const w = (REALISTIC_SIZES[id] || {}).w || 0;
+  return (
+    <g>
+      {pins.map(p => {
+        const right = p.x >= w - 2;
+        const inside = right ? p.x - 7 : p.x + 7;
+        return (
+          <g key={p.id}>
+            <rect x={p.x - 5} y={p.y - 5} width="10" height="10" rx="1.5" fill="#1A1A1A" stroke="#555" strokeWidth="0.5" />
+            <rect x={p.x - 3.5} y={p.y - 3.5} width="7" height="7" rx="1" fill="#C9CDD2" />
+            <circle cx={p.x} cy={p.y} r="1.6" fill="#FFD700" />
+            {labels && <text x={inside} y={p.y + 2.6} textAnchor={right ? 'end' : 'start'} fontSize="7" fontWeight="700"
+              fill="rgba(255,255,255,0.92)" fontFamily="'Inter',sans-serif">{p.label}</text>}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
 // ── Component SVG Renderings ──
 // Each renders at origin (0,0) within its bounding box size.
 
@@ -249,22 +317,7 @@ function ArduinoUno({ x, y }) {
       {/* ATmega chip */}
       <rect x="55" y="95" width="70" height="70" rx="2" fill="#1A1A1A" stroke="#333" strokeWidth="1" />
       <circle cx="62" cy="102" r="2" fill="#555" />
-      {/* Header pins - left (digital) */}
-      {[60, 90, 120, 150, 180, 210].map((py, i) => (
-        <g key={i}>
-          <rect x="-6" y={py - 6} width="12" height="12" rx="1" fill="#1A1A1A" stroke="#555" strokeWidth="0.5" />
-          <rect x="-4" y={py - 4} width="8" height="8" rx="1" fill="#C0C0C0" />
-          <circle cx="0" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
-      {/* Header pins - right (power) */}
-      {[60, 90, 120, 150, 180].map((py, i) => (
-        <g key={i}>
-          <rect x="174" y={py - 6} width="12" height="12" rx="1" fill="#1A1A1A" stroke="#555" strokeWidth="0.5" />
-          <rect x="176" y={py - 4} width="8" height="8" rx="1" fill="#C0C0C0" />
-          <circle cx="180" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
+      <HeaderPads id="arduino_uno" />
       {/* Reset button */}
       <circle cx="40" cy="195" r="8" fill="#444" stroke="#666" strokeWidth="1.5" />
       <circle cx="40" cy="195" r="4" fill="#888" />
@@ -294,22 +347,7 @@ function ESP32({ x, y }) {
       {/* En/Boot buttons */}
       <rect x="30" y="135" width="20" height="12" rx="2" fill="#444" />
       <rect x="90" y="135" width="20" height="12" rx="2" fill="#444" />
-      {/* Header pins - left */}
-      {[60, 90, 120, 150].map((py, i) => (
-        <g key={i}>
-          <rect x="-6" y={py - 6} width="12" height="12" rx="1" fill="#222" stroke="#555" strokeWidth="0.5" />
-          <rect x="-4" y={py - 4} width="8" height="8" rx="1" fill="#C0C0C0" />
-          <circle cx="0" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
-      {/* Header pins - right */}
-      {[60, 90, 120, 150].map((py, i) => (
-        <g key={i}>
-          <rect x="134" y={py - 6} width="12" height="12" rx="1" fill="#222" stroke="#555" strokeWidth="0.5" />
-          <rect x="136" y={py - 4} width="8" height="8" rx="1" fill="#C0C0C0" />
-          <circle cx="140" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
+      <HeaderPads id="esp32" />
       <text x="70" y="240" textAnchor="middle" fontSize="8" fill="#888" fontFamily="monospace">DevKit</text>
     </g>
   );
@@ -435,20 +473,7 @@ function MotorDriver({ x, y }) {
       <circle cx="50" cy="157" r="3" fill="#1A1A1A" />
       <circle cx="120" cy="157" r="3" fill="#1A1A1A" />
       <circle cx="140" cy="157" r="3" fill="#1A1A1A" />
-      {/* Header pins left (IN1–IN4, ENA, ENB) */}
-      {[32, 58, 90, 116, 148, 174].map((py, i) => (
-        <g key={i}>
-          <rect x="-4" y={py - 4} width="10" height="8" rx="1" fill="#1A1A1A" />
-          <circle cx="0" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
-      {/* Header pins right (12V, GND, 5V) */}
-      {[40, 75, 110].map((py, i) => (
-        <g key={i}>
-          <rect x="164" y={py - 4} width="10" height="8" rx="1" fill="#1A1A1A" />
-          <circle cx="170" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
+      <HeaderPads id="motor_driver" labels={false} />
     </g>
   );
 }
@@ -729,20 +754,7 @@ function ArduinoNano({ x, y }) {
       <rect x="45" y="50" width="30" height="15" rx="1" fill="#333" />
       {/* Chip */}
       <rect x="35" y="85" width="50" height="50" rx="2" fill="#1A1A1A" stroke="#333" strokeWidth="1" />
-      {/* Left pins */}
-      {[60, 90, 120, 150].map((py, i) => (
-        <g key={i}>
-          <rect x="-4" y={py - 4} width="10" height="8" rx="1" fill="#1A1A1A" />
-          <circle cx="0" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
-      {/* Right pins */}
-      {[60, 90, 120, 150].map((py, i) => (
-        <g key={i}>
-          <rect x="114" y={py - 4} width="10" height="8" rx="1" fill="#1A1A1A" />
-          <circle cx="120" cy={py} r="1.5" fill="#FFD700" />
-        </g>
-      ))}
+      <HeaderPads id="arduino_nano" />
     </g>
   );
 }
