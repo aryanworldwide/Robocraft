@@ -529,3 +529,130 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-red-400     { color: #f87
 html:not(.dark) :is(.on-dark, .terminal-surface) .text-purple-400  { color: #c084fc; }
 html:not(.dark) :is(.on-dark, .terminal-surface) .text-violet-400  { color: #a78bfa; }
 html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a5fa; }
+
+/* Gradient call-to-action buttons carry white label text. The 400/500 stops
+   only reach 2.3-2.8:1 against white, so the gradients below start one or two
+   shades darker - same hues, same look, but AA-compliant in both themes.
+   Written flat (no CSS nesting) so older Android WebViews apply it too. */
+.bg-gradient-to-r.from-cyan-400,
+.bg-gradient-to-l.from-cyan-400,
+.bg-gradient-to-br.from-cyan-400,
+.bg-gradient-to-bl.from-cyan-400,
+.bg-gradient-to-t.from-cyan-400,
+.bg-gradient-to-b.from-cyan-400,
+.bg-gradient-to-r.from-cyan-500,
+.bg-gradient-to-l.from-cyan-500,
+.bg-gradient-to-br.from-cyan-500,
+.bg-gradient-to-bl.from-cyan-500,
+.bg-gradient-to-t.from-cyan-500,
+.bg-gradient-to-b.from-cyan-500,
+.bg-gradient-to-r.from-cyan-600,
+.bg-gradient-to-l.from-cyan-600,
+.bg-gradient-to-br.from-cyan-600,
+.bg-gradient-to-bl.from-cyan-600,
+.bg-gradient-to-t.from-cyan-600,
+.bg-gradient-to-b.from-cyan-600 {
+  --tw-gradient-from: #0e7490 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(14 116 144 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.bg-gradient-to-r.from-green-500,
+.bg-gradient-to-l.from-green-500,
+.bg-gradient-to-br.from-green-500,
+.bg-gradient-to-bl.from-green-500,
+.bg-gradient-to-t.from-green-500,
+.bg-gradient-to-b.from-green-500 {
+  --tw-gradient-from: #15803d var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(21 128 61 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.bg-gradient-to-r.from-orange-400,
+.bg-gradient-to-l.from-orange-400,
+.bg-gradient-to-br.from-orange-400,
+.bg-gradient-to-bl.from-orange-400,
+.bg-gradient-to-t.from-orange-400,
+.bg-gradient-to-b.from-orange-400,
+.bg-gradient-to-r.from-orange-500,
+.bg-gradient-to-l.from-orange-500,
+.bg-gradient-to-br.from-orange-500,
+.bg-gradient-to-bl.from-orange-500,
+.bg-gradient-to-t.from-orange-500,
+.bg-gradient-to-b.from-orange-500 {
+  --tw-gradient-from: #c2410c var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(194 65 12 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.bg-gradient-to-r.from-violet-500,
+.bg-gradient-to-l.from-violet-500,
+.bg-gradient-to-br.from-violet-500,
+.bg-gradient-to-bl.from-violet-500,
+.bg-gradient-to-t.from-violet-500,
+.bg-gradient-to-b.from-violet-500 {
+  --tw-gradient-from: #6d28d9 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(109 40 217 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.bg-gradient-to-r.from-purple-500,
+.bg-gradient-to-l.from-purple-500,
+.bg-gradient-to-br.from-purple-500,
+.bg-gradient-to-bl.from-purple-500,
+.bg-gradient-to-t.from-purple-500,
+.bg-gradient-to-b.from-purple-500 {
+  --tw-gradient-from: #7e22ce var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(126 34 206 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.bg-gradient-to-r.to-blue-500,
+.bg-gradient-to-l.to-blue-500,
+.bg-gradient-to-br.to-blue-500,
+.bg-gradient-to-bl.to-blue-500,
+.bg-gradient-to-t.to-blue-500,
+.bg-gradient-to-b.to-blue-500,
+.bg-gradient-to-r.to-blue-600,
+.bg-gradient-to-l.to-blue-600,
+.bg-gradient-to-br.to-blue-600,
+.bg-gradient-to-bl.to-blue-600,
+.bg-gradient-to-t.to-blue-600,
+.bg-gradient-to-b.to-blue-600 {
+  --tw-gradient-to: #1d4ed8 var(--tw-gradient-to-position);
+}
+.bg-gradient-to-r.to-emerald-600,
+.bg-gradient-to-l.to-emerald-600,
+.bg-gradient-to-br.to-emerald-600,
+.bg-gradient-to-bl.to-emerald-600,
+.bg-gradient-to-t.to-emerald-600,
+.bg-gradient-to-b.to-emerald-600 {
+  --tw-gradient-to: #047857 var(--tw-gradient-to-position);
+}
+.bg-gradient-to-r.to-red-500,
+.bg-gradient-to-l.to-red-500,
+.bg-gradient-to-br.to-red-500,
+.bg-gradient-to-bl.to-red-500,
+.bg-gradient-to-t.to-red-500,
+.bg-gradient-to-b.to-red-500 {
+  --tw-gradient-to: #b91c1c var(--tw-gradient-to-position);
+}
+.bg-gradient-to-r.to-purple-600,
+.bg-gradient-to-l.to-purple-600,
+.bg-gradient-to-br.to-purple-600,
+.bg-gradient-to-bl.to-purple-600,
+.bg-gradient-to-t.to-purple-600,
+.bg-gradient-to-b.to-purple-600 {
+  --tw-gradient-to: #7e22ce var(--tw-gradient-to-position);
+}
+.bg-gradient-to-r.to-pink-600,
+.bg-gradient-to-l.to-pink-600,
+.bg-gradient-to-br.to-pink-600,
+.bg-gradient-to-bl.to-pink-600,
+.bg-gradient-to-t.to-pink-600,
+.bg-gradient-to-b.to-pink-600 {
+  --tw-gradient-to: #be185d var(--tw-gradient-to-position);
+}
+.bg-gradient-to-r.to-cyan-400,
+.bg-gradient-to-l.to-cyan-400,
+.bg-gradient-to-br.to-cyan-400,
+.bg-gradient-to-bl.to-cyan-400,
+.bg-gradient-to-t.to-cyan-400,
+.bg-gradient-to-b.to-cyan-400 {
+  --tw-gradient-to: #0e7490 var(--tw-gradient-to-position);
+}

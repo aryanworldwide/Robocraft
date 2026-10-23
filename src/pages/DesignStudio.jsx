@@ -256,8 +256,8 @@ export default function DesignStudio() {
         )}
         {objects.length === 0 && (
           <div className="absolute inset-x-0 top-1/3 text-center pointer-events-none">
-            <p className="text-sm font-semibold text-slate-600">Tap a shape below to place it on the workplane</p>
-            <p className="text-[11px] text-slate-500">Drag to orbit · pinch to zoom · tap a shape to select it</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Tap a shape below to place it on the workplane</p>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300">Drag to orbit · pinch to zoom · tap a shape to select it</p>
           </div>
         )}
         {busy && <div className="absolute inset-0 bg-white/40 flex items-center justify-center text-xs font-semibold text-slate-700">Working…</div>}
