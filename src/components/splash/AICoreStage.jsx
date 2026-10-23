@@ -10,7 +10,7 @@ export default function AICoreStage({ onDone }) {
   }, [onDone]);
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black on-dark flex items-center justify-center z-50">
       {/* Energy waves */}
       {expanded && [0, 1, 2].map(i => (
         <div

@@ -15,7 +15,7 @@
     --card-foreground: 222 32% 14%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 32% 14%;
-    --primary: 190 95% 38%;
+    --primary: 190 95% 29%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 16% 92%;
     --secondary-foreground: 222 32% 14%;
@@ -460,3 +460,72 @@ html:not(.dark) .text-slate-400 { color: #475569; } /* 7.0:1  */
 .via-purple-500.text-white { --tw-gradient-via: #9333ea var(--tw-gradient-via-position); }
 .via-violet-500.text-white { --tw-gradient-via: #7c3aed var(--tw-gradient-via-position); }
 .via-fuchsia-500.text-white { --tw-gradient-via: #a21caf var(--tw-gradient-via-position); }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Light-mode text contrast (WCAG 2 AA)
+
+   The UI was designed dark-first, so the bright 400/500 accent shades are
+   right on a dark background but only reach ~2–3:1 on a white card — below
+   the 4.5:1 AA needs for normal text. In light mode we swap them for the
+   700 shade of the same hue, which keeps the colour meaning and clears AA.
+   Panels that are dark in BOTH themes (code editors, the serial monitor,
+   the 3-D viewport, the splash) carry `.on-dark`, which keeps them bright.
+   ────────────────────────────────────────────────────────────────────────── */
+html:not(.dark) {
+  --c-cyan: #0e7490; --c-sky: #0369a1; --c-teal: #0f766e; --c-blue: #1d4ed8;
+  --c-green: #15803d; --c-emerald: #047857; --c-lime: #4d7c0f;
+  --c-amber: #b45309; --c-yellow: #a16207; --c-orange: #c2410c;
+  --c-red: #b91c1c; --c-rose: #be123c; --c-pink: #be185d;
+  --c-violet: #6d28d9; --c-purple: #7e22ce; --c-indigo: #4338ca; --c-fuchsia: #a21caf;
+}
+html:not(.dark) .text-cyan-300,
+html:not(.dark) .text-cyan-400,
+html:not(.dark) .text-cyan-500   { color: var(--c-cyan); }
+html:not(.dark) .text-sky-400,
+html:not(.dark) .text-sky-500    { color: var(--c-sky); }
+html:not(.dark) .text-teal-400,
+html:not(.dark) .text-teal-500   { color: var(--c-teal); }
+html:not(.dark) .text-blue-400,
+html:not(.dark) .text-blue-500   { color: var(--c-blue); }
+html:not(.dark) .text-green-400,
+html:not(.dark) .text-green-500  { color: var(--c-green); }
+html:not(.dark) .text-emerald-400,
+html:not(.dark) .text-emerald-500 { color: var(--c-emerald); }
+html:not(.dark) .text-lime-400,
+html:not(.dark) .text-lime-500   { color: var(--c-lime); }
+html:not(.dark) .text-amber-400,
+html:not(.dark) .text-amber-500  { color: var(--c-amber); }
+html:not(.dark) .text-yellow-400,
+html:not(.dark) .text-yellow-500 { color: var(--c-yellow); }
+html:not(.dark) .text-orange-400,
+html:not(.dark) .text-orange-500 { color: var(--c-orange); }
+html:not(.dark) .text-red-400,
+html:not(.dark) .text-red-500    { color: var(--c-red); }
+html:not(.dark) .text-rose-400,
+html:not(.dark) .text-rose-500   { color: var(--c-rose); }
+html:not(.dark) .text-pink-400,
+html:not(.dark) .text-pink-500   { color: var(--c-pink); }
+html:not(.dark) .text-violet-400,
+html:not(.dark) .text-violet-500 { color: var(--c-violet); }
+html:not(.dark) .text-purple-400,
+html:not(.dark) .text-purple-500 { color: var(--c-purple); }
+html:not(.dark) .text-indigo-400,
+html:not(.dark) .text-indigo-500 { color: var(--c-indigo); }
+html:not(.dark) .text-fuchsia-400,
+html:not(.dark) .text-fuchsia-500 { color: var(--c-fuchsia); }
+
+/* Surfaces that stay dark in both themes keep the bright shades. */
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-cyan-300    { color: #67e8f9; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-cyan-400    { color: #22d3ee; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-cyan-500    { color: #06b6d4; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-green-300   { color: #86efac; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-green-400   { color: #4ade80; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-green-500   { color: #22c55e; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-amber-400   { color: #fbbf24; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-yellow-400  { color: #facc15; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-orange-400  { color: #fb923c; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-orange-500  { color: #f97316; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-red-400     { color: #f87171; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-purple-400  { color: #c084fc; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-violet-400  { color: #a78bfa; }
+html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a5fa; }

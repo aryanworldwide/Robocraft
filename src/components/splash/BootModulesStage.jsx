@@ -23,7 +23,7 @@ export default function BootModulesStage({ onDone }) {
   }, [completed, onDone]);
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-black on-dark flex items-center justify-center z-50 overflow-hidden">
       {/* Background grid */}
       <div className="absolute inset-0 hex-grid opacity-20" />
       <div className="absolute inset-0 grid-pattern opacity-10" />

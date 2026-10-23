@@ -46,7 +46,7 @@ export default function NeuralNetworkStage({ onDone }) {
   }, [nodes.length, connections.length, onDone]);
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-black on-dark flex items-center justify-center z-50 overflow-hidden">
       <div className="absolute inset-0 hex-grid opacity-10" />
 
       {/* Floating particles */}

@@ -6,7 +6,7 @@ export default function SerialMonitor({ lines, running }) {
   useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; }, [lines]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col on-dark">
       <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-green-500/10">
         <Terminal className="w-3.5 h-3.5 text-green-400" />
         <span className="text-[11px] font-bold text-green-400">Serial Monitor</span>

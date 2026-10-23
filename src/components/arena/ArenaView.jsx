@@ -225,5 +225,5 @@ export default function ArenaView({ boardRef, cameraMode = 'chase', height = 320
     };
   }, [boardRef.current?.map]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <div ref={mountRef} className="w-full rounded-2xl overflow-hidden bg-[#0b1220] touch-none" style={{ height }} />;
+  return <div ref={mountRef} className="w-full rounded-2xl overflow-hidden bg-[#0b1220] on-dark touch-none" style={{ height }} />;
 }

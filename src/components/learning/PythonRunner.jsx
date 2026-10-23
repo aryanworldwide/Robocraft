@@ -70,7 +70,7 @@ export default function PythonRunner({ initialCode = '', initialInput = '', task
         <p className="text-xs text-muted-foreground mb-2 flex gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-yellow-400 shrink-0 mt-0.5" /><span><b className="text-foreground">Challenge:</b> {task}</span></p>
       )}
 
-      <div className="rounded-xl overflow-hidden border border-border bg-[#0d1117]">
+      <div className="rounded-xl overflow-hidden border border-border bg-[#0d1117] on-dark">
         <textarea
           ref={editorRef}
           value={code}
@@ -112,7 +112,7 @@ export default function PythonRunner({ initialCode = '', initialInput = '', task
       </div>
 
       {(output.length > 0 || running || hasRun) && (
-        <div className="mt-3 rounded-xl bg-black/80 p-3 font-mono text-[12px] leading-5 max-h-80 overflow-auto" aria-live="polite">
+        <div className="mt-3 rounded-xl bg-black/80 on-dark p-3 font-mono text-[12px] leading-5 max-h-80 overflow-auto" aria-live="polite">
           {output.map((o, i) => o.type === 'img'
             ? <img key={i} src={o.src} alt="Chart from your code" className="bg-white rounded-lg my-2 max-w-full" />
             : <pre key={i} className={`whitespace-pre-wrap break-words ${o.type === 'err' ? 'text-red-400' : 'text-green-300'}`}>{o.text}</pre>)}

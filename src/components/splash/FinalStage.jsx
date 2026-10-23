@@ -61,7 +61,7 @@ export default function FinalStage({ onDone }) {
   }, [onDone]);
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-black on-dark flex items-center justify-center z-50 overflow-hidden">
       {/* Cyber city background */}
       <div className={`absolute inset-0 transition-opacity duration-700 ${phase >= 1 ? 'opacity-30' : 'opacity-100'}`}>
         <CyberCityStage />

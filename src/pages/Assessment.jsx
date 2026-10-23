@@ -89,7 +89,7 @@ function ProgramEditor({ item, onSave, onCancel, saveLabel = 'Add to practical f
           <p className="text-[11px] font-bold">Program</p>
           <button onClick={() => setIt(x => ({ ...x, vdt: makeVDT(x.code, x.kind) }))} className="text-[10px] text-cyan-400">Regenerate VDT from code</button>
         </div>
-        <textarea value={it.code} onChange={e => setIt({ ...it, code: e.target.value })} rows={12} spellCheck={false} className="w-full rounded-lg px-3 py-2 text-[11px] font-mono bg-[#0d1117] text-slate-100 whitespace-pre overflow-auto" />
+        <textarea value={it.code} onChange={e => setIt({ ...it, code: e.target.value })} rows={12} spellCheck={false} className="w-full rounded-lg px-3 py-2 text-[11px] font-mono bg-[#0d1117] on-dark text-slate-100 whitespace-pre overflow-auto" />
       </div>
       {it.kind !== 'arduino' && (
         <div>
@@ -101,7 +101,7 @@ function ProgramEditor({ item, onSave, onCancel, saveLabel = 'Add to practical f
         <button onClick={run} disabled={running} className="flex-1 py-2 rounded-xl bg-green-600 text-white text-xs font-bold flex items-center justify-center gap-1.5">{running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />} Run & record output</button>
         {it.arena && <button onClick={() => navigate(`/arena?task=${it.arena}`)} className="px-3 py-2 rounded-xl glass-strong text-xs flex items-center gap-1"><Bot className="w-4 h-4" /> Test on robot</button>}
       </div>
-      {it.output && <pre className="rounded-lg bg-black/80 text-green-300 text-[11px] p-3 whitespace-pre-wrap max-h-48 overflow-auto">{it.output}</pre>}
+      {it.output && <pre className="rounded-lg bg-black/80 on-dark text-green-300 text-[11px] p-3 whitespace-pre-wrap max-h-48 overflow-auto">{it.output}</pre>}
       <div>
         <p className="text-[11px] font-bold mb-1">Variable Description Table</p>
         <VdtEditor rows={it.vdt} onChange={(vdt) => setIt({ ...it, vdt })} />
@@ -167,12 +167,12 @@ function Rehearsal({ pool }) {
         <button onClick={toExam} className="w-full py-2 rounded-xl bg-cyan-500 text-white text-xs font-bold">Algorithm done → go to the computer</button>
       </>}
       {phase === 'exam' && <>
-        <textarea value={code} onChange={e => setCode(e.target.value)} rows={14} spellCheck={false} className="w-full rounded-lg px-3 py-2 text-[11px] font-mono bg-[#0d1117] text-slate-100 whitespace-pre" />
+        <textarea value={code} onChange={e => setCode(e.target.value)} rows={14} spellCheck={false} className="w-full rounded-lg px-3 py-2 text-[11px] font-mono bg-[#0d1117] on-dark text-slate-100 whitespace-pre" />
         <div className="flex gap-2">
           <button onClick={run} className="flex-1 py-2 rounded-xl bg-green-600 text-white text-xs font-bold">Run</button>
           <button onClick={() => { clearInterval(tick.current); setPhase('viva'); }} className="flex-1 py-2 rounded-xl bg-cyan-500 text-white text-xs font-bold">Submit → viva</button>
         </div>
-        {out && <pre className="rounded-lg bg-black/80 text-green-300 text-[11px] p-3 whitespace-pre-wrap max-h-40 overflow-auto">{out}</pre>}
+        {out && <pre className="rounded-lg bg-black/80 on-dark text-green-300 text-[11px] p-3 whitespace-pre-wrap max-h-40 overflow-auto">{out}</pre>}
       </>}
       {phase === 'viva' && <>
         <p className="text-[11px] text-muted-foreground">Answer each aloud (or to a friend), then tick the ones you could explain confidently.</p>
@@ -188,7 +188,7 @@ function Rehearsal({ pool }) {
           <p>Viva: <b>{score.viva}/6</b></p>
           <p className="text-sm font-bold pt-1">Rehearsal score: {score.plan + score.prog + score.viva}/19</p>
           <p className="text-muted-foreground">Compare your work with the model answer:</p>
-          <pre className="rounded-lg bg-[#0d1117] text-slate-100 text-[10px] p-2 whitespace-pre overflow-auto max-h-48">{q.code}</pre>
+          <pre className="rounded-lg bg-[#0d1117] on-dark text-slate-100 text-[10px] p-2 whitespace-pre overflow-auto max-h-48">{q.code}</pre>
           <button onClick={() => setPhase('idle')} className="w-full py-2 rounded-xl glass text-xs mt-1">Try another</button>
         </div>
       )}

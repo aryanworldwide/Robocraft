@@ -53,7 +53,7 @@ export default function CodePanel({ code, pins, experiment, canProgram, onKnowCo
             value={shown}
             onChange={(e) => onEdit(e.target.value)}
             spellCheck={false} autoCapitalize="off" autoCorrect="off"
-            className="w-full h-full min-h-[16rem] text-[11px] leading-relaxed font-mono text-cyan-200 bg-[#0d1117] rounded-lg p-3 outline-none resize-none whitespace-pre"
+            className="w-full h-full min-h-[16rem] text-[11px] leading-relaxed font-mono text-cyan-200 bg-[#0d1117] on-dark rounded-lg p-3 outline-none resize-none whitespace-pre"
           />
         ) : (
           <pre className="text-[10px] leading-relaxed font-mono text-cyan-300/90 whitespace-pre code-surface p-3 m-1">{shown || '// Complete the wiring, then check the circuit to reveal the code.'}</pre>

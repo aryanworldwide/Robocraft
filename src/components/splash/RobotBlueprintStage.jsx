@@ -26,7 +26,7 @@ export default function RobotBlueprintStage({ onDone }) {
   }, [onDone]);
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-black on-dark flex items-center justify-center z-50 overflow-hidden">
       <div className="absolute inset-0 hex-grid opacity-15" />
 
       <div className="relative w-full max-w-sm aspect-square px-6">

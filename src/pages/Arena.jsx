@@ -18,8 +18,8 @@ function CodeEditor({ value, onChange, errorLine }) {
   const lines = value.split('\n').length;
   const gutter = useRef(null);
   return (
-    <div className="flex rounded-xl overflow-hidden border border-white/10 bg-[#0d1117] text-[12.5px] font-mono leading-[1.55]" style={{ height: 360 }}>
-      <div ref={gutter} className="select-none text-right px-2 py-2 text-slate-500 bg-[#0b0f14] overflow-hidden">
+    <div className="flex rounded-xl overflow-hidden border border-white/10 bg-[#0d1117] on-dark text-[12.5px] font-mono leading-[1.55]" style={{ height: 360 }}>
+      <div ref={gutter} className="select-none text-right px-2 py-2 text-slate-500 bg-[#0b0f14] on-dark overflow-hidden">
         {Array.from({ length: lines }, (_, i) => (
           <div key={i} className={errorLine === i + 1 ? 'text-red-400 font-bold' : ''}>{i + 1}</div>
         ))}
@@ -196,7 +196,7 @@ function TaskScreen({ task, results, onBack, onPass }) {
       <p className="text-xs text-muted-foreground mb-3">{task.desc}{best ? ` · Your best: ${(best / 1000).toFixed(1)} s` : ''}</p>
 
       <div className="relative">
-        <Suspense fallback={<div className="w-full rounded-2xl bg-[#0b1220] flex items-center justify-center text-xs text-slate-400" style={{ height: 320 }}>Loading 3-D view…</div>}>
+        <Suspense fallback={<div className="w-full rounded-2xl bg-[#0b1220] on-dark flex items-center justify-center text-xs text-slate-400" style={{ height: 320 }}>Loading 3-D view…</div>}>
           <ArenaView boardRef={boardRef} cameraMode={cam} height={320} />
         </Suspense>
         <div className="absolute top-2 left-2 text-[11px] font-mono bg-black/55 text-white rounded-lg px-2 py-1">
@@ -255,7 +255,7 @@ function TaskScreen({ task, results, onBack, onPass }) {
       )}
 
       {tab === 'serial' && (
-        <div className="rounded-xl bg-[#0d1117] text-green-300 font-mono text-[12px] p-3 overflow-auto" style={{ height: 260 }}>
+        <div className="rounded-xl bg-[#0d1117] on-dark text-green-300 font-mono text-[12px] p-3 overflow-auto" style={{ height: 260 }}>
           {serial.length ? serial.map((l, i) => <div key={i}>{l}</div>) : <span className="text-slate-500">Nothing printed yet. Use Serial.begin(9600); and Serial.println(value); in your code.</span>}
         </div>
       )}
