@@ -275,7 +275,7 @@ export async function generateOrRetrieveProject(userPrompt) {
     return { type: 'curriculum', project: existing[0] };
   }
 
-  // 2) Cached AI project? (DB read — ZERO integration credits)
+  // 2) One this student generated before? (a free read, no AI call)
   try {
     const recent = await backend.asServiceRole.entities.GeneratedProject.list('-created_date', 50);
     let best = null;
@@ -294,13 +294,14 @@ export async function generateOrRetrieveProject(userPrompt) {
   // 3) Genuinely new project → ONE AI call
   const project = await generateAIProject(idea);
 
-  // 4) Save to cache so future users get it for free
+  // 4) Keep it, so this student opening the same idea again is instant and free.
+  // Lengths are clamped to what the security rules accept.
   try {
     await backend.entities.GeneratedProject.create({
-      user_prompt: idea,
-      project_name: project.title,
+      user_prompt: idea.slice(0, 300),
+      project_name: String(project.title || 'Project').slice(0, 150),
       project_data: project,
-      difficulty: project.difficulty,
+      difficulty: String(project.difficulty || 'Beginner'),
     });
   } catch (e) {
     // Save failed — still return the project; just won't be cached

@@ -119,12 +119,18 @@ export default {
       const answer = (async () => {
         if (schema) {
           const shapeMsg = { role: 'system', content: 'Reply with ONE valid JSON object only (no markdown), with every field filled in, matching exactly this shape: ' + shapeOf(schema) };
+          // Most JSON here is small — a hint, a simpler explanation, five quiz
+          // questions — and the fast model answers those in a few seconds
+          // instead of twenty. Big asks (a whole project, with code) and any
+          // retry go to the stronger model.
+          const smallJson = prompt.length < 1200 && Object.keys(schema?.properties || {}).length <= 6;
           for (let attempt = 0; attempt < 2; attempt++) {
+            const jsonModel = (smallJson && attempt === 0) ? FAST_MODEL : MODEL;
             let out;
             try {
-              out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]], response_format: { type: 'json_object' } });
+              out = await env.AI.run(jsonModel, { ...base, messages: [messages[0], shapeMsg, messages[1]], response_format: { type: 'json_object' } });
             } catch {
-              out = await env.AI.run(MODEL, { ...base, messages: [messages[0], shapeMsg, messages[1]] });
+              out = await env.AI.run(jsonModel, { ...base, messages: [messages[0], shapeMsg, messages[1]] });
             }
             const parsed = extractJson(textOf(out));
             if (parsed) return parsed;
