@@ -65,7 +65,7 @@
     --secondary: 230 25% 14%;
     --secondary-foreground: 210 40% 98%;
     --muted: 230 25% 14%;
-    --muted-foreground: 215 20% 60%;
+    --muted-foreground: 215 20% 63%;
     --accent: 200 100% 50%;
     --accent-foreground: 230 35% 7%;
     --destructive: 0 84% 60%;
@@ -475,7 +475,7 @@ html:not(.dark) .text-slate-400 { color: #475569; } /* 7.0:1  */
 html:not(.dark) {
   --c-cyan: #0e7490; --c-sky: #0369a1; --c-teal: #0f766e; --c-blue: #1d4ed8;
   --c-green: #15803d; --c-emerald: #047857; --c-lime: #4d7c0f;
-  --c-amber: #b45309; --c-yellow: #a16207; --c-orange: #c2410c;
+  --c-amber: #92400e; --c-yellow: #a16207; --c-orange: #c2410c;
   --c-red: #b91c1c; --c-rose: #be123c; --c-pink: #be185d;
   --c-violet: #6d28d9; --c-purple: #7e22ce; --c-indigo: #4338ca; --c-fuchsia: #a21caf;
 }
