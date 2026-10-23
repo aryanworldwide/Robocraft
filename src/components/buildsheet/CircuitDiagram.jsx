@@ -110,23 +110,49 @@ function buildInstances(pinConnections) {
     if (!conn.componentId && conn.component) conn.componentId = matchComponentId(conn.component);
     if (!controllerId && conn.controllerPin) controllerId = 'arduino_uno';
     const cid = conn.componentId;
-    if (!cid || cid === controllerId) return;
+    if (cid === controllerId) return;
     const key = conn.component || cid;
-    if (!byName.has(key)) byName.set(key, { key, id: cid, name: conn.component, conns: [] });
+    if (!key) return;
+    if (!byName.has(key)) byName.set(key, { key, id: cid, name: conn.component || key, conns: [], generic: !cid });
     byName.get(key).conns.push(conn);
   });
   if (!controllerId) controllerId = 'arduino_uno';
-  return { controllerId, instances: Array.from(byName.values()) };
+
+  // A part we have no artwork for still gets drawn — as a labelled module with
+  // exactly the pins the wiring asks for, so no connection is ever lost.
+  const dyn = {};
+  for (const inst of byName.values()) {
+    if (!inst.generic) continue;
+    const pins = [];
+    inst.conns.forEach(c => {
+      const id = String(c.componentPin || 'PIN').toUpperCase();
+      if (!pins.some(p => p.id === id)) pins.push({ id, label: id, type: 'signal', x: 0, y: 0 });
+    });
+    const h = Math.max(86, 34 + pins.length * 24);
+    pins.forEach((p, i) => { p.y = 34 + i * 24; });
+    dyn[inst.key] = { pins, size: { w: 150, h } };
+    inst.id = `generic:${inst.key}`;
+  }
+  return { controllerId, instances: Array.from(byName.values()), dyn };
 }
 
 // ── Absolute pin position + exit side ────────────────────────────────────────
-function pinAbs(pos, compId, pinId) {
+function sizeOf(compId, dyn, key) {
+  if (compId && compId.startsWith('generic:')) return dyn[key]?.size || { w: 150, h: 90 };
+  return REALISTIC_SIZES[compId];
+}
+function pinsOf(compId, dyn, key) {
+  if (compId && compId.startsWith('generic:')) return dyn[key]?.pins || [];
+  return REALISTIC_PINS[compId];
+}
+
+function pinAbs(pos, compId, pinId, dyn, key) {
   if (!pos || !compId) return null;
-  const pins = REALISTIC_PINS[compId];
+  const pins = pinsOf(compId, dyn, key);
   if (!pins) return null;
   const pin = pins.find(p => p.id === pinId);
   if (!pin) return null;
-  const size = REALISTIC_SIZES[compId];
+  const size = sizeOf(compId, dyn, key) || { w: pos.w, h: pos.h };
   const x = pos.x + pin.x;
   const y = pos.y + pin.y;
   let side = 'left';
@@ -161,6 +187,26 @@ function wirePath(s, t) {
   }
   // mixed
   return `M ${s.x} ${s.y} L ${es.x} ${es.y} L ${et.x} ${es.y} L ${et.x} ${et.y} L ${t.x} ${t.y}`;
+}
+
+/** A part with no artwork: a labelled module carrying exactly its wired pins. */
+function GenericModule({ name, x, y, size, pins, onComponentClick }) {
+  return (
+    <g transform={`translate(${x},${y})`} onClick={() => onComponentClick?.(name)} style={{ cursor: onComponentClick ? 'pointer' : 'default' }}>
+      <rect width={size.w} height={size.h} rx="8" fill="#1F2937" stroke="#0F172A" strokeWidth="2" />
+      <rect x="6" y="6" width={size.w - 12} height="18" rx="4" fill="#374151" />
+      <text x={size.w / 2} y="19" textAnchor="middle" fontSize="10" fontWeight="800" fill="#E5E7EB" fontFamily="'Inter',sans-serif">
+        {String(name || 'MODULE').toUpperCase().slice(0, 18)}
+      </text>
+      {pins.map(p => (
+        <g key={p.id}>
+          <rect x={p.x - 5} y={p.y - 5} width="10" height="10" rx="1.5" fill="#111827" stroke="#555" strokeWidth="0.5" />
+          <circle cx={p.x} cy={p.y} r="1.6" fill="#FFD700" />
+          <text x={p.x + 10} y={p.y + 3} fontSize="8.5" fontWeight="700" fill="#D1D5DB" fontFamily="'Inter',sans-serif">{p.label}</text>
+        </g>
+      ))}
+    </g>
+  );
 }
 
 /** A small coloured label at a wire end, naming the pin it connects to. */
@@ -240,7 +286,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
     );
   }
 
-  const { controllerId, instances } = buildInstances(pinConnections);
+  const { controllerId, instances, dyn } = buildInstances(pinConnections);
   const cSize = REALISTIC_SIZES[controllerId] || { w: 180, h: 260 };
 
   // ── Layout coordinates ──
@@ -263,7 +309,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   // Discrete components on the breadboard
   const discrete = instances.filter(i => DISCRETE.has(i.id));
   discrete.forEach((inst, i) => {
-    const sz = REALISTIC_SIZES[inst.id];
+    const sz = sizeOf(inst.id, dyn, inst.key);
     const n = discrete.length;
     const span = BB_W - 160;
     const slot = n === 1 ? span / 2 : span / n;
@@ -280,7 +326,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   const modSpan = CANVAS_W - 2 * PAD;
   const modSlot = mods.length ? modSpan / mods.length : modSpan;
   mods.forEach((inst, i) => {
-    const sz = REALISTIC_SIZES[inst.id];
+    const sz = sizeOf(inst.id, dyn, inst.key);
     modMaxH = Math.max(modMaxH, sz.h);
     const x = PAD + modSlot * i + (modSlot - sz.w) / 2;
     const y = modY;
@@ -294,7 +340,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   const actSpan = CANVAS_W - 2 * PAD;
   const actSlot = actuators.length ? actSpan / actuators.length : actSpan;
   actuators.forEach((inst, i) => {
-    const sz = REALISTIC_SIZES[inst.id];
+    const sz = sizeOf(inst.id, dyn, inst.key);
     actMaxH = Math.max(actMaxH, sz.h);
     const x = PAD + actSlot * i + (actSlot - sz.w) / 2;
     const y = actY;
@@ -305,7 +351,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   const placed = new Set([controllerId, ...discrete.map(i => i.key), ...mods.map(i => i.key), ...actuators.map(i => i.key)]);
   const leftover = instances.filter(i => !placed.has(i.key));
   leftover.forEach((inst, i) => {
-    const sz = REALISTIC_SIZES[inst.id] || { w: 120, h: 130 };
+    const sz = sizeOf(inst.id, dyn, inst.key) || { w: 150, h: 130 };
     const x = PAD + i * (sz.w + 30);
     const y = actY + actMaxH + 70;
     positions[inst.key] = { x, y, w: sz.w, h: sz.h };
@@ -315,16 +361,19 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   // ── Build wires ──
   const wires = [];
   pinConnections.forEach((conn, idx) => {
-    const compId = conn.componentId || matchComponentId(conn.component);
+    const instKey = conn.component || conn.componentId || matchComponentId(conn.component);
+    const inst = instances.find(i => i.key === instKey);
+    const compId = inst?.id || conn.componentId || matchComponentId(conn.component);
     if (!compId) return;
-    const instKey = conn.component || compId;
     const pos = positions[instKey] || positions[compId];
     if (!pos) return;
 
     const ctrlPinId = conn.controllerPinId || matchPinId(controllerId, conn.controllerPin);
-    const compPinId = conn.componentPinId || matchPinId(compId, conn.componentPin);
-    const s = pinAbs(positions[controllerId], controllerId, ctrlPinId);
-    const t = pinAbs(pos, compId, compPinId);
+    const compPinId = inst?.generic
+      ? String(conn.componentPin || 'PIN').toUpperCase()
+      : (conn.componentPinId || matchPinId(compId, conn.componentPin));
+    const s = pinAbs(positions[controllerId], controllerId, ctrlPinId, dyn, controllerId);
+    const t = pinAbs(pos, compId, compPinId, dyn, instKey);
     if (!s || !t) return;
 
     wires.push({
@@ -357,8 +406,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
       pair.forEach((mp, j) => {
         const outId = outs[oIdx + j];
         if (!outId) return;
-        const s = pinAbs(driverPos, 'motor_driver', outId);
-        const t = pinAbs(mPos, m.id, mp);
+        const s = pinAbs(driverPos, 'motor_driver', outId, dyn, driverInst.key);
+        const t = pinAbs(mPos, m.id, mp, dyn, m.key);
         if (!s || !t) return;
         wires.push({
           key: `auto_d${mi}${j}`,
@@ -377,8 +426,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
       { b: 'N', d: 'GND', c: WIRE_COLORS.black },
     ];
     pairs.forEach((p, j) => {
-      const s = pinAbs(bPos, batteryInst.id, p.b);
-      const t = pinAbs(dPos, 'motor_driver', p.d);
+      const s = pinAbs(bPos, batteryInst.id, p.b, dyn, batteryInst.key);
+      const t = pinAbs(dPos, 'motor_driver', p.d, dyn, driverInst.key);
       if (!s || !t) return;
       wires.push({ key: `auto_b${j}`, d: wirePath(s, t), color: p.c, s, t, sTag: p.b === 'P' ? '+' : '−', tTag: p.d, label: `Battery → ${p.d}`, dimmed: false, highlighted: false, idx: -1 });
     });
@@ -387,8 +436,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
     // Battery direct to motor (simple projects)
     const bPos = positions[batteryInst.key];
     motorInsts.forEach((m, mi) => {
-      const s = pinAbs(bPos, batteryInst.id, 'P');
-      const t = pinAbs(positions[m.key], m.id, 'P');
+      const s = pinAbs(bPos, batteryInst.id, 'P', dyn, batteryInst.key);
+      const t = pinAbs(positions[m.key], m.id, 'P', dyn, m.key);
       if (!s || !t) return;
       wires.push({ key: `auto_bm${mi}`, d: wirePath(s, t), color: WIRE_COLORS.red, s, t, label: 'Battery → Motor', dimmed: false, highlighted: false, idx: -1 });
     });
@@ -495,19 +544,13 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
           <RealisticComponent key={inst.key} componentId={inst.id}
             x={positions[inst.key].x} y={positions[inst.key].y} onComponentClick={onComponentClick} />
         ))}
-        {/* Modules */}
-        {mods.map(inst => (
-          <RealisticComponent key={inst.key} componentId={inst.id}
-            x={positions[inst.key].x} y={positions[inst.key].y} onComponentClick={onComponentClick} />
-        ))}
-        {/* Actuators */}
-        {actuators.map(inst => (
-          <RealisticComponent key={inst.key} componentId={inst.id}
-            x={positions[inst.key].x} y={positions[inst.key].y} onComponentClick={onComponentClick} />
-        ))}
-        {leftover.map(inst => (
-          <RealisticComponent key={inst.key} componentId={inst.id}
-            x={positions[inst.key].x} y={positions[inst.key].y} onComponentClick={onComponentClick} />
+        {/* Modules, actuators and anything we have no artwork for */}
+        {[...mods, ...actuators, ...leftover].map(inst => (
+          inst.generic
+            ? <GenericModule key={inst.key} name={inst.name} x={positions[inst.key].x} y={positions[inst.key].y}
+                size={dyn[inst.key].size} pins={dyn[inst.key].pins} onComponentClick={onComponentClick} />
+            : <RealisticComponent key={inst.key} componentId={inst.id}
+                x={positions[inst.key].x} y={positions[inst.key].y} onComponentClick={onComponentClick} />
         ))}
       </g>
 
