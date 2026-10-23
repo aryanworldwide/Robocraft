@@ -23,10 +23,14 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - id: lint
-        run: npm run lint 2>&1 | tee /tmp/lint.txt
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee /tmp/lint.txt
       # Temporary: surface the findings where they can be read without the
       # Actions log viewer.
       - if: failure()
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
