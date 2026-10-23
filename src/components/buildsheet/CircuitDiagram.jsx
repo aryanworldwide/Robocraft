@@ -354,7 +354,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   mods.forEach((inst, i) => {
     const sz = sizeOf(inst.id, dyn, inst.key);
     modMaxH = Math.max(modMaxH, sz.h);
-    const x = PAD + modSlot * i + (modSlot - sz.w) / 2;
+    // a lone module sits off to one side, so wires to it stay visible
+    const x = mods.length === 1 ? PAD + modSpan * 0.22 : PAD + modSlot * i + (modSlot - sz.w) / 2;
     const y = modY;
     positions[inst.key] = { x, y, w: sz.w, h: sz.h };
   });
@@ -368,7 +369,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   actuators.forEach((inst, i) => {
     const sz = sizeOf(inst.id, dyn, inst.key);
     actMaxH = Math.max(actMaxH, sz.h);
-    const x = PAD + actSlot * i + (actSlot - sz.w) / 2;
+    const x = actuators.length === 1 ? PAD + actSpan * 0.62 : PAD + actSlot * i + (actSlot - sz.w) / 2;
     const y = actY;
     positions[inst.key] = { x, y, w: sz.w, h: sz.h };
   });

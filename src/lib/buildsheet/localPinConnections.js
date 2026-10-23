@@ -27,6 +27,8 @@ export function detectComponentType(name) {
   if (/push\s*button|\bbutton\b|\bswitch\b|tact/.test(n)) return 'push_button';
   if (/buzzer|piezo|speaker/.test(n)) return 'buzzer';
   if (/servo/.test(n)) return 'servo';
+  if (/a4988|drv8825|stepper\s*driver/.test(n)) return 'a4988';
+  if (/nema\s*-?17/.test(n)) return 'nema17';
   if (/stepper/.test(n)) return 'stepper';
   if (/motor\s*driver|l298|l293|driver/.test(n)) return 'motor_driver';
   if (/dc\s*motor|\bmotor\b/.test(n)) return 'dc_motor';
@@ -40,6 +42,7 @@ export function detectComponentType(name) {
   if (/relay/.test(n)) return 'relay';
   if (/bluetooth|hc-?05|hc-?06|ble/.test(n)) return 'bluetooth';
   if (/joystick/.test(n)) return 'joystick';
+  if (/mpu\s*-?6050|gy-?521|\bimu\b|gyro(scope)?|accelerometer/.test(n)) return 'mpu6050';
   if (/battery|9v|cell/.test(n)) return 'battery';
   if (/power\s*supply|adapter|charger/.test(n)) return 'power_supply';
   if (/rfid|nfc/.test(n)) return 'rfid';
