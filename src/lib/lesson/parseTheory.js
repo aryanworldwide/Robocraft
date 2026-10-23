@@ -22,9 +22,9 @@ function parseSection(raw) {
   const paragraphs = [];
   let para = [];
   for (const l of rest) {
-    if (/^[•\-]/.test(l)) {
+    if (/^[•-]/.test(l)) {
       if (para.length) { paragraphs.push(para.join(' ')); para = []; }
-      bullets.push(l.replace(/^[•\-]\s*/, ''));
+      bullets.push(l.replace(/^[•-]\s*/, ''));
     } else if (l.endsWith(':')) {
       if (para.length) { paragraphs.push(para.join(' ')); para = []; }
       paragraphs.push(l); // sub-heading line
@@ -76,8 +76,8 @@ export function getKeyPoints(lesson) {
     const block = raw.slice(kpIdx).split(/\n\n/)[0];
     block.split('\n').forEach(l => {
       const t = l.trim();
-      if (/^[•\-]/.test(t)) {
-        const c = t.replace(/^[•\-]\s*/, '');
+      if (/^[•-]/.test(t)) {
+        const c = t.replace(/^[•-]\s*/, '');
         if (!out.includes(c)) out.push(c);
       }
     });

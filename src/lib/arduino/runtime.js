@@ -205,7 +205,7 @@ export function semicolonHint(code) {
     if (/^[\w\s*&]+\([^;]*\)$/.test(s) && next(i).startsWith('{')) continue; // function header
     if (/^(\}|\))/.test(s)) continue;
     const n = next(i);
-    if (/^[)\]+\-*\/%&|^?:.<>=,]/.test(n) || /^(&&|\|\|)/.test(n)) continue; // expression continues
+    if (/^[)\]+\-*/%&|^?:.<>=,]/.test(n) || /^(&&|\|\|)/.test(n)) continue; // expression continues
     return { line: i + 1, msg: `Line ${i + 1} looks like it is missing a ";" at the end: ${s}` };
   }
   return null;

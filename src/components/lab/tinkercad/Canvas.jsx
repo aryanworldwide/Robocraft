@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { LAB_COMPONENTS, getDef, pinLocalPos, pinWorldPos, isBoard } from '@/lib/lab/labComponents';
+import { LAB_COMPONENTS, getDef, pinLocalPos, pinWorldPos} from '@/lib/lab/labComponents';
 import PartArt from '@/components/lab/art/PartArt';
 
 const PIN_COLORS = { power:'#EF4444', ground:'#1F2937', digital:'#3B82F6', analog:'#22C55E', pwm:'#F97316', data:'#A78BFA', plus:'#EF4444', minus:'#1F2937', signal:'#EAB308', terminal:'#94A3B8' };

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect} from 'react';
 import { aiEnabled } from '@/lib/features';
-import { Wrench, Cpu, Zap, Check, X, RotateCcw, Upload, Lightbulb, ChevronRight, ChevronLeft, Code2, Copy, Download, Wrench as WrenchIcon, Package, AlertCircle } from 'lucide-react';
+import { Wrench, Zap, Check, RotateCcw, Upload, Lightbulb, ChevronRight, Code2, Copy, Download, Wrench as WrenchIcon, Package, AlertCircle } from 'lucide-react';
 import { backend } from '@/api/client';
-import { COMPONENTS, BUILD_CHALLENGES, getComponentById } from '@/lib/curriculum/buildChallenges';
+import { BUILD_CHALLENGES, getComponentById } from '@/lib/curriculum/buildChallenges';
 
 export default function BuildWithMe({ challengeId, onComplete, xpReward = 50 }) {
   const challenge = BUILD_CHALLENGES.find(c => c.id === challengeId) || BUILD_CHALLENGES[0];

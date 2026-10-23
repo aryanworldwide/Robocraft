@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getAllLessons, getLesson, getQuizForLesson } from '@/lib/curriculum';
 import { weakAreas, getMode } from '@/lib/adaptive';
-import { getConceptIntro, getTakeaway, getThinkingQuestion } from '@/lib/lesson/parseTheory';
+import { getConceptIntro, getTakeaway} from '@/lib/lesson/parseTheory';
 import { exportFullRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { Clock, Target, CheckCircle2, XCircle, ArrowRight, RotateCcw, Download, Brain, AlertTriangle, Trophy, ChevronRight } from 'lucide-react';
 import BackButton from '@/components/BackButton';

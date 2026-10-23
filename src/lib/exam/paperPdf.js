@@ -14,6 +14,9 @@ export function pdfSafe(s) {
     .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, d => '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)])
     .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, d => '^' + '0123456789'['⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d)])
     .replace(/̅/g, "'").normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[✓✔]/g, 'Yes').replace(/[✗✘]/g, 'No').replace(/•/g, '-')
+    // Deliberate: jsPDF's built-in fonts only cover Latin-1, so anything
+    // outside printable ASCII is dropped rather than printed as tofu.
+    // eslint-disable-next-line no-control-regex
     .replace(/[^\x00-\x7E\n]/g, '');
 }
 

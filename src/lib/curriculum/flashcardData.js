@@ -1,5 +1,4 @@
 // Generates flash cards and interactive activities from lesson data
-import { getQuizForLesson } from './index';
 
 export function generateFlashCards(lesson) {
   if (!lesson) return [];

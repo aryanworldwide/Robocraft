@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ENGINEERING_CHALLENGES, getChallenge } from '@/lib/curriculum/engineeringChallenges';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Lightbulb, ListChecks, Sparkles, XCircle, ArrowRight } from 'lucide-react';
 

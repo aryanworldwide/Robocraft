@@ -1,5 +1,5 @@
 import React from 'react';
-import { LAB_COMPONENTS, getDef } from '@/lib/lab/labComponents';
+import { getDef } from '@/lib/lab/labComponents';
 import { Trash2, RotateCw, Info, CheckCircle2, XCircle, AlertTriangle, Lightbulb, Wrench } from 'lucide-react';
 
 export default function PropertiesPanel({ selected, components, wires, experiment, validation, freeCheck, wiringGuide, helpStep, onRotate, onDelete }) {

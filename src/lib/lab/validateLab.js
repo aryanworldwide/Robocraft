@@ -1,5 +1,5 @@
 // Validation: compares student wires against an experiment's required connections.
-import { getDef, isBoard, pinLocalPos } from './labComponents';
+import { getDef, isBoard} from './labComponents';
 
 // Does a required pin spec match an actual (componentType, pinId)?
 function pinMatches(spec, actualType, actualPinId) {

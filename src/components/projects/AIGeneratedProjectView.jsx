@@ -8,7 +8,7 @@ import { useInk } from '@/lib/ui/ink';
 import { normalizeProject } from '@/lib/aiShape';
 import {
   ArrowLeft, Clock, IndianRupee, Cpu, AlertTriangle, Copy, Check, Download,
-  ChevronDown, ChevronUp, FileText, Eye, Shield, Globe, Lightbulb, CheckCircle2,
+  ChevronDown, ChevronUp, FileText, Eye, Shield, Globe, Lightbulb, 
   Bot, Wrench, Layers, Beaker, Sparkles, AlertCircle
 } from 'lucide-react';
 

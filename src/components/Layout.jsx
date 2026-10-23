@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { formatClass } from '@/lib/utils';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { Home, BookOpen, FolderGit2, Search, BarChart3, Wrench } from 'lucide-react';
+import { Home, BookOpen, FolderGit2, BarChart3, Wrench } from 'lucide-react';
 import { useApp } from '@/lib/AppContext';
 import AIMentor from '@/components/learning/AIMentor';
 

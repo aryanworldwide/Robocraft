@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState} from 'react';
 import { PIN_COLORS } from '@/lib/circuit/components';
 
 function getPinPos(components, pinKey) {

@@ -35,7 +35,7 @@ export function parseBlocks(src) {
     const fig = line.trim().match(/^\[fig:([A-Za-z0-9]+)(?:\|(.+))?\]$/);
     if (fig) { flushPara(); flushList(); blocks.push({ t: 'fig', name: fig[1], caption: fig[2] }); continue; }
     if (!line.trim()) { flushPara(); flushList(); continue; }
-    const b = line.match(/^\s*[•\-]\s+(.*)$/);
+    const b = line.match(/^\s*[•-]\s+(.*)$/);
     const n = line.match(/^\s*(\d+)[.)]\s+(.*)$/);
     if (b || n) {
       flushPara();

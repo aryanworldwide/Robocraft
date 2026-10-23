@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Binary, Gauge, Radar, GitBranch, Zap, RotateCw, Target } from 'lucide-react';
+import { Binary, Gauge, Radar, GitBranch, RotateCw} from 'lucide-react';
 
 // ── Boolean Logic Lab ──────────────────────────────────────────
 function BooleanLogicLab() {

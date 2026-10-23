@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { getProject } from '@/lib/curriculum';
 import { priceOf, estimateBOM, inr } from '@/lib/prices';
-import { ArrowLeft, Clock, IndianRupee, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu, Maximize2 } from 'lucide-react';
+import { Clock, IndianRupee, Wrench, ListChecks, AlertTriangle, Copy, Check, Download, ChevronDown, ChevronUp, Cpu, Maximize2 } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 const CircuitDiagram = lazy(() => import('@/components/buildsheet/CircuitDiagram'));

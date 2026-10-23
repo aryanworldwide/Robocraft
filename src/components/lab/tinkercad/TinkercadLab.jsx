@@ -3,7 +3,7 @@ import { aiEnabled } from '@/lib/features';
 import { useNavigate } from 'react-router-dom';
 import {
   Undo2, Redo2, Trash2, ChevronLeft, Code2, Play, Pause, RotateCcw,
-  PanelLeftClose, PanelLeftOpen, X, Save, FolderOpen, Blocks, Cpu, Sparkles, Wrench, Terminal, Maximize2, LayoutGrid,
+  PanelLeftClose, X, Save, FolderOpen, Blocks, Cpu, Sparkles, Wrench, Terminal, Maximize2, LayoutGrid,
 } from 'lucide-react';
 import { LAB_EXPERIMENTS, getExperiment, generateCode } from '@/lib/lab/labExperiments';
 import { validateCircuit, resolvePins } from '@/lib/lab/validateLab';
@@ -12,7 +12,6 @@ import {
   detectBoard, validateFreeBuild, resolveFreePins, freeWireStatuses,
   generateFreeCode, createFreeSimState, stepFreeSim, freeSimInputs, nextWiringStep,
 } from '@/lib/lab/freeBuild';
-import { getDef } from '@/lib/lab/labComponents';
 import { CircuitBoard } from '@/lib/lab/circuitBoard';
 import { runSketch } from '@/lib/arduino/runtime';
 import { transpile } from '@/lib/arduino/transpile';

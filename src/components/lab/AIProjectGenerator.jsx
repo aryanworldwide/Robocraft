@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { backend } from '@/api/client';
-import { Sparkles, Loader2, Send, Bot, Wand2 } from 'lucide-react';
+import { Sparkles, Loader2, Bot, Wand2 } from 'lucide-react';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 
 const EXAMPLES = [

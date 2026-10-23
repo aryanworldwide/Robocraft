@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { backend } from '@/api/client';
-import { ChevronLeft, Clock, IndianRupee, Package, Wrench, BookOpen, Code2, FlaskConical, AlertTriangle, Globe, Lightbulb, Save, CheckCircle2, Share2, Copy, Check, Download, Send, Bot, Loader2, Volume2, ChevronDown, FileText, Eye } from 'lucide-react';
+import { ChevronLeft, Clock, IndianRupee, Package, Wrench, BookOpen, Code2, FlaskConical, AlertTriangle, Globe, Lightbulb, Save, CheckCircle2, Share2, Copy, Check, Download, Send, Bot, Loader2, Volume2, ChevronDown, Eye } from 'lucide-react';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import { useInk } from '@/lib/ui/ink';
@@ -85,7 +85,7 @@ export default function GeneratedProjectView({ project: rawProject, onBack, onSa
   const speak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text.replace(/[🤖📦🔌💻📖✨💡]/g, ''));
+      const u = new SpeechSynthesisUtterance(text.replace(/(?:🤖|📦|🔌|💻|📖|✨|💡)/gu, ''));
       u.rate = 0.85; u.lang = 'en-US';
       window.speechSynthesis.speak(u);
     }

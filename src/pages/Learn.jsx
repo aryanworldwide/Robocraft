@@ -6,7 +6,7 @@ import { useApp } from '@/lib/AppContext';
 import { getSubjects } from '@/lib/curriculum';
 import { getMode, subjectMastery } from '@/lib/adaptive';
 import { exportRevisionPdf } from '@/lib/revision/exportRevisionPdf';
-import { Bot, Code, Brain, Cpu, Cog, CircuitBoard, Zap, Rocket, BookOpen, Clock, ChevronRight, CheckCircle2, Target, Download, Wrench, AlertTriangle } from 'lucide-react';
+import { Bot, Code, Brain, Cpu, Cog, CircuitBoard, Zap, Rocket, BookOpen, Clock, ChevronRight, CheckCircle2, Download, Wrench} from 'lucide-react';
 
 const ICON_MAP = { Bot, Code, Brain, Cpu, Cog, CircuitBoard, Zap, Rocket, BookOpen };
 

@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
-import { getCurriculum } from '@/lib/curriculum';
 import { getReminderSettings, setReminderSettings, remindersAreNative } from '@/lib/reminders';
 import { localDay } from '@/lib/gamification';
 import { toast } from '@/components/ui/use-toast';

@@ -65,7 +65,7 @@ export default function ExperimentLab({ experiment, onExit }) {
   const speak = (text) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[💡🔘⚙️👁️📡🤖🧱🚧📦]/g, ''));
+    const u = new SpeechSynthesisUtterance(text.replace(/(?:💡|🔘|⚙️|👁️|📡|🤖|🧱|🚧|📦)/gu, ''));
     u.rate = 0.85; u.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
     window.speechSynthesis.speak(u);
   };

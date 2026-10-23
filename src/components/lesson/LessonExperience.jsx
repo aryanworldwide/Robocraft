@@ -13,7 +13,7 @@ import ExplainDifferently from '@/components/lesson/ExplainDifferently';
 import {
   BookOpen, Lightbulb, Wrench, Globe, AlertTriangle, BrainCircuit,
   CheckCircle2, Layers, FileText, Download, ChevronDown, ChevronUp,
-  Zap, Clock, Eye, Compass, Sparkles, ArrowRight, Check, X,
+  Zap, Compass, Sparkles, Check, X,
 } from 'lucide-react';
 
 function SectionCard({ icon: Icon, color, label, children, delay = 0 }) {

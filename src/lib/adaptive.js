@@ -2,7 +2,7 @@
 // Switches the app between "gamified" (Class 9-10) and "engineering" (Class 11-12)
 // and computes mastery / weak areas / exam readiness / challenge difficulty locally.
 
-import { getSubjects, getQuizForLesson } from '@/lib/curriculum';
+import { getSubjects} from '@/lib/curriculum';
 import { getUiMode } from '@/lib/uiMode';
 
 // "engineering" = Pro display style (default for Class 11; anyone can switch in Settings).

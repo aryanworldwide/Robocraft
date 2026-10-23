@@ -78,7 +78,7 @@ export function matchPinId(componentId, pinLabel) {
   // "Signal (Orange)" → SIGNAL · "GPIO 21 (SDA)" → GPIO21 · "3.3V" → 3V3
   const norm = (v) => String(v).toUpperCase()
     .replace(/\([^)]*\)/g, ' ')
-    .replace(/[^A-Z0-9+\-]/g, '')
+    .replace(/[^A-Z0-9+-]/g, '')
     .replace(/^3\.?3V$|^33V$/, '3V3');
   const want = norm(pinLabel);
   if (!want) return null;
