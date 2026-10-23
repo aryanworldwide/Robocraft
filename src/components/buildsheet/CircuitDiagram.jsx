@@ -26,7 +26,7 @@ function resolveColor(conn) {
 }
 
 // ── Name → component id matching (reused from prior renderer) ────────────────
-function matchComponentId(name) {
+export function matchComponentId(name) {
   if (!name) return null;
   const lower = name.toLowerCase();
   const idMap = {
@@ -63,33 +63,59 @@ function matchComponentId(name) {
   for (const [id, aliases] of Object.entries(idMap)) {
     if (aliases.some(a => lower === a)) return id;
   }
-  for (const [id, aliases] of Object.entries(idMap)) {
-    if (aliases.some(a => lower.includes(a))) return id;
-  }
+  // Longest alias wins, so "a4988 stepper driver" is not swallowed by "stepper".
+  const pairs = Object.entries(idMap).flatMap(([id, aliases]) => aliases.map(a => [id, a]));
+  pairs.sort((x, y) => y[1].length - x[1].length);
+  for (const [id, a] of pairs) if (lower.includes(a)) return id;
   return null;
 }
 
-function matchPinId(componentId, pinLabel) {
+export function matchPinId(componentId, pinLabel) {
   if (!componentId || !pinLabel) return null;
   const pins = REALISTIC_PINS[componentId];
   if (!pins) return null;
-  const lower = String(pinLabel).toLowerCase().replace(/[()]/g, '').trim();
-  const exact = pins.find(p => p.id.toLowerCase() === lower);
-  if (exact) return exact.id;
-  const labelMatch = pins.find(p => p.label.toLowerCase() === lower);
-  if (labelMatch) return labelMatch.id;
-  const partial = pins.find(p =>
-    p.label.toLowerCase().includes(lower) || lower.includes(p.label.toLowerCase()) || p.id.toLowerCase().includes(lower));
-  if (partial) return partial.id;
-  if (lower.includes('vcc') || lower.includes('power') || lower.includes('5v') || lower.includes('vin') || lower.includes('12v')) {
-    const p = pins.find(x => x.type === 'power');
-    if (p) return p.id;
+
+  // "Signal (Orange)" → SIGNAL · "GPIO 21 (SDA)" → GPIO21 · "3.3V" → 3V3
+  const norm = (v) => String(v).toUpperCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/[^A-Z0-9+\-]/g, '')
+    .replace(/^3\.?3V$|^33V$/, '3V3');
+  const want = norm(pinLabel);
+  if (!want) return null;
+
+  const by = (f) => pins.find(f);
+  const hit = by(p => norm(p.id) === want) || by(p => norm(p.label) === want);
+  if (hit) return hit.id;
+
+  // D13 / GPIO13 / PIN13 all mean the same header pin
+  const num = want.match(/^(?:D|GPIO|PIN|IO)?(\d{1,2})$/);
+  if (num) {
+    const n = num[1];
+    const digital = by(p => norm(p.id) === `D${n}`) || by(p => norm(p.label) === `GPIO${n}`);
+    if (digital) return digital.id;
   }
-  if (lower.includes('gnd') || lower.includes('ground') || lower.includes('cathode') || lower.includes('negative') || lower.includes('−') || lower.includes('-')) {
-    const p = pins.find(x => x.type === 'ground');
-    if (p) return p.id;
-  }
-  return null;
+  const analog = want.match(/^A(\d)$/);
+  if (analog) { const a = by(p => norm(p.id) === `A${analog[1]}`); if (a) return a.id; }
+
+  const starts = by(p => want.startsWith(norm(p.id)) || norm(p.id).startsWith(want))
+    || by(p => want.startsWith(norm(p.label)) || norm(p.label).startsWith(want));
+  if (starts) return starts.id;
+
+  // meaning-based fallbacks, so a human phrase still lands on the right pin
+  const ofType = (...types) => by(p => types.includes(p.type));
+  let cand = null;
+  if (/^(VCC|VIN|VDD|5V|3V3|POWER|PLUS|\+|RED)/.test(want)) cand = ofType('power');
+  else if (/^(GND|GROUND|MINUS|-|NEG|BROWN|BLACK)/.test(want)) cand = ofType('ground');
+  else if (/^(SIG|SIGNAL|OUT|DATA|S|YELLOW|ORANGE|PULSE)/.test(want)) {
+    cand = by(p => ['SIG', 'OUT', 'DATA', 'S'].includes(norm(p.id))) || ofType('pwm', 'signal', 'digital', 'analog');
+  } else if (/^(ANODE|POSITIVE|LEG1|TERMINAL1|PIN1|T1|A)$/.test(want)) cand = pins[0];
+  else if (/^(CATHODE|NEGATIVE|LEG2|TERMINAL2|PIN2|T2|B|C)$/.test(want)) cand = pins[1] || pins[pins.length - 1];
+  else if (/^TRIGGER/.test(want)) cand = by(p => norm(p.id) === 'TRIG');
+  else if (/^ECHO/.test(want)) cand = by(p => norm(p.id) === 'ECHO');
+  if (cand) return cand.id;
+
+  // Still unknown: land on the part's first signal pin rather than dropping the wire.
+  return (by(p => !['power', 'ground'].includes(p.type)) || pins[0] || {}).id || null;
 }
 
 // ── Component categories for workbench placement ─────────────────────────────
