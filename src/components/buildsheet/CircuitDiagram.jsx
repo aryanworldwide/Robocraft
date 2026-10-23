@@ -241,7 +241,8 @@ function PinTag({ p, text, color, dim, nudge = 0 }) {
   const short = String(text).replace(/\s*\(.*\)$/, '').slice(0, 12);
   const w = Math.max(22, short.length * 7.2 + 10);
   const off = 15;
-  const x = p.side === 'left' ? p.x - off - w : p.side === 'right' ? p.x + off : p.x - w / 2;
+  const raw = p.side === 'left' ? p.x - off - w : p.side === 'right' ? p.x + off : p.x - w / 2;
+  const x = Math.max(4, Math.min(raw, 1180 - w - 4)); // never fall off the page
   const y = (p.side === 'top' ? p.y - off - 16 : p.side === 'bottom' ? p.y + off : p.y - 8) + nudge;
   return (
     <g opacity={dim ? 0.25 : 1} style={{ pointerEvents: 'none' }}>
