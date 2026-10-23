@@ -3,8 +3,10 @@ import { useState, useEffect } from "react";
 
 // Three at once is as many as fits on a phone; after that the oldest goes.
 const TOAST_LIMIT = 3;
-// Dismiss after five seconds instead of sitting there for 16 minutes.
-const TOAST_REMOVE_DELAY = 5000;
+// How long a toast stays on screen before it closes itself, and how long the
+// closed toast is kept around afterwards for its fade-out.
+const TOAST_DURATION = 5000;
+const TOAST_REMOVE_DELAY = 400;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -135,6 +137,12 @@ function toast({ ...props }) {
       },
     },
   });
+
+  // These toasts are plain elements, not a library's, so nothing closes them
+  // on their own: without this they sat on the screen until the student found
+  // the little x.
+  const ms = typeof props.duration === 'number' ? props.duration : TOAST_DURATION;
+  if (ms > 0) setTimeout(dismiss, ms);
 
   return {
     id,
