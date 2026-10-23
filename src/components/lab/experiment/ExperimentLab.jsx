@@ -109,7 +109,7 @@ export default function ExperimentLab({ experiment, onExit }) {
 
   const clearWires = () => { setWires([]); setSelectedPin(null); setSelectedWire(null); setFeedback(null); };
 
-  const handleCopy = () => { navigator.clipboard.writeText(sanitizeCode(experiment.code)); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  const handleCopy = () => { navigator.clipboard?.writeText(sanitizeCode(experiment.code))?.catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   const handleDownload = () => {
     const blob = new Blob([sanitizeCode(experiment.code)], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -124,7 +124,7 @@ export default function ExperimentLab({ experiment, onExit }) {
     <div className="fixed inset-x-0 flex flex-col" style={{ top: 'calc(4rem + env(safe-area-inset-top))', bottom: 'calc(5.5rem + env(safe-area-inset-bottom))' }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-3 py-2.5 glass-strong z-30 border-b border-cyan-500/10">
-        <button onClick={onExit} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-cyan-400 transition-colors">
+        <button onClick={onExit} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-cyan-400 transition-colors tap-target">
           <ChevronLeft className="w-4 h-4" /> Experiments
         </button>
         <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function ExperimentLab({ experiment, onExit }) {
                       className="flex items-center gap-1 text-[11px] glass px-2.5 py-1.5 rounded-lg text-purple-400 hover:bg-purple-500/10">
                       <Sparkles className="w-3 h-3" /> Help me write the code
                     </button>
-                    <button onClick={handleCopy} className="flex items-center gap-1 text-[11px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
+                    <button aria-label="Copy" onClick={handleCopy} className="flex items-center gap-1 text-[11px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
                       {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
                     </button>
                     <button onClick={handleDownload} className="flex items-center gap-1 text-[11px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">

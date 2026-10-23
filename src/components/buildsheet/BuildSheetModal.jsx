@@ -84,7 +84,7 @@ Use simple English. Use emojis. Write 4-6 paragraphs.`;
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold disabled:opacity-40 hover:neon-glow transition-all">
             {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} PDF
           </button>
-          <button onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 transition-colors">
+          <button aria-label="Close" onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 transition-colors tap-target">
             <X className="w-4 h-4" />
           </button>
         </div>

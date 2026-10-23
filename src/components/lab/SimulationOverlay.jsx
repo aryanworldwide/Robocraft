@@ -70,7 +70,7 @@ export default function SimulationOverlay({ project, onClose }) {
             <CheckCircle2 className="w-5 h-5 text-green-400" />
             <h3 className="font-bold text-green-400 text-sm">Simulation Running</h3>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10">
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 tap-target">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>

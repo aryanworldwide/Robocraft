@@ -35,7 +35,7 @@ function StudioTile({ icon: Icon, color, kicker, title, blurb, cta, onOpen, chil
         </div>
       </button>
       {children}
-      <button onClick={onOpen} className="w-full py-3 text-xs font-bold text-white flex items-center justify-center gap-1.5" style={{ background: `linear-gradient(90deg, ${fillDeep}, ${fill})` }}>
+      <button aria-label="Add" onClick={onOpen} className="w-full py-3 text-xs font-bold text-white flex items-center justify-center gap-1.5" style={{ background: `linear-gradient(90deg, ${fillDeep}, ${fill})` }}>
         <Plus className="w-4 h-4" /> {cta}
       </button>
     </div>

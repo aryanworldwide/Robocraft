@@ -63,7 +63,7 @@ export default function VoiceBuildAssistant({ components, wires, board, lang, on
             className="text-[9px] glass px-2 py-1 rounded-lg text-cyan-400 flex items-center gap-1">
             <Globe className="w-3 h-3" /> {lang === 'en' ? 'EN' : 'हि'}
           </button>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/10">
+          <button aria-label="Close" onClick={onClose} className="p-1 rounded-lg hover:bg-white/10 tap-target">
             <X className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>

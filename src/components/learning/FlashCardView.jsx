@@ -7,7 +7,7 @@ export default function FlashCardView({ card, isFlipped, onFlip, onPrev, onNext,
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-center gap-2">
-        <button onClick={onPrev} disabled={!canPrev} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">
+        <button aria-label="Back" onClick={onPrev} disabled={!canPrev} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors tap-target">
           <ChevronLeft className="w-5 h-5 text-cyan-400" />
         </button>
         <div className="flex-1 max-w-sm" style={{ perspective: '1000px' }}>
@@ -45,7 +45,7 @@ export default function FlashCardView({ card, isFlipped, onFlip, onPrev, onNext,
             </div>
           </div>
         </div>
-        <button onClick={onNext} disabled={!canNext} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">
+        <button aria-label="Next" onClick={onNext} disabled={!canNext} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors tap-target">
           <ChevronRight className="w-5 h-5 text-cyan-400" />
         </button>
       </div>

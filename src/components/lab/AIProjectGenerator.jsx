@@ -16,6 +16,9 @@ export default function AIProjectGenerator({ onGenerate }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [stage, setStage] = useState('');
+  // A blank 25-second wait feels broken, so the elapsed count keeps running
+  // even after the named stages run out.
+  const [secs, setSecs] = useState(0);
 
   const stages = [
     '🤖 Analyzing your idea...',
@@ -33,9 +36,11 @@ export default function AIProjectGenerator({ onGenerate }) {
     setError(null);
     setStage(0);
 
+    setSecs(0);
     const stageInterval = setInterval(() => {
       setStage(s => Math.min(s + 1, stages.length - 1));
     }, 1500);
+    const secsInterval = setInterval(() => setSecs(s => s + 1), 1000);
 
     try {
       const res = await backend.integrations.Core.InvokeLLM({
@@ -117,7 +122,7 @@ Return a JSON object with EXACTLY these fields:
     } catch (err) {
       setError('Could not generate project. Please try again with a different description.');
     } finally {
-      clearInterval(stageInterval);
+      clearInterval(stageInterval); clearInterval(secsInterval);
       setLoading(false);
       setStage('');
     }
@@ -143,7 +148,12 @@ Return a JSON object with EXACTLY these fields:
           <div className="py-8 text-center">
             <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-3" />
             <p className="text-sm font-medium text-cyan-400 animate-pulse">{stages[stage]}</p>
-            <p className="text-[10px] text-muted-foreground mt-2">This takes about 15-20 seconds...</p>
+            <div className="w-40 h-1 mx-auto mt-3 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${Math.min(95, secs * 4)}%` }} />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              {secs}s · usually 20-30 seconds{secs > 35 ? ' · nearly there, writing the code takes longest' : ''}
+            </p>
           </div>
         ) : (
           <>

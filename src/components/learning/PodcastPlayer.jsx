@@ -158,7 +158,7 @@ Return as JSON with a "turns" array.`,
         <Radio className="w-4 h-4 text-cyan-400" />
         <span className="text-xs font-bold text-cyan-400">AI PODCAST</span>
         <span className="text-[10px] text-muted-foreground ml-auto">{currentIdx + 1} / {segments.length}</span>
-        <button onClick={regenerate} className="p-1 rounded-lg glass hover:bg-cyan-500/10 transition-colors" title="Regenerate">
+        <button aria-label="Reset" onClick={regenerate} className="p-1 rounded-lg glass hover:bg-cyan-500/10 transition-colors tap-target" title="Regenerate">
           <RotateCcw className="w-3 h-3 text-muted-foreground" />
         </button>
       </div>
@@ -185,7 +185,7 @@ Return as JSON with a "turns" array.`,
         <button onClick={() => goSegment(currentIdx - 1)} disabled={currentIdx === 0} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">
           <SkipBack className="w-4 h-4 text-cyan-400" />
         </button>
-        <button onClick={togglePlayPause} className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center hover:neon-glow transition-all">
+        <button aria-label="Play or pause" onClick={togglePlayPause} className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center hover:neon-glow transition-all">
           {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-0.5" />}
         </button>
         <button onClick={() => goSegment(currentIdx + 1)} disabled={currentIdx === segments.length - 1} className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors">

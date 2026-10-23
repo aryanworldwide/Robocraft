@@ -148,7 +148,7 @@ function AIMentorInner({ lessonContext, compact }) {
                   placeholder="Ask RoboMentor..."
                   className="flex-1 glass rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 />
-                <button
+                <button aria-label="Send message"
                   onClick={() => send()}
                   disabled={!input.trim() || loading}
                   className="w-9 h-9 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center disabled:opacity-40 hover:neon-glow transition-all"
@@ -219,7 +219,7 @@ function AIMentorInner({ lessonContext, compact }) {
             placeholder="Ask RoboMentor anything..."
             className="flex-1 glass rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           />
-          <button
+          <button aria-label="Send message"
             onClick={() => send()}
             disabled={!input.trim() || loading}
             className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center disabled:opacity-40 hover:neon-glow transition-all"

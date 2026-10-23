@@ -114,7 +114,7 @@ export default function Leaderboard() {
           <h1 className="text-xl font-bold">Leaderboard</h1>
           <p className="text-xs text-muted-foreground">{formatClass(selectedClass)} · XP earned this week (resets every Monday)</p>
         </div>
-        {signedIn && <button onClick={load} className="p-2 rounded-lg glass" aria-label="Refresh"><RefreshCw className="w-4 h-4 text-muted-foreground" /></button>}
+        {signedIn && <button onClick={load} className="p-2 rounded-lg glass tap-target" aria-label="Refresh"><RefreshCw className="w-4 h-4 text-muted-foreground" /></button>}
       </div>
 
       <WeeklyChallengeCard />

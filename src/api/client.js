@@ -9,6 +9,8 @@ import { accountsEnabled, aiEnabled } from '@/lib/features';
 import { fb, currentFirebaseUser, authError } from '@/api/firebase';
 import { nativeGoogle } from '@/lib/platform';
 
+let deleting = false;
+
 const unavailable = (what) => Promise.reject(Object.assign(new Error(`${what} aren't available yet.`), { status: 503, offline: true }));
 
 // ── Accounts ────────────────────────────────────────────────────────────────
@@ -83,16 +85,52 @@ const auth = {
   },
   async updateMe(data) {
     if (!accountsEnabled) return unavailable('Accounts');
+    // A progress sync queued just before "delete my account" must not write the
+    // document back after it has been removed.
+    if (deleting) return;
     const { db, F, auth: a } = await fb();
     if (!a.currentUser) return;
     await F.setDoc(F.doc(db, 'users', a.currentUser.uid), { ...data, updated_at: F.serverTimestamp() }, { merge: true });
   },
-  async deleteAccount() {
+  // Deleting an account is irreversible, so prove who is asking BEFORE anything
+  // is erased. Firebase refuses deleteUser on an old session, and the previous
+  // order wiped the student's progress first and only then hit that refusal,
+  // leaving an account with nothing in it.
+  async deleteAccount({ password } = {}) {
     const { db, F, auth: a, A } = await fb();
     const u = a.currentUser; if (!u) return;
-    try { await F.deleteDoc(F.doc(db, 'users', u.uid)); } catch {}
-    try { await F.deleteDoc(F.doc(db, 'leaderboard', u.uid)); } catch {}
-    try { await A.deleteUser(u); } catch (e) { throw authError(e); }
+
+    const minutesSinceLogin = (Date.now() - Date.parse(u.metadata?.lastSignInTime || 0)) / 60000;
+    if (!(minutesSinceLogin < 4)) {
+      const google = (u.providerData || []).some(p => p.providerId === 'google.com');
+      try {
+        if (google) {
+          await A.reauthenticateWithPopup(u, new A.GoogleAuthProvider());
+        } else if (password) {
+          await A.reauthenticateWithCredential(u, A.EmailAuthProvider.credential(u.email, password));
+        } else {
+          throw Object.assign(new Error('For your safety, enter your password to confirm.'), { needsPassword: true });
+        }
+      } catch (e) {
+        if (e?.needsPassword) throw e;
+        throw authError(e);
+      }
+    }
+
+    deleting = true;
+    try {
+      // The student's own saved AI projects go too.
+      try {
+        const snap = await F.getDocs(F.query(F.collection(db, PROJECTS), F.where('owner', '==', u.uid), F.limit(300)));
+        await Promise.all(snap.docs.map(d => F.deleteDoc(d.ref).catch(() => {})));
+      } catch { /* offline or none saved */ }
+      try { await F.deleteDoc(F.doc(db, 'leaderboard', u.uid)); } catch { /* may not exist */ }
+      try { await F.deleteDoc(F.doc(db, 'users', u.uid)); } catch { /* may not exist */ }
+      await A.deleteUser(u);
+    } catch (e) {
+      deleting = false;
+      throw authError(e);
+    }
   },
   async logout() {
     if (!accountsEnabled) return;
@@ -166,13 +204,22 @@ const generatedProject = {
     await F.updateDoc(F.doc(db, PROJECTS, id), data);
     return { id, ...data };
   },
+  // Only ever the signed-in student's own projects. These documents are written
+  // straight from the browser, so sharing them between accounts would let anyone
+  // put arbitrary text in front of another child. Sorting happens here rather
+  // than in the query so no composite index is needed.
   async list(sort = '-created_date', limit = 50) {
     if (!accountsEnabled) return [];
-    const { db, F } = await fb();
-    const field = sort.replace(/^-/, '');
-    const q = F.query(F.collection(db, PROJECTS), F.orderBy(field, sort.startsWith('-') ? 'desc' : 'asc'), F.limit(limit));
+    const { db, F, auth: a } = await fb();
+    if (!a.currentUser) return [];
+    const q = F.query(F.collection(db, PROJECTS), F.where('owner', '==', a.currentUser.uid), F.limit(200));
     const snap = await F.getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const field = sort.replace(/^-/, '');
+    const dir = sort.startsWith('-') ? -1 : 1;
+    return snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((x, y) => (String(x[field] || '') < String(y[field] || '') ? -1 : 1) * dir)
+      .slice(0, limit);
   },
   async filter(criteria = {}) {
     const all = await generatedProject.list('-created_date', 100);

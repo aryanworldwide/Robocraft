@@ -390,10 +390,10 @@ export default function BuildWithMe({ challengeId, onComplete, xpReward = 50 }) 
               <span className="text-xs font-bold text-cyan-400">Arduino Code</span>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={handleCopyCode} className="p-1.5 rounded-lg glass hover:bg-cyan-500/10 transition-colors">
+              <button aria-label="Copy" onClick={handleCopyCode} className="p-1.5 rounded-lg glass hover:bg-cyan-500/10 transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-cyan-400" />}
               </button>
-              <button onClick={handleDownloadCode} className="p-1.5 rounded-lg glass hover:bg-cyan-500/10 transition-colors">
+              <button aria-label="Download" onClick={handleDownloadCode} className="p-1.5 rounded-lg glass hover:bg-cyan-500/10 transition-colors tap-target">
                 <Download className="w-3.5 h-3.5 text-cyan-400" />
               </button>
             </div>

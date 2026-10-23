@@ -15,7 +15,7 @@ export default function BadgePopup({ badges, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-cyan-500/10">
+          <button aria-label="Close" onClick={onClose} className="p-1 rounded-lg hover:bg-cyan-500/10 tap-target">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>

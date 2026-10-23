@@ -58,14 +58,14 @@ export default function CodePanel({ project, onClose }) {
             <BookOpen className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-bold text-cyan-400">Arduino Code</span>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10">
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 tap-target">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3">
           <div className="flex gap-1.5 mb-2">
-            <button onClick={handleCopy} className="flex items-center gap-1 text-[10px] glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
+            <button aria-label="Copy" onClick={handleCopy} className="flex items-center gap-1 text-[10px] glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
               {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
             </button>
             <button onClick={handleDownload} className="flex items-center gap-1 text-[10px] glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">

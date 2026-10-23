@@ -60,7 +60,7 @@ Recommend 3-6 component ids from the list to build this (include the board if ne
               <p className="text-[10px] text-muted-foreground">Describe what you want to build</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 transition-colors">
+          <button aria-label="Close" onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 transition-colors tap-target">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -78,7 +78,7 @@ Recommend 3-6 component ids from the list to build this (include the board if ne
                 </button>
               ))}
             </div>
-            <button onClick={generate} disabled={loading || !prompt.trim()}
+            <button aria-label="Tools" onClick={generate} disabled={loading || !prompt.trim()}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-bold disabled:opacity-40 transition-all">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Designing your build…</> : <><Wrench className="w-4 h-4" /> Design My Build</>}
             </button>

@@ -1,15 +1,35 @@
 // RoboCraft offline support: after the first visit the app opens without internet.
 // Pages: network first (fresh updates), cached copy when offline.
 // App files (JS/CSS/images/fonts): cache first — their names change on every build.
-const CACHE = 'robocraft-v1';
+// The app registers this file as sw.js?v=<app version>, so each release
+// installs a fresh worker (and a fresh cache) instead of keeping the old one.
+const VERSION = new URL(self.location.href).searchParams.get('v') || '1';
+const CACHE = `robocraft-${VERSION}`;
 const BASE = self.registration.scope;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll([BASE, BASE + 'manifest.json', BASE + 'icon-192.png'])).then(() => self.skipWaiting()));
 });
 
+// Every build gives the JS and CSS new hashed names, so the old ones would sit
+// in the cache for ever and the app's storage would grow with each update.
+// They are dropped when a new service worker takes over; the handful still in
+// use are fetched again on the next load.
+async function pruneOldAssets() {
+  const cache = await caches.open(CACHE);
+  const keys = await cache.keys();
+  await Promise.all(
+    keys.filter((r) => new URL(r.url).pathname.includes('/assets/')).map((r) => cache.delete(r))
+  );
+}
+
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    await pruneOldAssets();
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', (e) => {

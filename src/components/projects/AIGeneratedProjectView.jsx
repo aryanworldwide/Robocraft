@@ -1,9 +1,11 @@
+import ErrorBoundary from '@/components/ErrorBoundary';
 import React, { useState, lazy, Suspense } from 'react';
 const CircuitDiagram = lazy(() => import('@/components/buildsheet/CircuitDiagram'));
 const FullscreenCircuit = lazy(() => import('@/components/buildsheet/FullscreenCircuit'));
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import { useInk } from '@/lib/ui/ink';
+import { normalizeProject } from '@/lib/aiShape';
 import {
   ArrowLeft, Clock, IndianRupee, Cpu, AlertTriangle, Copy, Check, Download,
   ChevronDown, ChevronUp, FileText, Eye, Shield, Globe, Lightbulb, CheckCircle2,
@@ -11,13 +13,12 @@ import {
 } from 'lucide-react';
 
 function CodeBlock({ code, label, color }) {
-  const [showCircuit, setShowCircuit] = useState(false);
   const [copied, setCopied] = useState(false);
   const clean = sanitizeCode(code);
   if (!clean) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(clean);
+    navigator.clipboard?.writeText(clean)?.catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -39,7 +40,7 @@ function CodeBlock({ code, label, color }) {
           <Cpu className="w-4 h-4" style={{ color }} /> {label}
         </h3>
         <div className="flex items-center gap-2">
-          <button onClick={handleCopy} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">
+          <button aria-label="Copy" onClick={handleCopy} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">
             {copied ? <><Check className="w-3.5 h-3.5" /> Copied</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
           </button>
           <button onClick={handleDownload} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">
@@ -69,9 +70,13 @@ function CollapsibleSection({ title, icon: Icon, iconColor, children, defaultOpe
   );
 }
 
-export default function AIGeneratedProjectView({ project, onBack }) {
+export default function AIGeneratedProjectView({ project: rawProject, onBack }) {
+  // The AI occasionally returns a string where a list belongs; normalise once
+  // here so nothing below has to guard against it.
+  const project = React.useMemo(() => normalizeProject(rawProject) || {}, [rawProject]);
   const ink = useInk();
   const [showBuildSheet, setShowBuildSheet] = useState(false);
+  const [showCircuit, setShowCircuit] = useState(false);
   const diffColors = { Beginner: '#4ADE80', Intermediate: '#F59E0B', Advanced: '#EF4444' };
   const diffColor = diffColors[project.difficulty] || '#4ADE80';
   const validation = project.validation || { valid: true, issues: [] };
@@ -80,7 +85,7 @@ export default function AIGeneratedProjectView({ project, onBack }) {
     <div className="max-w-3xl mx-auto px-4 py-4 pb-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 animate-slide-up">
-        <button onClick={onBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-cyan-400 transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-cyan-400 transition-colors tap-target">
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
         <div className="flex items-center gap-2">
@@ -163,7 +168,9 @@ export default function AIGeneratedProjectView({ project, onBack }) {
           </div>
           <button onClick={() => setShowCircuit(true)} className="w-full rounded-xl overflow-hidden bg-white">
             <Suspense fallback={<div className="py-10 text-xs text-muted-foreground">Drawing the circuit…</div>}>
-              <CircuitDiagram pinConnections={project.pinConnections} />
+              <ErrorBoundary compact message="The wiring diagram could not be drawn. The pin table below still lists every connection.">
+                <CircuitDiagram pinConnections={project.pinConnections} />
+              </ErrorBoundary>
             </Suspense>
           </button>
         </div>

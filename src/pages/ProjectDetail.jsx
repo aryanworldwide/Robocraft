@@ -1,3 +1,4 @@
+import ErrorBoundary from '@/components/ErrorBoundary';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
@@ -131,7 +132,9 @@ export default function ProjectDetail() {
           </div>
           <button onClick={() => setShowCircuit(true)} className="w-full rounded-xl overflow-hidden bg-white">
             <Suspense fallback={<div className="py-10 text-xs text-muted-foreground">Drawing the circuit…</div>}>
-              <CircuitDiagram pinConnections={sheetData.pinConnections} />
+              <ErrorBoundary compact message="The wiring diagram could not be drawn. The pin table below still lists every connection.">
+                <CircuitDiagram pinConnections={sheetData.pinConnections} />
+              </ErrorBoundary>
             </Suspense>
           </button>
           <p className="text-[10px] text-muted-foreground mt-2">Every wire is coloured the same as the table below. Tap the picture to zoom in.</p>
@@ -209,7 +212,7 @@ export default function ProjectDetail() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-cyan-400" /> Arduino Code</h3>
             <div className="flex items-center gap-2">
-              <button onClick={handleCopy} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">
+              <button aria-label="Copy" onClick={handleCopy} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">
                 {copied ? <><Check className="w-3.5 h-3.5" /> Copied</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
               </button>
               <button onClick={handleDownload} className="text-xs glass px-3 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/15 transition-colors flex items-center gap-1">

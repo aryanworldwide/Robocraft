@@ -2,6 +2,11 @@ import React, { useMemo, useState, useEffect } from 'react';
 import CyberCityStage from './CyberCityStage';
 import { useTheme } from '@/lib/ThemeContext';
 
+// Storage is unavailable in a private window and in some locked-down WebViews;
+// the splash must not be the thing that fails.
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
+
 const MESSAGES = [
   '🤖 Welcome Future Engineer.',
   '⚙️ Every Robot Starts With One Idea.',
@@ -25,18 +30,18 @@ export default function FinalStage({ onDone }) {
   const [explode, setExplode] = useState(false);
 
   const message = useMemo(() => {
-    const last = localStorage.getItem('rc_last_msg');
+    const last = lsGet('rc_last_msg');
     let pool = MESSAGES.filter(m => m !== last);
     const picked = pool[Math.floor(Math.random() * pool.length)];
-    localStorage.setItem('rc_last_msg', picked);
+    lsSet('rc_last_msg', picked);
     return picked;
   }, []);
 
   const fact = useMemo(() => {
-    const last = localStorage.getItem('rc_last_fact');
+    const last = lsGet('rc_last_fact');
     let pool = FACTS.filter(f => f !== last);
     const picked = pool[Math.floor(Math.random() * pool.length)];
-    localStorage.setItem('rc_last_fact', picked);
+    lsSet('rc_last_fact', picked);
     return picked;
   }, []);
 

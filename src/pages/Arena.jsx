@@ -1,3 +1,4 @@
+import ErrorBoundary from '@/components/ErrorBoundary';
 import React, { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
@@ -197,7 +198,9 @@ function TaskScreen({ task, results, onBack, onPass }) {
 
       <div className="relative">
         <Suspense fallback={<div className="w-full rounded-2xl bg-[#0b1220] on-dark flex items-center justify-center text-xs text-slate-400" style={{ height: 320 }}>Loading 3-D view…</div>}>
-          <ArenaView boardRef={boardRef} cameraMode={cam} height={320} />
+          <ErrorBoundary compact message="The 3-D view could not start. Your code and progress are safe — try reloading.">
+            <ArenaView boardRef={boardRef} cameraMode={cam} height={320} />
+          </ErrorBoundary>
         </Suspense>
         <div className="absolute top-2 left-2 text-[11px] font-mono bg-black/55 text-white rounded-lg px-2 py-1">
           t = {(time / 1000).toFixed(1)} s
@@ -225,7 +228,7 @@ function TaskScreen({ task, results, onBack, onPass }) {
         {running
           ? <button onClick={stop} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold text-sm flex items-center justify-center gap-1.5"><Square className="w-4 h-4" /> Stop</button>
           : <button onClick={run} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-1.5"><Play className="w-4 h-4" /> Run code</button>}
-        <button onClick={reset} className="px-3 py-2.5 rounded-xl glass-strong text-sm" aria-label="Reset"><RotateCcw className="w-4 h-4" /></button>
+        <button onClick={reset} className="px-3 py-2.5 rounded-xl glass-strong text-sm tap-target" aria-label="Reset"><RotateCcw className="w-4 h-4" /></button>
         <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="px-2 py-2.5 rounded-xl glass-strong text-xs bg-transparent">
           {[0.5, 1, 2, 4, 8, 16].map(s => <option key={s} value={s}>{s}× speed</option>)}
         </select>

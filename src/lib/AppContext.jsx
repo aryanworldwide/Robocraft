@@ -7,6 +7,52 @@ import { scheduleReminders } from '@/lib/reminders';
 
 const AppContext = createContext();
 
+// Storage can be full, or blocked entirely in a locked-down WebView. Progress
+// also lives in memory and on the server, so a failed write must never take the
+// screen down with it.
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* full or blocked */ } };
+
+const uniq = (a, b) => Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])]));
+
+// Merge one class's progress from two devices. Nothing a student has earned is
+// ever taken away: XP and streaks take the higher number, finished lessons and
+// badges are unioned, and per-item maps keep the better score.
+const mergeClass = (a = {}, b = {}) => {
+  const newer = (Number(b.updatedAt) || 0) >= (Number(a.updatedAt) || 0) ? b : a;
+  const older = newer === b ? a : b;
+  const maxNum = (k) => Math.max(Number(a[k]) || 0, Number(b[k]) || 0);
+  const bestScores = { ...(older.quizScores || {}), ...(newer.quizScores || {}) };
+  for (const [k, v] of Object.entries(older.quizScores || {})) {
+    const nv = bestScores[k];
+    const score = (x) => (typeof x === 'number' ? x : Number(x?.score) || 0);
+    if (score(v) > score(nv)) bestScores[k] = v;
+  }
+  return {
+    ...older,
+    ...newer,
+    xp: maxNum('xp'),
+    coins: maxNum('coins'),
+    streak: maxNum('streak'),
+    completedLessons: uniq(a.completedLessons, b.completedLessons),
+    achievements: uniq(a.achievements, b.achievements),
+    bookmarks: uniq(a.bookmarks, b.bookmarks),
+    activitiesCompleted: uniq(a.activitiesCompleted, b.activitiesCompleted),
+    quizScores: bestScores,
+    notes: { ...(older.notes || {}), ...(newer.notes || {}) },
+    updatedAt: Math.max(Number(a.updatedAt) || 0, Number(b.updatedAt) || 0),
+  };
+};
+
+const mergeProgress = (local = {}, server = {}) => {
+  const out = {};
+  for (const classId of new Set([...Object.keys(local || {}), ...Object.keys(server || {})])) {
+    const l = local?.[classId], r = server?.[classId];
+    out[classId] = l && r ? mergeClass(l, r) : (l || r);
+  }
+  return out;
+};
+
 const localDayOf = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 export const AppProvider = ({ children }) => {
@@ -30,25 +76,22 @@ export const AppProvider = ({ children }) => {
     if (!authChecked) return;
 
     const uid = user?.id || 'guest';
-    let loadedClass = null;
-    let loadedProgress = {};
 
-    // For authenticated users, prefer server-synced data
-    if (user && !isGuest && user.robocraft_data) {
-      loadedClass = user.robocraft_data.selectedClass || null;
-      loadedProgress = user.robocraft_data.progress || {};
-    }
+    // What this device has, and what the server has. A student who studied
+    // offline on their phone and then opened the app on a tablet must not lose
+    // either side, so the two are merged rather than one replacing the other.
+    let localProgress = {};
+    const stored = lsGet(storageKey(uid));
+    if (stored) { try { localProgress = JSON.parse(stored) || {}; } catch { /* corrupt: ignore */ } }
 
-    // Fall back to localStorage
-    if (!loadedClass) {
-      loadedClass = localStorage.getItem(classKey(uid));
-    }
-    if (Object.keys(loadedProgress).length === 0) {
-      const stored = localStorage.getItem(storageKey(uid));
-      if (stored) {
-        try { loadedProgress = JSON.parse(stored); } catch {}
-      }
-    }
+    const serverData = (user && !isGuest && user.robocraft_data) ? user.robocraft_data : null;
+    const serverProgress = serverData?.progress || {};
+
+    const loadedProgress = mergeProgress(localProgress, serverProgress);
+    const loadedClass = serverData?.selectedClass || lsGet(classKey(uid)) || null;
+
+    // Write the merged copy straight back so this device is whole even offline.
+    lsSet(storageKey(uid), JSON.stringify(loadedProgress));
 
     setSelectedClass(loadedClass);
     progressRef.current = loadedProgress;
@@ -105,7 +148,7 @@ export const AppProvider = ({ children }) => {
   const selectClass = (classId) => {
     const uid = user?.id || 'guest';
     setSelectedClass(classId);
-    localStorage.setItem(classKey(uid), classId);
+    lsSet(classKey(uid), classId);
   };
 
   const getProgressForClass = (classId) => {
@@ -131,11 +174,12 @@ export const AppProvider = ({ children }) => {
   const updateProgress = (classId, updates) => {
     const classProgress = getProgressForClass(classId);
     const newClassProgress = { ...classProgress, ...updates };
+    newClassProgress.updatedAt = Date.now();
     const newProgress = { ...progressRef.current, [classId]: newClassProgress };
     progressRef.current = newProgress;
     setProgress(newProgress);
     const uid = user?.id || 'guest';
-    localStorage.setItem(storageKey(uid), JSON.stringify(newProgress));
+    lsSet(storageKey(uid), JSON.stringify(newProgress));
     return newClassProgress;
   };
 

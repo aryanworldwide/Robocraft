@@ -37,6 +37,8 @@ export default function Settings() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
 
   const classes = [
     { id: 'class_9', name: 'Class 9', desc: 'Foundation of Robotics, Python, AI & Computing', icon: '🤖', color: '#00D2FF' },
@@ -52,20 +54,28 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
+    setDeleteError('');
     try {
       if (user && !isGuest) {
         const { backend } = await import('@/api/client');
-        await backend.auth.deleteAccount();
+        await backend.auth.deleteAccount({ password: deletePassword });
       }
-      Object.keys(localStorage).forEach(key => {
-        if (key.includes('progress') || key.includes('robocraft') || key.includes('class_')) {
-          localStorage.removeItem(key);
-        }
-      });
+      // Everything this app ever kept on the device, including saved code,
+      // podcasts and cached AI answers.
+      try {
+        Object.keys(localStorage)
+          .filter(key => /progress|robocraft|class_|py_code_|podcast_|rc_/i.test(key))
+          .forEach(key => localStorage.removeItem(key));
+      } catch { /* storage blocked: nothing to clear */ }
       await logout();
       navigate('/login');
     } catch (err) {
       setIsDeleting(false);
+      if (err?.needsPassword) {
+        setNeedsPassword(true);
+        setDeleteError('Enter your password to confirm. Nothing has been deleted yet.');
+        return;
+      }
       setDeleteError(err?.message || 'Could not delete the account. Please log out, log in again and retry.');
     }
   };
@@ -248,7 +258,7 @@ export default function Settings() {
       </button>
 
       {/* Logout */}
-      <button
+      <button aria-label="Log out"
         onClick={logout}
         className="w-full glass-strong rounded-2xl p-4 flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition-colors animate-slide-up"
         style={{ animationDelay: '0.25s' }}
@@ -283,13 +293,24 @@ export default function Settings() {
               placeholder="Type DELETE"
               className="w-full glass rounded-xl p-3 text-sm text-center font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-red-500/50 mb-4"
             />
+            {needsPassword && (
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+                placeholder="Your password"
+                autoComplete="current-password"
+                aria-label="Your password"
+                className="w-full glass rounded-xl p-3 text-sm text-center text-foreground focus:outline-none focus:ring-1 focus:ring-red-500/50 mb-4"
+              />
+            )}
             <div className="flex gap-2">
-              <button onClick={() => { setShowDeleteDialog(false); setDeleteConfirm(''); }} className="flex-1 py-3 rounded-xl glass text-cyan-400 font-medium text-sm hover:bg-cyan-500/10 transition-colors">
+              <button onClick={() => { setShowDeleteDialog(false); setDeleteConfirm(''); setDeletePassword(''); setNeedsPassword(false); setDeleteError(''); }} className="flex-1 py-3 rounded-xl glass text-cyan-400 font-medium text-sm hover:bg-cyan-500/10 transition-colors">
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteConfirm !== 'DELETE' || isDeleting}
+                disabled={deleteConfirm !== 'DELETE' || isDeleting || (needsPassword && !deletePassword)}
                 className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-sm disabled:opacity-40 hover:bg-red-700 transition-colors"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}

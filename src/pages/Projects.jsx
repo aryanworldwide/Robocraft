@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import React, { useState, useCallback, useEffect } from 'react';
 import { formatClass } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
@@ -19,6 +20,14 @@ export default function Projects() {
   const projects = getProjects(selectedClass);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+  // Elapsed seconds, so a 25-second wait reads as progress rather than a hang.
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    if (!loading) return;
+    setSecs(0);
+    const t = setInterval(() => setSecs(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [loading]);
   const [generatedProject, setGeneratedProject] = useState(null);
 
   const handleRefresh = useCallback(async () => {
@@ -53,7 +62,11 @@ export default function Projects() {
 
   // Show AI-generated project view if one was generated
   if (generatedProject && !loading) {
-    return <AIGeneratedProjectView project={generatedProject} onBack={() => setGeneratedProject(null)} />;
+    return (
+      <ErrorBoundary compact message="This AI project could not be shown. Try generating it again.">
+        <AIGeneratedProjectView project={generatedProject} onBack={() => setGeneratedProject(null)} />
+      </ErrorBoundary>
+    );
   }
 
   return (
@@ -76,8 +89,12 @@ export default function Projects() {
           <h3 className="font-bold text-sm gradient-text mb-2">AI is designing your project...</h3>
           <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground">
             <Loader2 className="w-3 h-3 animate-spin" />
-            <span>Selecting components · Designing circuit · Writing code · Creating build guide</span>
+            <span>{['Selecting components', 'Designing the circuit', 'Writing the code', 'Creating the build guide'][Math.min(3, Math.floor(secs / 6))]}</span>
           </div>
+          <div className="w-44 h-1 mx-auto mt-3 rounded-full bg-muted overflow-hidden">
+            <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${Math.min(95, secs * 4)}%` }} />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">{secs}s · usually 20-30 seconds</p>
         </div>
       )}
 

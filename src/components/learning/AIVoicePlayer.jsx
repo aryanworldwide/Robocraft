@@ -113,16 +113,16 @@ export default function AIVoicePlayer({ text, title }) {
 
   return (
     <div className="glass-strong rounded-2xl p-3 flex items-center gap-3" style={{ border: '1px solid rgba(0,210,255,0.15)' }}>
-      <button
+      <button aria-label="Play or pause"
         onClick={togglePlayPause}
         className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center hover:neon-glow transition-all flex-shrink-0"
       >
         {isPlaying && !isPaused ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white ml-0.5" />}
       </button>
       {isPlaying && (
-        <button
+        <button aria-label="Stop"
           onClick={stop}
-          className="w-8 h-8 rounded-lg glass flex items-center justify-center hover:bg-red-500/15 transition-colors flex-shrink-0"
+          className="w-8 h-8 rounded-lg glass flex items-center justify-center hover:bg-red-500/15 transition-colors flex-shrink-0 tap-target"
         >
           <Square className="w-3.5 h-3.5 text-red-400" />
         </button>

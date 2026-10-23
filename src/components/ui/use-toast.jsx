@@ -1,8 +1,10 @@
 // Inspired by react-hot-toast library
 import { useState, useEffect } from "react";
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+// Three at once is as many as fits on a phone; after that the oldest goes.
+const TOAST_LIMIT = 3;
+// Dismiss after five seconds instead of sitting there for 16 minutes.
+const TOAST_REMOVE_DELAY = 5000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",

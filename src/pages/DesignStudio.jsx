@@ -1,3 +1,4 @@
+import ErrorBoundary from '@/components/ErrorBoundary';
 import React, { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
@@ -241,7 +242,9 @@ export default function DesignStudio() {
       {/* viewport */}
       <div className="flex-1 min-h-0 relative">
         <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">Loading 3-D workplane…</div>}>
-          <StudioView objects={objects} selected={selected} mode={mode} snap={snap} onPick={onPick} onTransform={onTransform} viewCmd={viewCmd} additive={multi} />
+          <ErrorBoundary compact message="The 3-D workplane could not start. Your saved designs are safe.">
+            <StudioView objects={objects} selected={selected} mode={mode} snap={snap} onPick={onPick} onTransform={onTransform} viewCmd={viewCmd} additive={multi} />
+          </ErrorBoundary>
         </Suspense>
         <div className="absolute right-2 top-2 flex flex-col gap-1">
           {[['home', <HomeIcon key="h" className="w-4 h-4" />], ['top', 'TOP'], ['front', 'FRT'], ['side', 'SIDE'], ['zoomin', <ZoomIn key="i" className="w-4 h-4" />], ['zoomout', <ZoomOut key="o" className="w-4 h-4" />]].map(([n, l]) => (

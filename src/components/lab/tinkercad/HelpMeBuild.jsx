@@ -55,7 +55,7 @@ function HelpMeBuildInner({ components, wires, code, status }) {
               onKeyDown={e => { if (e.key === 'Enter') { ask(input); setInput(''); } }}
               placeholder="Ask anything…"
               className="flex-1 glass rounded-lg px-2 py-1.5 text-[11px] outline-none border border-border focus:border-cyan-500/40" />
-            <button onClick={() => { ask(input); setInput(''); }} className="px-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"><Send className="w-3.5 h-3.5" /></button>
+            <button aria-label="Send message" onClick={() => { ask(input); setInput(''); }} className="px-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"><Send className="w-3.5 h-3.5" /></button>
           </div>
           <div className="max-h-40 overflow-y-auto text-[11px] text-foreground/90 leading-relaxed whitespace-pre-line">
             {loading ? <div className="flex items-center gap-1.5 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Thinking…</div> : reply}

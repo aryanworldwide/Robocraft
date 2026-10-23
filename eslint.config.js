@@ -6,12 +6,10 @@ import pluginUnusedImports from "eslint-plugin-unused-imports";
 
 export default [
   {
-    files: [
-      "src/components/**/*.{js,mjs,cjs,jsx}",
-      "src/pages/**/*.{js,mjs,cjs,jsx}",
-      "src/Layout.jsx",
-    ],
-    ignores: ["src/lib/**/*", "src/components/ui/**/*"],
+    // Everything we write, not just the pages: the bug that shipped a blank
+    // screen was an undefined name in a helper module.
+    files: ["src/**/*.{js,mjs,cjs,jsx}"],
+    ignores: ["src/components/ui/**/*"],
     ...pluginJs.configs.recommended,
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
@@ -35,6 +33,12 @@ export default [
       "unused-imports": pluginUnusedImports,
     },
     rules: {
+      // The `rules` key replaces whatever the spread configs set, so the ones
+      // that matter are listed here explicitly. `no-undef` is the one that
+      // catches a name used but never imported.
+      ...pluginJs.configs.recommended.rules,
+      "no-undef": "error",
+      "no-empty": ["error", { allowEmptyCatch: true }],
       "no-unused-vars": "off",
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",

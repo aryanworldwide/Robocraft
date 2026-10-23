@@ -71,7 +71,7 @@ export default function FullscreenCircuit({ pinConnections, projectName, onClose
           <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="text-xs glass px-3 py-2 rounded-lg text-cyan-400 hover:bg-cyan-500/10 font-bold">
             Reset
           </button>
-          <button onClick={onClose} className="p-2 rounded-lg glass text-red-400 hover:bg-red-500/10">
+          <button aria-label="Close" onClick={onClose} className="p-2 rounded-lg glass text-red-400 hover:bg-red-500/10 tap-target">
             <X className="w-5 h-5" />
           </button>
         </div>

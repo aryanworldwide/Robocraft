@@ -43,7 +43,7 @@ function Out({ label, value, unit, strong }) {
 function Tool({ title, desc, children, open, onToggle }) {
   return (
     <div className="glass-strong rounded-2xl">
-      <button onClick={onToggle} className="w-full flex items-center gap-2 p-4 text-left">
+      <button aria-label="Collapse" onClick={onToggle} className="w-full flex items-center gap-2 p-4 text-left">
         <div className="flex-1"><p className="text-sm font-bold">{title}</p><p className="text-[11px] text-muted-foreground">{desc}</p></div>
         {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </button>

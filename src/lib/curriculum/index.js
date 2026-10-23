@@ -69,6 +69,16 @@ export function getLesson(classId, lessonId) {
   return lessons.find(l => l.id === lessonId);
 }
 
+// Which class a lesson belongs to. Links between classes (and an old bookmark
+// saved before the student switched class) would otherwise dead-end.
+export function findLessonAnywhere(lessonId) {
+  for (const classId of Object.keys(curricula)) {
+    const lesson = getAllLessons(classId).find(l => l.id === lessonId);
+    if (lesson) return { classId, lesson };
+  }
+  return null;
+}
+
 export function getQuizForLesson(classId, lessonId) {
   const curriculum = curricula[classId];
   const hand = (curriculum && curriculum.quizzes && curriculum.quizzes[lessonId]) || [];

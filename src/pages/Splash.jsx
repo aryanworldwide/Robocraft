@@ -8,6 +8,9 @@ import RobotBlueprintStage from '@/components/splash/RobotBlueprintStage';
 import NeuralNetworkStage from '@/components/splash/NeuralNetworkStage';
 import FinalStage from '@/components/splash/FinalStage';
 
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
+
 // Hard budget: the whole boot sequence never exceeds 2.5 seconds.
 const BOOT_BUDGET_MS = 2500;
 
@@ -16,13 +19,13 @@ export default function Splash() {
   const { isAuthenticated, authChecked, user } = useAuth();
   const [stage, setStage] = useState(0);
 
-  const isFirstLaunch = !localStorage.getItem('rc_booted');
+  const isFirstLaunch = !lsGet('rc_booted');
 
   const finish = useCallback(() => {
-    localStorage.setItem('rc_booted', '1');
+    lsSet('rc_booted', '1');
     if (authChecked && isAuthenticated) {
       const uid = user?.id || 'guest';
-      const savedClass = localStorage.getItem(`robocraft_class_${uid}`);
+      const savedClass = lsGet(`robocraft_class_${uid}`);
       navigate(savedClass ? '/' : '/class-selection');
     } else if (authChecked) {
       navigate('/login');

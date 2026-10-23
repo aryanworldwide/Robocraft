@@ -657,3 +657,21 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-b.to-cyan-400 {
   --tw-gradient-to: #0e7490 var(--tw-gradient-to-position);
 }
+
+/* Touch targets. Small icon buttons and the text "Back" links are under the
+   44px that a finger can reliably hit, so they get an invisible 44x44 hit area
+   centred on them. Nothing moves and nothing changes size on screen. */
+@media (pointer: coarse) {
+  .tap-target { position: relative; touch-action: manipulation; }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
+}

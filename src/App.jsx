@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useState, useEffect } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -15,6 +15,7 @@ import LevelUpPopup from '@/components/learning/LevelUpPopup';
 import InstallHint from '@/components/InstallHint';
 import { isPro } from '@/lib/uiMode';
 import { toast } from '@/components/ui/use-toast';
+import ErrorBoundary from '@/components/ErrorBoundary';
 // Add page imports here
 import Splash from '@/pages/Splash';
 import Login from '@/pages/Login';
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
           You're offline — lessons, quizzes and the lab still work. AI features need internet.
         </div>
       )}
+      <ErrorBoundary resetKey={location.pathname}>
       <Suspense fallback={<PageLoading />}>
       <Routes>
         <Route path="/splash" element={<Splash />} />
@@ -148,6 +150,7 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       </Suspense>
+      </ErrorBoundary>
       {!pro && badgePopup && <BadgePopup badges={badgePopup} onClose={() => setBadgePopup(null)} />}
       {!pro && levelPopup && <LevelUpPopup level={levelPopup} onClose={() => setLevelPopup(null)} />}
       <InstallHint />

@@ -1,0 +1,22 @@
+# A name used but never imported builds fine and then shows a blank screen in
+# the app. ESLint's no-undef catches exactly that, so it runs on every push.
+# It is deliberately a job of its own: a lint complaint should never stand
+# between a finished app and the Play Store.
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run lint

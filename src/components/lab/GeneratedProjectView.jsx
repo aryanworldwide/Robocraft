@@ -4,6 +4,7 @@ import { ChevronLeft, Clock, IndianRupee, Package, Wrench, BookOpen, Code2, Flas
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import { useInk } from '@/lib/ui/ink';
+import { normalizeProject } from '@/lib/aiShape';
 
 function highlightCode(code) {
   if (!code) return '';
@@ -33,7 +34,7 @@ function CodeBlock({ code, filename }) {
   return (
     <div>
       <div className="flex gap-1.5 mb-2">
-        <button onClick={handleCopy} className="flex items-center gap-1 text-[10px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
+        <button aria-label="Copy" onClick={handleCopy} className="flex items-center gap-1 text-[10px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
           {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
         </button>
         <button onClick={handleDownload} className="flex items-center gap-1 text-[10px] glass px-2.5 py-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10">
@@ -61,7 +62,10 @@ function Section({ icon: Icon, title, color, children, defaultOpen }) {
   );
 }
 
-export default function GeneratedProjectView({ project, onBack, onSaved, savedProjectId, setSavedProjectId }) {
+export default function GeneratedProjectView({ project: rawProject, onBack, onSaved, savedProjectId, setSavedProjectId }) {
+  // The AI occasionally returns a string where a list belongs; normalise once
+  // here so nothing below has to guard against it.
+  const project = React.useMemo(() => normalizeProject(rawProject) || {}, [rawProject]);
   const ink = useInk();
   const [saved, setSaved] = useState(!!project._savedId);
   const [currentSavedId, setCurrentSavedId] = useState(project._savedId || savedProjectId || null);
@@ -149,7 +153,7 @@ export default function GeneratedProjectView({ project, onBack, onSaved, savedPr
     <div className="max-w-2xl mx-auto px-4 py-4 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 animate-slide-up sticky top-14 z-30 glass-strong rounded-2xl px-3 py-2">
-        <button onClick={onBack} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-cyan-400 transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-cyan-400 transition-colors tap-target">
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
         <div className="flex items-center gap-1.5">
@@ -178,18 +182,18 @@ export default function GeneratedProjectView({ project, onBack, onSaved, savedPr
       {/* Action buttons */}
       <div className="flex gap-2 mb-4 animate-slide-up">
         {!saved ? (
-          <button onClick={handleSave} disabled={saving}
+          <button aria-label="Save" onClick={handleSave} disabled={saving}
             className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50 hover:neon-glow transition-all">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} {saving ? 'Saving...' : 'Save Project'}
           </button>
         ) : (
-          <button onClick={handleComplete}
+          <button aria-label="Mark done" onClick={handleComplete}
             className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${completed ? 'glass text-green-400' : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'}`}>
             <CheckCircle2 className="w-3.5 h-3.5" /> {completed ? 'Completed' : 'Mark Complete'}
           </button>
         )}
         {saved && (
-          <button onClick={handleShare} disabled={shared}
+          <button aria-label="Share" onClick={handleShare} disabled={shared}
             className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${shared ? 'glass text-cyan-400' : 'glass text-cyan-400 hover:bg-cyan-500/10'}`}>
             <Share2 className="w-3.5 h-3.5" /> {shared ? 'Shared' : 'Share'}
           </button>
@@ -342,7 +346,7 @@ export default function GeneratedProjectView({ project, onBack, onSaved, savedPr
           <input value={chatInput} onChange={e => setChatInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && askMentor(chatInput)}
             placeholder="Ask your mentor..." className="flex-1 glass rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
-          <button onClick={() => askMentor(chatInput)} disabled={!chatInput.trim() || chatLoading}
+          <button aria-label="Send message" onClick={() => askMentor(chatInput)} disabled={!chatInput.trim() || chatLoading}
             className="w-8 h-8 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center disabled:opacity-40">
             <Send className="w-3.5 h-3.5 text-white" />
           </button>

@@ -27,7 +27,7 @@ export default function InstallHint() {
   return (
     <div className="fixed inset-x-3 z-[90] glass-strong rounded-2xl p-4 shadow-2xl animate-slide-up"
       style={{ bottom: 'calc(env(safe-area-inset-bottom) + 76px)' }}>
-      <button onClick={close} aria-label="Close" className="absolute top-2 right-2 p-1.5 text-muted-foreground"><X className="w-4 h-4" /></button>
+      <button onClick={close} aria-label="Close" className="absolute top-2 right-2 p-1.5 text-muted-foreground tap-target"><X className="w-4 h-4" /></button>
       <p className="text-sm font-bold mb-2 pr-6">Install RoboCraft on your iPhone</p>
       <ol className="text-xs text-muted-foreground space-y-1.5">
         <li className="flex items-center gap-1.5">1. Tap <Share className="w-4 h-4 text-cyan-400 inline" /> <b className="text-foreground">Share</b> in Safari (bottom bar, or ••• first)</li>

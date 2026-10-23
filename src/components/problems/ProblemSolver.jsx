@@ -96,7 +96,7 @@ export default function ProblemSolver({ topicIds, compact = false, onAnswered })
         </ol>
       )}
 
-      <button onClick={next} className="mt-4 w-full py-2.5 rounded-xl glass text-cyan-500 text-sm font-bold flex items-center justify-center gap-1.5">
+      <button aria-label="Refresh" onClick={next} className="mt-4 w-full py-2.5 rounded-xl glass text-cyan-500 text-sm font-bold flex items-center justify-center gap-1.5">
         {result === null ? <><RefreshCw className="w-4 h-4" /> Skip — new problem</> : <>Next problem <ChevronRight className="w-4 h-4" /></>}
       </button>
     </div>

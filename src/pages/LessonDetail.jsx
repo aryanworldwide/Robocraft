@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReportButton from '@/components/ReportButton';
 import { useApp } from '@/lib/AppContext';
-import { getLesson, getQuizForLesson } from '@/lib/curriculum';
+import { getLesson, getQuizForLesson, findLessonAnywhere } from '@/lib/curriculum';
 import { generateFlashCards, generateMatchGame, generateArrangeSteps, generateFillBlank, generateDidYouKnow } from '@/lib/curriculum/flashcardData';
 import { ArrowLeft, Bookmark, CheckCircle2, Trophy, Share2, BookOpen, Headphones, Gamepad2, Wrench, Clock, Target, Lightbulb, Globe, Edit3, Check, Sparkles, FileText, Download, Loader2 } from 'lucide-react';
 import { hasSpeech } from '@/lib/platform';
@@ -39,7 +39,7 @@ export default function LessonDetail() {
   const ink = useInk();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedClass, getProgressForClass, markLessonComplete, toggleBookmark, addRecentlyViewed, saveNote, recordFlashcardReview, recordActivityComplete } = useApp();
+  const { selectedClass, selectClass, getProgressForClass, markLessonComplete, toggleBookmark, addRecentlyViewed, saveNote, recordFlashcardReview, recordActivityComplete } = useApp();
   const progress = getProgressForClass(selectedClass);
   const lesson = useMemo(() => getLesson(selectedClass, id), [selectedClass, id]);
   const quizQuestions = useMemo(() => getQuizForLesson(selectedClass, id), [selectedClass, id]);
@@ -94,10 +94,32 @@ export default function LessonDetail() {
   }, [lesson, quizQuestions]);
 
   if (!lesson) {
+    // The link may point at a chapter from another class — a shared link, or a
+    // bookmark kept from before the student switched. Offer the switch instead
+    // of a dead end.
+    const elsewhere = findLessonAnywhere(id);
+    const classNames = { class_9: 'Class 9', class_10: 'Class 10', class_11: 'Class 11' };
     return (
       <div className="max-w-3xl mx-auto px-4 py-8 text-center">
-        <p className="text-muted-foreground">Lesson not found.</p>
-        <button onClick={() => navigate('/learn')} className="text-cyan-400 mt-2">Back to Learn</button>
+        {elsewhere ? (
+          <>
+            <p className="text-muted-foreground">
+              “{elsewhere.lesson.title}” is a {classNames[elsewhere.classId] || 'another class'} chapter.
+            </p>
+            <button
+              onClick={() => { selectClass(elsewhere.classId); navigate(`/lesson/${id}`, { replace: true }); }}
+              className="mt-3 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-medium"
+            >
+              Switch to {classNames[elsewhere.classId] || 'that class'} and open it
+            </button>
+            <div><button onClick={() => navigate('/learn')} className="text-cyan-400 mt-3 text-sm">Back to Learn</button></div>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground">Lesson not found.</p>
+            <button onClick={() => navigate('/learn')} className="text-cyan-400 mt-2">Back to Learn</button>
+          </>
+        )}
       </div>
     );
   }
@@ -140,6 +162,7 @@ export default function LessonDetail() {
         return;
       }
       if (navigator.share) { await navigator.share({ title: lesson.title, text, url: window.location.href }); return; }
+      if (!navigator.clipboard) throw new Error('no clipboard');
       await navigator.clipboard.writeText(window.location.href);
       toast({ title: 'Link copied', description: 'Paste it anywhere to share this lesson.' });
     } catch (e) {
@@ -156,7 +179,7 @@ export default function LessonDetail() {
       <div className="flex items-center justify-between mb-3 animate-slide-up sticky top-14 z-30 glass-strong rounded-2xl px-3 py-2">
         <BackButton />
         <div className="flex items-center gap-1">
-          <button onClick={handleShare} className="p-2 rounded-lg transition-colors text-muted-foreground hover:text-cyan-400">
+          <button aria-label="Share" onClick={handleShare} className="p-2 rounded-lg transition-colors text-muted-foreground hover:text-cyan-400 tap-target">
             <Share2 className="w-4 h-4" />
           </button>
           <button onClick={() => toggleBookmark(selectedClass, lesson.id)} className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-yellow-400' : 'text-muted-foreground hover:text-yellow-400'}`}>
@@ -194,7 +217,7 @@ export default function LessonDetail() {
       </div>
 
       {/* Chapter notes download — prominent at top */}
-      <button onClick={handleNotesDownload} disabled={notesLoading}
+      <button aria-label="Download" onClick={handleNotesDownload} disabled={notesLoading}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl glass text-green-500 dark:text-green-400 text-xs font-bold mb-4 hover:bg-green-500/10 transition-colors animate-slide-up disabled:opacity-60">
         {notesLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Preparing PDF…</> : <><Download className="w-4 h-4" /> Download Chapter Notes (PDF)</>}
       </button>
@@ -360,7 +383,7 @@ export default function LessonDetail() {
       </div>
 
       {/* Complete button */}
-      <button
+      <button aria-label="Mark done"
         onClick={handleComplete}
         disabled={completed}
         className={`w-full py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${

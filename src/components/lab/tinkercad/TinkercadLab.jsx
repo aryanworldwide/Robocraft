@@ -27,6 +27,10 @@ import LabWelcome from './LabWelcome';
 import BuildAnything from './BuildAnything';
 import WorkflowStepper from './WorkflowStepper';
 import HelpMeBuild from './HelpMeBuild';
+import { toast } from '@/components/ui/use-toast';
+
+// Returns false when the device refuses the write (storage full, private mode).
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
 
 let _id = 1;
 const newId = () => `c${_id++}`;
@@ -35,6 +39,12 @@ const BUILDS_KEY = 'robocraft_lab_builds';
 export default function TinkercadLab({ onExit }) {
   const navigate = useNavigate();
   const [experimentId, setExperimentId] = useState(null);
+  // Read once, not on every render: a corrupt or oversized value would
+  // otherwise throw in the middle of drawing the lab.
+  const [savedBuilds, setSavedBuilds] = useState(() => {
+    try { const v = JSON.parse(localStorage.getItem(BUILDS_KEY) || '[]'); return Array.isArray(v) ? v : []; }
+    catch { return []; }
+  });
   const experiment = experimentId ? getExperiment(experimentId) : null;
   const free = !experiment;
 
@@ -264,6 +274,16 @@ export default function TinkercadLab({ onExit }) {
 
   const resetSim = () => { setRunning(false); setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); };
   const runSim = () => {
+    // Pressing Run on an empty breadboard used to do nothing at all, which
+    // reads as a broken button. Say what is missing instead.
+    if (components.length === 0) {
+      toast({ title: 'Nothing to run yet', description: 'Drag a board and a part onto the workbench first.' });
+      return;
+    }
+    if (wires.length === 0) {
+      toast({ title: 'Wire the parts first', description: 'Connect your parts to the board — tap one pin, then the other, to draw a wire.' });
+      return;
+    }
     setSimState(experiment ? createSimState() : createFreeSimState()); setSerial([]); setCodeError(null);
     let eng = 'code';
     try { transpile(activeCode); } catch (e) {
@@ -279,9 +299,11 @@ export default function TinkercadLab({ onExit }) {
   const saveBuild = () => {
     const name = window.prompt('Name this build:', `Build ${new Date().toLocaleDateString()}`);
     if (!name) return;
-    const builds = JSON.parse(localStorage.getItem(BUILDS_KEY) || '[]');
-    builds.push({ id: `b${Date.now()}`, name, components, wires, boardType, code: userCode });
-    localStorage.setItem(BUILDS_KEY, JSON.stringify(builds));
+    const builds = [...savedBuilds, { id: `b${Date.now()}`, name, components, wires, boardType, code: userCode }];
+    setSavedBuilds(builds);
+    if (!lsSet(BUILDS_KEY, JSON.stringify(builds))) {
+      toast({ title: 'Could not save', description: 'This device is out of storage space. Delete an old build and try again.' });
+    }
   };
   const loadBuild = (b) => {
     snapshot();
@@ -289,7 +311,6 @@ export default function TinkercadLab({ onExit }) {
     setExperimentId(null); setUserCode(b.code ?? null); setWiringGuide(null); setRunning(false); setSimState(createFreeSimState()); setSerial([]);
     setShowSaves(false); setShowWelcome(false);
   };
-  const savedBuilds = JSON.parse(localStorage.getItem(BUILDS_KEY) || '[]');
 
   const helpStep = nextWiringStep(wiringGuide, components, wires);
   const selectedComp = selectedId ? components.find(c => c.id === selectedId) : null;
@@ -312,11 +333,11 @@ export default function TinkercadLab({ onExit }) {
         </button>}
 
         <div className="ml-auto flex items-center gap-1">
-          <button onClick={undo} disabled={!past.length} title="Undo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30"><Undo2 className="w-4 h-4" /></button>
-          <button onClick={redo} disabled={!future.length} title="Redo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30 hidden sm:block"><Redo2 className="w-4 h-4" /></button>
-          <button onClick={saveBuild} title="Save build" className="p-1.5 rounded-lg glass text-cyan-500"><Save className="w-4 h-4" /></button>
+          <button aria-label="Undo" onClick={undo} disabled={!past.length} title="Undo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30 tap-target"><Undo2 className="w-4 h-4" /></button>
+          <button aria-label="Redo" onClick={redo} disabled={!future.length} title="Redo" className="p-1.5 rounded-lg glass text-cyan-500 disabled:opacity-30 hidden sm:block tap-target"><Redo2 className="w-4 h-4" /></button>
+          <button aria-label="Save" onClick={saveBuild} title="Save build" className="p-1.5 rounded-lg glass text-cyan-500 tap-target"><Save className="w-4 h-4" /></button>
           <button onClick={() => setShowSaves(true)} title="My builds" className="p-1.5 rounded-lg glass text-cyan-500"><FolderOpen className="w-4 h-4" /></button>
-          <button onClick={clearAll} title="Clear" className="p-1.5 rounded-lg glass text-red-400 hidden sm:block"><Trash2 className="w-4 h-4" /></button>
+          <button aria-label="Delete" onClick={clearAll} title="Clear" className="p-1.5 rounded-lg glass text-red-400 hidden sm:block tap-target"><Trash2 className="w-4 h-4" /></button>
           <button onClick={() => setShowTemplates(true)} title="Projects" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg glass text-cyan-500 text-[11px] font-bold hover:bg-cyan-500/10 transition-colors hidden md:flex"><LayoutGrid className="w-3.5 h-3.5" /><span>Projects</span></button>
           <button onClick={() => setShowCode(true)} title="Code" className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg glass text-cyan-400 text-[11px] font-bold hover:bg-cyan-500/10 transition-colors hidden md:flex"><Code2 className="w-3.5 h-3.5" /><span>Code</span></button>
           <button onClick={() => setShowSerial(s => !s)} title="Serial" className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors hidden md:flex ${showSerial ? 'bg-green-500/20 text-green-400' : 'glass text-cyan-400 hover:bg-cyan-500/10'}`}><Terminal className="w-3.5 h-3.5" /><span>Serial</span></button>
@@ -324,7 +345,7 @@ export default function TinkercadLab({ onExit }) {
           {!running
             ? <button onClick={runSim} disabled={!canRun} title="Run" className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[11px] font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"><Play className="w-3.5 h-3.5" /><span className="hidden md:inline">Run</span></button>
             : <button onClick={() => setRunning(false)} className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-bold transition-colors"><Pause className="w-3.5 h-3.5" /><span className="hidden md:inline">Stop</span></button>}
-          <button onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors"><RotateCcw className="w-4 h-4" /></button>
+          <button aria-label="Reset" onClick={resetSim} title="Reset" className="p-1.5 rounded-lg glass text-cyan-400 hover:bg-cyan-500/10 transition-colors tap-target"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
 
@@ -482,7 +503,7 @@ function MobSheet({ title, onClose, children }) {
       <div className="relative glass-strong border-t border-border rounded-t-2xl flex flex-col" style={{ height: '70vh' }}>
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
           <span className="text-sm font-bold text-cyan-400">{title}</span>
-          <button onClick={onClose} className="p-1.5 rounded-lg glass text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg glass text-muted-foreground hover:text-red-400 tap-target"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
       </div>
@@ -497,7 +518,7 @@ function TemplatePicker({ onPick, onClose }) {
       <div className="relative z-10 w-full max-w-md glass-strong rounded-2xl p-5 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold">Projects ({LAB_EXPERIMENTS.length})</h2>
-          <button onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
+          <button aria-label="Close" onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 tap-target"><X className="w-4 h-4" /></button>
         </div>
         <div className="space-y-2">
           {LAB_EXPERIMENTS.map(ex => (
@@ -522,7 +543,7 @@ function SavesModal({ builds, onLoad, onClose }) {
       <div className="relative z-10 w-full max-w-md glass-strong rounded-2xl p-5 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold">My Builds</h2>
-          <button onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400"><X className="w-4 h-4" /></button>
+          <button aria-label="Close" onClick={onClose} className="p-2 rounded-lg glass text-muted-foreground hover:text-red-400 tap-target"><X className="w-4 h-4" /></button>
         </div>
         {builds.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-8">No saved builds yet. Build something and tap Save.</p>

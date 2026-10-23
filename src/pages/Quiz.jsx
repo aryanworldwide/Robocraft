@@ -2,7 +2,7 @@ import ShareScoreButton from '@/components/share/ShareScoreButton';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
-import { getQuizForLesson, getLesson, shuffle } from '@/lib/curriculum';
+import { getQuizForLesson, getLesson, shuffle, findLessonAnywhere } from '@/lib/curriculum';
 import { XP_REWARDS } from '@/lib/gamification';
 import { ArrowLeft, Check, X, Trophy, RotateCcw, ChevronRight, Target, Coins, Zap } from 'lucide-react';
 import Confetti from '@/components/learning/Confetti';
@@ -36,10 +36,10 @@ function fillMatches(given, expected) {
 const correctTextFor = (q) =>
   q.type === 'fill' ? q.answer : (q.options ? q.options[q.answer] : '—');
 
-export default function Quiz() {
+function QuizRun() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedClass, recordQuizScore } = useApp();
+  const { selectedClass, selectClass, recordQuizScore } = useApp();
   const lessonTitleForShare = getLesson(selectedClass, id)?.title || 'Chapter quiz';
   const allQuestions = useMemo(() => getQuizForLesson(selectedClass, id), [selectedClass, id]);
 
@@ -71,10 +71,28 @@ export default function Quiz() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   if (!allQuestions || allQuestions.length === 0) {
+    // The chapter may simply belong to another class (shared link, old bookmark).
+    const elsewhere = getLesson(selectedClass, id) ? null : findLessonAnywhere(id);
+    const classNames = { class_9: 'Class 9', class_10: 'Class 10', class_11: 'Class 11' };
     return (
       <div className="max-w-2xl mx-auto px-4 py-8 text-center">
-        <p className="text-muted-foreground">No quiz available for this lesson yet.</p>
-        <button onClick={() => navigate('/learn')} className="text-cyan-400 mt-2">Back to Learn</button>
+        {elsewhere ? (
+          <>
+            <p className="text-muted-foreground">This quiz belongs to a {classNames[elsewhere.classId] || 'different'} chapter.</p>
+            <button
+              onClick={() => { selectClass(elsewhere.classId); navigate(`/quiz/${id}`, { replace: true }); }}
+              className="mt-3 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-medium"
+            >
+              Switch to {classNames[elsewhere.classId] || 'that class'} and start
+            </button>
+            <div><button onClick={() => navigate('/learn')} className="text-cyan-400 mt-3 text-sm">Back to Learn</button></div>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground">No quiz available for this lesson yet.</p>
+            <button onClick={() => navigate('/learn')} className="text-cyan-400 mt-2">Back to Learn</button>
+          </>
+        )}
       </div>
     );
   }
@@ -364,7 +382,7 @@ export default function Quiz() {
             Submit Answer
           </button>
         ) : (
-          <button
+          <button aria-label="Next"
             onClick={handleNext}
             className="w-full py-3.5 rounded-2xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:neon-glow transition-all flex items-center justify-center gap-2"
           >
@@ -374,4 +392,13 @@ export default function Quiz() {
       </div>
     </div>
   );
+}
+
+// Every piece of quiz state is seeded from the lesson, so moving to another
+// quiz without unmounting would leave the previous run's questions and score on
+// screen. Keying the run on the lesson gives each quiz a clean component.
+export default function Quiz() {
+  const { id } = useParams();
+  const { selectedClass } = useApp();
+  return <QuizRun key={`${selectedClass || 'none'}:${id}`} />;
 }

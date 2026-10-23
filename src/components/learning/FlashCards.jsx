@@ -90,10 +90,10 @@ export default function FlashCards({ cards, onComplete }) {
 
       {/* Flash card */}
       <div className="flex items-center justify-center gap-2">
-        <button
+        <button aria-label="Back"
           onClick={prev}
           disabled={currentIdx === 0}
-          className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors"
+          className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors tap-target"
         >
           <ChevronLeft className="w-5 h-5 text-cyan-400" />
         </button>
@@ -160,10 +160,10 @@ export default function FlashCards({ cards, onComplete }) {
           </div>
         </div>
 
-        <button
+        <button aria-label="Next"
           onClick={next}
           disabled={currentIdx === cards.length - 1}
-          className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors"
+          className="p-2 rounded-xl glass disabled:opacity-30 hover:bg-cyan-500/10 transition-colors tap-target"
         >
           <ChevronRight className="w-5 h-5 text-cyan-400" />
         </button>
