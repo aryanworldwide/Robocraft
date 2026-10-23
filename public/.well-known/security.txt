@@ -1,5 +1,5 @@
 Contact: https://github.com/aryanworldwide/Robocraft/security/advisories/new
-Contact: mailto:robocraft.support@example.com
+Contact: mailto:aryansonkar243@gmail.com
 Expires: 2027-10-23T09:07:47Z
 Preferred-Languages: en, hi
 Canonical: https://aryanworldwide.github.io/Robocraft/.well-known/security.txt
