@@ -379,7 +379,7 @@ export default function Home() {
                 className="glass rounded-2xl p-4 cursor-pointer hover:scale-[1.02] transition-transform group"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${subjectColors[lesson.subject] || '#00D2FF'}20`, color: subjectColors[lesson.subject] || '#00D2FF' }}>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${subjectColors[lesson.subject] || '#00D2FF'}20`, color: ink(subjectColors[lesson.subject] || '#00D2FF', 0.125) }}>
                     {lesson.subject}
                   </span>
                   <span className="text-[10px] text-muted-foreground">{lesson.difficulty}</span>
