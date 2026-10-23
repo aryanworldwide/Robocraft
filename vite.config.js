@@ -25,17 +25,16 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (!id.includes('node_modules')) {
-              if (id.includes('/src/lib/curriculum/')) return 'curriculum';
-              return undefined;
-            }
-            if (/node_modules\/(react|react-dom|scheduler|react-router)/.test(id)) return 'vendor-react';
-            if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'vendor-firebase';
+            // Only libraries that nothing else initialises at import time are
+            // split out. React and everything that touches it stay together:
+            // giving React a chunk of its own makes a chunk that uses it run
+            // first, and the app dies on `createContext` of undefined.
+            if (id.includes('/src/lib/curriculum/')) return 'curriculum';
+            if (!id.includes('node_modules')) return undefined;
             if (id.includes('node_modules/three')) return 'vendor-three';
             if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas')) return 'vendor-pdf';
-            if (id.includes('node_modules/@radix-ui')) return 'vendor-ui';
-            if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
-            return 'vendor';
+            if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'vendor-firebase';
+            return undefined;
           },
         },
       },
