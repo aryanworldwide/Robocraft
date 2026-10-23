@@ -159,7 +159,7 @@ export function groupSoup(g) {
   const hit = GROUP_CACHE.get(g.children);
   if (hit && hit.frame === g.frame) return hit.soup;
   const solids = [], holes = [];
-  for (const c of g.children) (c.hole ? holes : solids).push(objectSoup(c));
+  for (const c of g.children) { if (c.decal || c.visual) continue; (c.hole ? holes : solids).push(objectSoup(c)); }
   const world = combine(solids, holes);
   // normalise into the unit box using the group's stored frame
   const { origin, extent } = g.frame; // world bounds at grouping time

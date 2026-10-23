@@ -2,6 +2,13 @@
 import { makeGroup, ungroup, objectSoup, soupBounds } from './shapes';
 
 const P = (type, size, pos, extra = {}) => ({ type, size, pos, rot: [0, 0, 0], hole: false, ...extra });
+// Printed artwork laid on a board's top face (drawn, never printed/exported).
+const D = (decal, size, pos) => ({ type: 'box', size: [size[0], size[1], 0.02], pos, rot: [0, 0, 0], hole: false, decal });
+// A row of gold header pins.
+const PINS = (n, from, to, y, color = '#c8a94b') => Array.from({ length: n }, (_, i) => {
+  const t = n === 1 ? 0.5 : i / (n - 1);
+  return P('box', [1.1, 1.1, 3], [from[0] + (to[0] - from[0]) * t, y, from[1] + (to[1] - from[1]) * t], { color, visual: true });
+});
 const H = (type, size, pos, extra = {}) => P(type, size, pos, { hole: true, ...extra });
 
 export const PARTS = [
@@ -11,6 +18,7 @@ export const PARTS = [
       const X = -34.3, Z = -26.7; // board corner → centred
       return [
         P('box', [68.6, 53.4, 1.6], [0, 0, 0], { color: '#0f766e' }),                 // PCB
+        D('uno_top', [68.6, 53.4], [0, 1.6, 0]),                                      // silkscreen
         P('box', [16, 12, 11], [X + 7, 1.6, Z + 12], { color: '#b9c0ca' }),            // USB-B
         P('box', [14, 9, 11], [X + 5, 1.6, Z + 45], { color: '#15181d' }),             // barrel jack
         P('box', [26, 2.5, 8.5], [6, 1.6, Z + 4], { color: '#1a1a1a' }),               // header row (top)
@@ -21,6 +29,10 @@ export const PARTS = [
         P('cylinder', [5, 5, 3], [-16, 1.6, 6], { color: '#9aa4b2' }),                 // crystal
         P('box', [8, 5, 3], [-24, 1.6, -4], { color: '#15181d' }),                     // regulator
         P('box', [3.5, 3.5, 3], [X + 10, 1.6, 0], { color: '#cfd6df' }),               // reset button
+        ...PINS(10, [-7, Z + 4], [19, Z + 4], 4.1),                                   // header pins
+        ...PINS(8, [-29, Z + 4], [-11, Z + 4], 4.1),
+        ...PINS(8, [-2, Z + 50], [19, Z + 4 + 46], 4.1),
+        ...PINS(6, [-28, Z + 50], [-8, Z + 50], 4.1),
         ...[[14, 2.5], [15.3, 50.7], [66.1, 7.6], [66.1, 35.5]].map(([x, z]) => H('cylinder', [3.2, 3.2, 6], [X + x, -2, Z + z])),
       ];
     },
@@ -29,6 +41,7 @@ export const PARTS = [
     id: 'esp32', name: 'ESP32 DevKit', note: '55 × 28 mm, 30 pins', color: '#15181d',
     build: () => [
       P('box', [55, 28, 1.6], [0, 0, 0], { color: '#15181d' }),
+      D('esp_top', [55, 28], [0, 1.6, 0]),
       P('box', [26, 18, 3], [-6, 1.6, 0], { color: '#9aa4b2' }),                        // shielded module
       P('box', [8, 12, 0.6], [14, 1.6, 0], { color: '#d4a017' }),                       // PCB antenna
       P('box', [8, 7, 3], [-24, 1.6, 0], { color: '#b9c0ca' }),                         // micro-USB
@@ -36,18 +49,22 @@ export const PARTS = [
       P('box', [50, 2.5, 8.5], [0, 1.6, 12.5], { color: '#1a1a1a' }),
       P('box', [4.5, 3.5, 2.5], [18, 1.6, -8], { color: '#2a2f36' }),
       P('box', [4.5, 3.5, 2.5], [18, 1.6, 8], { color: '#2a2f36' }),
+      ...PINS(15, [-24, -12.5], [24, -12.5], 4.1),
+      ...PINS(15, [-24, 12.5], [24, 12.5], 4.1),
     ],
   },
   {
     id: 'hcsr04', name: 'Ultrasonic HC-SR04', note: '45 × 20 mm, Ø16 eyes 26 mm apart', color: '#1d4ed8',
     build: () => [
       P('box', [45, 20, 1.6], [0, 0, 0], { color: '#1d4ed8' }),
+      D('sonar_top', [45, 20], [0, 1.6, 0]),
       P('cylinder', [16, 16, 12], [-13, 4, 1], { color: '#b9c0ca', rot: [90, 0, 0] }),
       P('cylinder', [13, 13, 2], [-13, 4, 7], { color: '#4b5563', rot: [90, 0, 0] }),
       P('cylinder', [16, 16, 12], [13, 4, 1], { color: '#b9c0ca', rot: [90, 0, 0] }),
       P('cylinder', [13, 13, 2], [13, 4, 7], { color: '#4b5563', rot: [90, 0, 0] }),
       P('box', [8, 4, 3], [0, 1.6, 2], { color: '#cbd5e1' }),                            // crystal
       P('box', [10, 2.5, 8.5], [0, -2.5, -8], { color: '#1a1a1a' }),                      // 4-pin header
+      ...PINS(4, [-3.8, -8], [3.8, -8], -4.5),
     ],
   },
   {
@@ -83,14 +100,16 @@ export const PARTS = [
     ],
   },
   {
-    id: 'l298n', name: 'L298N motor driver', note: '43 × 43 mm with heatsink', color: '#1e40af',
+    id: 'l298n', name: 'L298N motor driver', note: '43 × 43 mm with heatsink', color: '#b91c1c',
     build: () => [
-      P('box', [43, 43, 1.6], [0, 0, 0], { color: '#1e40af' }),
+      P('box', [43, 43, 1.6], [0, 0, 0], { color: '#b91c1c' }),
+      D('driver_top', [43, 43], [0, 1.6, 0]),
       P('box', [20, 16, 16], [0, 1.6, 4], { color: '#111827' }),                            // heatsink
       P('box', [20, 2, 20], [0, 1.6, 4], { color: '#2a2f36' }),
       P('box', [16, 10, 10], [-12, 1.6, -14], { color: '#16a34a' }),                         // screw terminals
       P('box', [16, 10, 10], [12, 1.6, -14], { color: '#16a34a' }),
       P('box', [24, 2.5, 8.5], [0, 1.6, 17], { color: '#1a1a1a' }),
+      ...PINS(6, [-10, 17], [10, 17], 4.1),
       ...[[-18, -18], [18, -18], [-18, 18], [18, 18]].map(([x, z]) => H('cylinder', [3.2, 3.2, 6], [x, -2, z])),
     ],
   },

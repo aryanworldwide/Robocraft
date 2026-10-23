@@ -78,7 +78,18 @@ export default function Canvas({
       setView({ scale: s, x: PAD_L + (vw - w * s) / 2 - minX * s, y: (vh - h * s) / 2 - minY * s });
     };
     window.addEventListener('lab-fit', fit);
-    return () => window.removeEventListener('lab-fit', fit);
+    // refit when the workspace itself changes size (drawer, rotation, keyboard)
+    let last = 0, tid = null;
+    const ro = new ResizeObserver(() => {
+      const r = svgRef.current?.getBoundingClientRect();
+      if (!r || !r.width) return;
+      const size = r.width * r.height;
+      if (last && Math.abs(size - last) / last < 0.12) { last = size; return; }
+      last = size;
+      clearTimeout(tid); tid = setTimeout(fit, 120);
+    });
+    if (svgRef.current) ro.observe(svgRef.current);
+    return () => { window.removeEventListener('lab-fit', fit); ro.disconnect(); clearTimeout(tid); };
   }, []);
 
   const toWorld = useCallback((clientX, clientY) => {

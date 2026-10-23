@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { unitShape, groupSoup, ungroup } from '@/lib/design/shapes';
+import { decalCanvas } from '@/lib/design/decals';
 
 const DEG = Math.PI / 180;
 
@@ -10,10 +11,36 @@ function disposeTree(root) {
   root?.traverse?.(o => { o.geometry?.dispose?.(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose?.()); });
 }
 
+/** A board's printed top face: a textured plane laid flat on the part. */
+function decalMesh(kid) {
+  const canvas = decalCanvas(kid.decal);
+  if (!canvas) return null;
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({
+    map: tex, roughness: 0.65, metalness: 0.05, transparent: true, polygonOffset: true, polygonOffsetFactor: -2,
+  }));
+  m.rotation.order = 'YXZ';
+  m.renderOrder = 1;
+  return m;
+}
+
+function applyDecalTransform(mesh, k) {
+  const [w, d, h] = k.size;
+  mesh.position.set(k.pos[0], k.pos[1] + h + 0.03, k.pos[2]);
+  mesh.rotation.set(-Math.PI / 2, (k.rot?.[1] || 0) * DEG, 0);
+  mesh.scale.set(w, d, 1);
+}
+
 /** Place a part's coloured sub-parts in world space for the given transform. */
 function layoutAssembly(rec, obj) {
   const kids = ungroup(obj);
-  kids.forEach((k, i) => { const m = rec.assembly.children[i]; if (m) applyTransform(m, k); });
+  kids.forEach((k, i) => {
+    const m = rec.assembly.children[i];
+    if (!m) return;
+    if (k.decal) applyDecalTransform(m, k); else applyTransform(m, k);
+  });
 }
 
 function geometryFor(obj) {
@@ -213,6 +240,12 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
           scene.add(proxy);
           const assembly = new THREE.Group();
           for (const k of ungroup(obj)) {
+            if (k.decal) {
+              const dm = decalMesh(k);
+              if (dm) { dm.userData.id = obj.id; assembly.add(dm); continue; }
+              assembly.add(new THREE.Object3D()); // keep indices aligned with ungroup()
+              continue;
+            }
             const mat = k.hole
               ? new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.95 })
               : new THREE.MeshStandardMaterial({ color: k.color || obj.color || '#ef4444', roughness: 0.5, metalness: 0.08, emissive: 0x0c4a6e, emissiveIntensity: 0, flatShading: ['box', 'wedge', 'pyramid'].includes(k.type) });
@@ -227,7 +260,7 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
         const dragging = ctx.current.tc.dragging && ctx.current.tc.object === rec.mesh;
         if (!dragging) applyTransform(rec.mesh, obj);
         layoutAssembly(rec, dragging ? readTransform(rec.mesh, obj) : obj);
-        rec.assembly.children.forEach(m => { m.material.opacity = obj.hole ? 0.45 : 1; m.material.transparent = !!obj.hole; });
+        rec.assembly.children.forEach(m => { if (!m.material) return; m.material.opacity = obj.hole ? 0.45 : 1; m.material.transparent = !!obj.hole || !!m.material.map; });
         rec.mesh.userData.obj = obj;
         continue;
       }
@@ -263,7 +296,7 @@ export default function StudioView({ objects, selected, mode, snap, onPick, onTr
       const on = selected.includes(id);
       if (mesh.material?.emissive) mesh.material.emissive.setHex(on ? 0x0c4a6e : 0x000000);
       // parts keep their real colours when selected — only a gentle tint
-      assembly?.children.forEach(c => { if (c.material) c.material.emissiveIntensity = on ? 0.22 : 0; });
+      assembly?.children.forEach(c => { if (c.material?.emissive) c.material.emissiveIntensity = on ? 0.22 : 0; });
     });
     if (selected.length) {
       const box = new THREE.Box3();

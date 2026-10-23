@@ -257,7 +257,7 @@ export default function TinkercadLab({ onExit }) {
     });
     setComponents(placed);
     setWires(preWired);
-    setTimeout(() => window.dispatchEvent(new CustomEvent('lab-fit')), 80);
+    [80, 420].forEach(ms => setTimeout(() => window.dispatchEvent(new CustomEvent('lab-fit')), ms));
   };
 
   useEffect(() => { const t = setTimeout(() => window.dispatchEvent(new CustomEvent('lab-fit')), 120); return () => clearTimeout(t); }, [showSerial]);

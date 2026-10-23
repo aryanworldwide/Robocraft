@@ -163,6 +163,21 @@ function wirePath(s, t) {
   return `M ${s.x} ${s.y} L ${es.x} ${es.y} L ${et.x} ${es.y} L ${et.x} ${et.y} L ${t.x} ${t.y}`;
 }
 
+/** A small coloured label at a wire end, naming the pin it connects to. */
+function PinTag({ p, text, color, dim }) {
+  if (!p || !text) return null;
+  const w = Math.max(22, String(text).length * 7.2 + 10);
+  const off = 15;
+  const x = p.side === 'left' ? p.x - off - w : p.side === 'right' ? p.x + off : p.x - w / 2;
+  const y = p.side === 'top' ? p.y - off - 16 : p.side === 'bottom' ? p.y + off : p.y - 8;
+  return (
+    <g opacity={dim ? 0.25 : 1} style={{ pointerEvents: 'none' }}>
+      <rect x={x} y={y} width={w} height={16} rx={4} fill="#fff" stroke={color} strokeWidth="1.4" />
+      <text x={x + w / 2} y={y + 11.5} textAnchor="middle" fontSize="9.5" fontWeight="800" fill={color} fontFamily="'Inter',sans-serif">{text}</text>
+    </g>
+  );
+}
+
 // ── A large realistic breadboard as the workbench stage ──────────────────────
 function WorkbenchBreadboard({ x, y, w, h }) {
   const holes = Math.floor((w - 60) / 13);
@@ -235,9 +250,11 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   const ctrlX = (CANVAS_W - cSize.w) / 2;
   const ctrlY = TITLE_H + 24;
 
-  const BB_W = 880, BB_H = 250;
+  const discreteCount = instances.filter(i => DISCRETE.has(i.id)).length;
+  const showBreadboard = discreteCount > 0;
+  const BB_W = 880, BB_H = showBreadboard ? 250 : 0;
   const bbX = (CANVAS_W - BB_W) / 2;
-  const bbY = ctrlY + cSize.h + 120;
+  const bbY = ctrlY + cSize.h + (showBreadboard ? 120 : 0);
 
   const positions = {};
   positions[controllerId] = { x: ctrlX, y: ctrlY, w: cSize.w, h: cSize.h };
@@ -257,7 +274,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
   // Modules row (sensors, driver, displays, comms)
   const mods = instances.filter(i =>
     SENSOR.has(i.id) || i.id === 'motor_driver' || DISPLAY.has(i.id) || COMMS.has(i.id));
-  const modY = bbY + BB_H + 96;
+  const modY = bbY + BB_H + (showBreadboard ? 96 : 110);
   let modMaxH = 0;
   const modSpan = CANVAS_W - 2 * PAD;
   const modSlot = mods.length ? modSpan / mods.length : modSpan;
@@ -314,6 +331,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
       d: wirePath(s, t),
       color: resolveColor(conn),
       s, t,
+      sTag: String(conn.controllerPin || '').toUpperCase(),
+      tTag: String(conn.componentPin || '').toUpperCase(),
       label: `${conn.controllerPin} → ${conn.componentPin}`,
       dimmed: highlightWire != null && highlightWire !== idx,
       highlighted: highlightWire === idx,
@@ -344,7 +363,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
           key: `auto_d${mi}${j}`,
           d: wirePath(s, t),
           color: j === 0 ? WIRE_COLORS.red : WIRE_COLORS.black,
-          s, t, label: `${outId} → ${mp}`, dimmed: false, highlighted: false, idx: -1,
+          s, t, sTag: outId, tTag: mp, label: `${outId} → ${mp}`, dimmed: false, highlighted: false, idx: -1,
         });
       });
     });
@@ -360,7 +379,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
       const s = pinAbs(bPos, batteryInst.id, p.b);
       const t = pinAbs(dPos, 'motor_driver', p.d);
       if (!s || !t) return;
-      wires.push({ key: `auto_b${j}`, d: wirePath(s, t), color: p.c, s, t, label: `Battery → ${p.d}`, dimmed: false, highlighted: false, idx: -1 });
+      wires.push({ key: `auto_b${j}`, d: wirePath(s, t), color: p.c, s, t, sTag: p.b === 'P' ? '+' : '−', tTag: p.d, label: `Battery → ${p.d}`, dimmed: false, highlighted: false, idx: -1 });
     });
   }
   if (batteryInst && !driverInst && motorInsts.length > 0) {
@@ -376,7 +395,7 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
 
   // ── Canvas height ──
   const allBottoms = Object.values(positions).map(p => p.y + p.h);
-  const contentBottom = Math.max(...allBottoms, bbY + BB_H);
+  const contentBottom = Math.max(...allBottoms, showBreadboard ? bbY + BB_H : 0);
   const CANVAS_H = contentBottom + 60 + 36; // + legend
 
   // ── Header ──
@@ -428,8 +447,8 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
         </g>
       </g>
 
-      {/* ── Breadboard stage ── */}
-      <WorkbenchBreadboard x={bbX} y={bbY} w={BB_W} h={BB_H} />
+      {/* ── Breadboard stage (only when parts sit on it) ── */}
+      {showBreadboard && <WorkbenchBreadboard x={bbX} y={bbY} w={BB_W} h={BB_H} />}
 
       {/* ── Wires (under components' pin caps, over breadboard) ── */}
       <g>
@@ -446,6 +465,14 @@ export default function CircuitDiagram({ pinConnections, projectName, header, on
             />
           </g>
         ))}
+      </g>
+
+      {/* ── Pin tags: which pin each wire lands on ── */}
+      <g>
+        {wires.map(w => [
+          w.sTag && <PinTag key={`${w.key}s`} p={w.s} text={w.sTag} color={w.color} dim={w.dimmed} />,
+          w.tTag && <PinTag key={`${w.key}t`} p={w.t} text={w.tTag} color={w.color} dim={w.dimmed} />,
+        ])}
       </g>
 
       {/* ── Components ── */}
