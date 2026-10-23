@@ -4,6 +4,7 @@ import { useApp } from '@/lib/AppContext';
 import { LAB_EXPERIMENTS } from '@/lib/lab/labExperiments';
 import { SHAPES } from '@/lib/design/shapes';
 import { PROJECTS as DESIGN_PROJECTS } from '@/lib/design/parts';
+import { useInk } from '@/lib/ui/ink';
 import { Cpu, Bot, Cog, Trophy, ChevronRight, FileText, Plus, Clock, Boxes, CircuitBoard } from 'lucide-react';
 
 const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } };
@@ -18,20 +19,22 @@ const ago = (t) => {
 
 /** Tinkercad-style studio tile: a big entry into one workspace. */
 function StudioTile({ icon: Icon, color, kicker, title, blurb, cta, onOpen, children }) {
+  const ink = useInk();
+  const fill = ink.fill(color);
   return (
     <div className="glass-strong rounded-3xl overflow-hidden">
       <button onClick={onOpen} className="w-full text-left p-4 flex items-start gap-3">
         <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${color}1f` }}>
-          <Icon className="w-6 h-6" style={{ color }} />
+          <Icon className="w-6 h-6" style={{ color: ink(color, 0.12) }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold tracking-wider" style={{ color }}>{kicker}</p>
+          <p className="text-[10px] font-bold tracking-wider" style={{ color: ink(color) }}>{kicker}</p>
           <p className="text-base font-bold leading-tight">{title}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{blurb}</p>
         </div>
       </button>
       {children}
-      <button onClick={onOpen} className="w-full py-3 text-xs font-bold text-white flex items-center justify-center gap-1.5" style={{ background: `linear-gradient(90deg, ${color}, ${color}cc)` }}>
+      <button onClick={onOpen} className="w-full py-3 text-xs font-bold text-white flex items-center justify-center gap-1.5" style={{ background: `linear-gradient(90deg, ${fill}, ${fill}e6)` }}>
         <Plus className="w-4 h-4" /> {cta}
       </button>
     </div>
@@ -61,6 +64,7 @@ const EXTRAS = [
 
 export default function BuildHub() {
   const navigate = useNavigate();
+  const ink = useInk();
   const { selectedClass, getProgressForClass } = useApp();
   const p = getProgressForClass(selectedClass);
   const count = (k) => Object.values(p[k] || {}).filter(v => (typeof v === 'object' ? v?.passed : v)).length;
@@ -109,7 +113,7 @@ export default function BuildHub() {
           return (
             <button key={c.path} onClick={() => navigate(c.path)} className="w-full glass-strong rounded-2xl p-3 flex items-center gap-3 text-left">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}1f` }}>
-                <Icon className="w-5 h-5" style={{ color: c.color }} />
+                <Icon className="w-5 h-5" style={{ color: ink(c.color, 0.12) }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold">{c.title}{n > 0 && <span className="ml-2 text-[10px] text-green-500">{n} done</span>}</p>

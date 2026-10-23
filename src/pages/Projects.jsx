@@ -10,8 +10,10 @@ import { generateOrRetrieveProject } from '@/lib/buildsheet/aiProjectSearch';
 import { aiEnabled } from '@/lib/features';
 import { toast } from '@/components/ui/use-toast';
 import { Clock, IndianRupee, ChevronRight, Wrench, Filter, Bot, Loader2, Cpu } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function Projects() {
+  const ink = useInk();
   const navigate = useNavigate();
   const { selectedClass } = useApp();
   const projects = getProjects(selectedClass);
@@ -111,7 +113,7 @@ export default function Projects() {
                 <div className="w-12 h-12 rounded-xl bg-cyan-500/15 flex items-center justify-center">
                   <Wrench className="w-6 h-6 text-cyan-400" />
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColors[project.difficulty]}20`, color: diffColors[project.difficulty] }}>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColors[project.difficulty]}20`, color: ink(diffColors[project.difficulty], 0.125) }}>
                   {project.difficulty}
                 </span>
               </div>

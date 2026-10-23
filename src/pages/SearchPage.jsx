@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/AppContext';
 import { searchContent } from '@/lib/curriculum';
 import { Search as SearchIcon, Clock, ChevronRight, Wrench } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function SearchPage() {
+  const ink = useInk();
   const navigate = useNavigate();
   const { selectedClass } = useApp();
   const [query, setQuery] = useState('');
@@ -53,7 +55,7 @@ export default function SearchPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${subjectColors[lesson.subject] || '#00D2FF'}20`, color: subjectColors[lesson.subject] || '#00D2FF' }}>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${subjectColors[lesson.subject] || '#00D2FF'}20`, color: ink(subjectColors[lesson.subject] || '#00D2FF', 0.125) }}>
                           {lesson.subject}
                         </span>
                       </div>

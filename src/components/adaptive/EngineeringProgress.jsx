@@ -5,8 +5,10 @@ import { computeMastery, weakAreas, examReadiness, challengeLevel, recentProgres
 import { exportFullRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import MasteryRing from '@/components/adaptive/MasteryRing';
 import { AlertTriangle, ArrowRight, BookOpen, Cpu, Download, FileText, Target, TrendingUp, Wrench } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function EngineeringProgress() {
+  const ink = useInk();
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass } = useApp();
   const progress = getProgressForClass(selectedClass);
@@ -44,7 +46,7 @@ export default function EngineeringProgress() {
           {domains.map(d => (
             <div key={d.id} className="cursor-pointer" onClick={() => navigate('/learn')}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium" style={{ color: d.color }}>{d.name}</span>
+                <span className="text-xs font-medium" style={{ color: ink(d.color) }}>{d.name}</span>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{d.mastered}✓ · {d.weak}✗ · {d.mastery}%</span>
               </div>
               <div className="h-2 glass rounded-full overflow-hidden">

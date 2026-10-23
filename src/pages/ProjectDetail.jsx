@@ -13,8 +13,10 @@ import { generateBuildSheetData } from '@/lib/buildsheet/generateData';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import { downloadFile } from '@/lib/platform';
 import { FileText, Eye } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function ProjectDetail() {
+  const ink = useInk();
   const { id } = useParams();
   const navigate = useNavigate();
   const { selectedClass } = useApp();
@@ -70,7 +72,7 @@ export default function ProjectDetail() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 animate-slide-up">
         <BackButton />
-        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColors[project.difficulty]}20`, color: diffColors[project.difficulty] }}>
+        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColors[project.difficulty]}20`, color: ink(diffColors[project.difficulty], 0.125) }}>
           {project.difficulty}
         </span>
       </div>

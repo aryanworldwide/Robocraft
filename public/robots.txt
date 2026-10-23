@@ -1,0 +1,5 @@
+# RoboCraft — https://github.com/aryanworldwide/Robocraft
+User-agent: *
+Allow: /
+
+Sitemap: https://aryanworldwide.github.io/Robocraft/sitemap.xml

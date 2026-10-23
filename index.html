@@ -2,33 +2,94 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>RoboCraft — Robotics &amp; AI for ICSE and ISC students</title>
+    <meta name="description" content="RoboCraft teaches the CISCE Robotics and Artificial Intelligence syllabus for Classes 9–11: chapter notes with diagrams, board-style practice papers, a 2-D circuit lab and a 3-D robot arena that run your own Arduino code, a 3-D design studio with STL export, and a printable practical file." />
+    <link rel="canonical" href="https://aryanworldwide.github.io/Robocraft/" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0a0f1e" />
+
+    <!-- The app needs eval for its Arduino interpreter and WebAssembly for Python;
+         everything else is locked to this origin and the two services it calls. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://apis.google.com; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https://*.firebaseapp.com https://*.web.app https://accounts.google.com; connect-src 'self' blob: data: https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.firebaseapp.com https://*.workers.dev https://cdn.jsdelivr.net; manifest-src 'self'; media-src 'self' blob: data:" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="RoboCraft" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="description" content="RoboCraft - Learn Robotics. Build Robots. Control Them. A premium robotics learning platform for students." />
-    <meta name="theme-color" content="#0a0f1e" />
-    <title>RoboCraft - Learn Robotics. Build Robots. Control Them.</title>
-    <script>
-      (function () {
-        try {
-          var t = localStorage.getItem('robocraft_theme');
-          if (t !== 'light' && t !== 'dark') {
-            t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          }
-          if (t === 'dark') document.documentElement.classList.add('dark');
-        } catch (e) {
-          document.documentElement.classList.add('dark');
-        }
-      })();
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RoboCraft" />
+    <meta property="og:title" content="RoboCraft — Robotics &amp; AI for ICSE and ISC students" />
+    <meta property="og:description" content="Chapter notes, board-style papers, a circuit lab and a 3-D robot arena that run your own Arduino code, a 3-D design studio and a printable practical file." />
+    <meta property="og:url" content="https://aryanworldwide.github.io/Robocraft/" />
+    <meta property="og:image" content="https://aryanworldwide.github.io/Robocraft/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="RoboCraft — learn robotics, build robots, control them." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RoboCraft — Robotics &amp; AI for ICSE and ISC students" />
+    <meta name="twitter:description" content="Notes, board practice, a circuit lab, a 3-D robot arena and a practical-file generator — all offline-friendly." />
+    <meta name="twitter:image" content="https://aryanworldwide.github.io/Robocraft/og.png" />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <script src="/theme-boot.js"></script>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://aryanworldwide.github.io/Robocraft/#website","url":"https://aryanworldwide.github.io/Robocraft/","name":"RoboCraft","description":"Robotics and Artificial Intelligence learning app for ICSE and ISC students (Classes 9-11).","inLanguage":"en-IN"},{"@type":"SoftwareApplication","name":"RoboCraft","applicationCategory":"EducationalApplication","operatingSystem":"Android, Web","url":"https://aryanworldwide.github.io/Robocraft/","description":"Learn the CISCE Robotics and AI syllabus: chapter notes with diagrams, board-style practice papers, a circuit lab and a 3-D robot arena that run real Arduino code, a 3-D design studio with STL export, and a printable practical file.","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"audience":{"@type":"EducationalAudience","educationalRole":"student"}}]}
     </script>
+    <style>
+      /* Shown until the app loads — also what a crawler sees. */
+      .pre { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #0f172a; }
+      html.dark .pre { color: #e2e8f0; }
+      body { margin: 0; background: #f4f6fa; }
+      html.dark body { background: #0a0f1e; }
+      .pre h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .6rem; letter-spacing: -.02em; }
+      .pre p { line-height: 1.6; margin: 0 0 1rem; }
+      .pre .lead { font-size: 1.05rem; }
+      .pre ul { line-height: 1.7; padding-left: 1.1rem; }
+      .pre a { color: #0891b2; }
+      html.dark .pre a { color: #22d3ee; }
+      .pre .cta { display: inline-block; background: linear-gradient(90deg, #06b6d4, #2563eb); color: #fff; text-decoration: none; font-weight: 700; padding: .7rem 1.2rem; border-radius: .8rem; margin: .25rem .5rem .25rem 0; }
+      .pre .muted { color: #475569; font-size: .85rem; }
+      html.dark .pre .muted { color: #94a3b8; }
+      .skip-link { position: absolute; left: -9999px; top: 0; background: #0891b2; color: #fff; padding: .6rem 1rem; border-radius: 0 0 .5rem 0; z-index: 100; }
+      .skip-link:focus { left: 0; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="root">
+      <!-- Replaced by the app as soon as it loads. -->
+      <main id="main" class="pre">
+        <h1>RoboCraft — Robotics &amp; AI for ICSE and ISC students</h1>
+        <p class="lead">A complete companion for the CISCE <strong>Robotics and Artificial Intelligence</strong> syllabus, Classes 9 to 11. Most of it works offline, and there are no ads.</p>
+        <p>
+          <a class="cta" href="https://github.com/aryanworldwide/Robocraft/releases/tag/apk-latest">Download the Android app</a>
+          <a class="cta" href="https://github.com/aryanworldwide/Robocraft">Source code on GitHub</a>
+        </p>
+        <h2>What is inside</h2>
+        <ul>
+          <li><strong>Every chapter</strong> as textbook notes with labelled diagrams, key terms and audio.</li>
+          <li><strong>Board practice</strong> — chapter-wise MCQs, short and long answers with model answers, timed sample papers and PDF answer keys.</li>
+          <li><strong>Circuit Lab (2-D)</strong> — wire an Arduino circuit and run your own sketch on a simulated board.</li>
+          <li><strong>Robot Arena (3-D)</strong> — the same Arduino code drives a robot car: line follower, obstacle avoider, smart dustbin, maze and PID tuning.</li>
+          <li><strong>3-D Design Studio</strong> — solid modelling with holes and groups, real robot parts in true sizes, and STL export for 3-D printing.</li>
+          <li><strong>Mechanism Lab</strong> — four-bar linkages, slider-crank, robot-arm kinematics and gear trains.</li>
+          <li><strong>Practical file</strong> — CISCE-format assignments, an automatic variable description table and a printable PDF.</li>
+        </ul>
+        <p class="muted">
+          <a href="./privacy.html">Privacy policy</a> ·
+          <a href="./terms.html">Terms of use</a> ·
+          <a href="./accessibility.html">Accessibility</a> ·
+          <a href="./contact.html">Contact</a>
+        </p>
+        <noscript><p><strong>JavaScript is switched off.</strong> RoboCraft runs in the browser, so please enable JavaScript or install the Android app from the link above.</p></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

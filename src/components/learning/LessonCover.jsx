@@ -1,7 +1,9 @@
 import React from 'react';
 import { ListChecks, Clock, BarChart3, Target } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function LessonCover({ lesson, color }) {
+  const ink = useInk();
   const coverColors = {
     Robotics: '#00D2FF',
     'Python Programming': '#4ADE80',
@@ -30,7 +32,7 @@ export default function LessonCover({ lesson, color }) {
           <div>
             <span
               className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full"
-              style={{ background: `${c}20`, color: c }}
+              style={{ background: `${c}20`, color: ink(c, 0.125) }}
             >
               {lesson.subject}
             </span>

@@ -3,6 +3,7 @@ import { backend } from '@/api/client';
 import { ChevronLeft, Clock, IndianRupee, Package, Wrench, BookOpen, Code2, FlaskConical, AlertTriangle, Globe, Lightbulb, Save, CheckCircle2, Share2, Copy, Check, Download, Send, Bot, Loader2, Volume2, ChevronDown, FileText, Eye } from 'lucide-react';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
+import { useInk } from '@/lib/ui/ink';
 
 function highlightCode(code) {
   if (!code) return '';
@@ -61,6 +62,7 @@ function Section({ icon: Icon, title, color, children, defaultOpen }) {
 }
 
 export default function GeneratedProjectView({ project, onBack, onSaved, savedProjectId, setSavedProjectId }) {
+  const ink = useInk();
   const [saved, setSaved] = useState(!!project._savedId);
   const [currentSavedId, setCurrentSavedId] = useState(project._savedId || savedProjectId || null);
   const [completed, setCompleted] = useState(project._isCompleted || false);
@@ -162,7 +164,7 @@ export default function GeneratedProjectView({ project, onBack, onSaved, savedPr
         <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-5 animate-float" style={{ background: diffColor }} />
         <div className="relative">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium" style={{ background: `${diffColor}20`, color: diffColor }}>{project.difficulty}</span>
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium" style={{ background: `${diffColor}20`, color: ink(diffColor, 0.125) }}>{project.difficulty}</span>
             <span className="text-[10px] glass px-2.5 py-1 rounded-full text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> {project.estimatedTime}</span>
             <span className="text-[10px] glass px-2.5 py-1 rounded-full text-muted-foreground flex items-center gap-1"><IndianRupee className="w-3 h-3" /> {project.estimatedCost}</span>
           </div>

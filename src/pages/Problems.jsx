@@ -5,8 +5,10 @@ import { rankFor } from '@/lib/uiMode';
 import ProblemSolver, { useProblemStats } from '@/components/problems/ProblemSolver';
 import BackButton from '@/components/BackButton';
 import { Sigma, Shuffle, ChevronRight } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function Problems() {
+  const ink = useInk();
   const { selectedClass } = useApp();
   const { stats } = useProblemStats();
   const topics = useMemo(() => topicsForClass(selectedClass), [selectedClass]);
@@ -57,7 +59,7 @@ export default function Problems() {
                     <p className="text-sm font-semibold">{t.title}</p>
                     <p className="text-[11px] text-muted-foreground">{tries ? `${stats[t.id].correct}/${tries} correct · ${a}%` : 'Not attempted'}</p>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: rank.color, background: `${rank.color}20` }}>{tries >= 3 ? rank.name : tries ? 'Keep going' : 'New'}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: ink(rank.color, 0.125), background: `${rank.color}20` }}>{tries >= 3 ? rank.name : tries ? 'Keep going' : 'New'}</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </button>
               );

@@ -33,8 +33,10 @@ import { topicsForLesson } from '@/lib/problems';
 import ProblemSolver from '@/components/problems/ProblemSolver';
 import { exportLessonRevisionPdf } from '@/lib/revision/exportRevisionPdf';
 import { toast } from '@/components/ui/use-toast';
+import { useInk } from '@/lib/ui/ink';
 
 export default function LessonDetail() {
+  const ink = useInk();
   const { id } = useParams();
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass, markLessonComplete, toggleBookmark, addRecentlyViewed, saveNote, recordFlashcardReview, recordActivityComplete } = useApp();
@@ -168,7 +170,7 @@ export default function LessonDetail() {
         <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full opacity-5 animate-float" style={{ background: color }} />
         <div className="relative">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium" style={{ background: `${color}20`, color }}>
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium" style={{ background: `${color}20`, color: ink(color, 0.125) }}>
               {lesson.subject}
             </span>
             <span className="text-[10px] glass px-2.5 py-1 rounded-full text-muted-foreground">{lesson.difficulty}</span>

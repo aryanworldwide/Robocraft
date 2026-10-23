@@ -230,7 +230,9 @@ export default function Settings() {
           RoboCraft helps ICSE/ISC students learn Robotics &amp; AI: chapters, board-style practice, a circuit lab, a 3-D robot arena, a 3-D design studio and a practical file.
         </p>
         <div className="flex flex-wrap gap-3 mt-3 text-xs">
-          <a href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener" className="text-cyan-500 font-semibold">Privacy policy</a>
+          {[['privacy.html', 'Privacy policy'], ['terms.html', 'Terms of use'], ['accessibility.html', 'Accessibility'], ['security.html', 'Security'], ['contact.html', 'Contact']].map(([f, label]) => (
+            <a key={f} href={`${import.meta.env.BASE_URL}${f}`} target="_blank" rel="noopener" className="text-cyan-500 font-semibold">{label}</a>
+          ))}
           <ReportButton label="Report a problem" className="!text-xs" />
         </div>
       </div>

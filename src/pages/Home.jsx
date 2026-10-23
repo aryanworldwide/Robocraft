@@ -13,10 +13,12 @@ import { GraduationCap, Shapes, RotateCcw, Cpu, Sigma, Calculator, Terminal, Med
 import DailyMissions from '@/components/learning/DailyMissions';
 import ExamSeasonCard from '@/components/ExamSeasonCard';
 import EngineeringHome from '@/components/adaptive/EngineeringHome';
+import { useInk } from '@/lib/ui/ink';
 
 export default function Home() {
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass } = useApp();
+  const ink = useInk();
   const progress = getProgressForClass(selectedClass);
   const allLessons = getAllLessons(selectedClass);
   const recommended = getRecommendedLessons(selectedClass, progress.completedLessons);
@@ -105,7 +107,7 @@ export default function Home() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-bold" style={{ color: levelInfo.current?.color }}>{levelInfo.levelNumber}</span>
+            <span className="text-lg font-bold" style={{ color: ink(levelInfo.current?.color) }}>{levelInfo.levelNumber}</span>
             <span className="text-[8px] text-muted-foreground">LVL</span>
           </div>
         </div>
@@ -115,10 +117,10 @@ export default function Home() {
       <div className="glass-strong rounded-2xl p-3 flex items-center justify-between animate-slide-up" style={{ animationDelay: '0.03s' }}>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${levelInfo.current?.color}20` }}>
-            <Star className="w-4 h-4" style={{ color: levelInfo.current?.color }} />
+            <Star className="w-4 h-4" style={{ color: ink(levelInfo.current?.color, 0.125) }} />
           </div>
           <div>
-            <p className="text-xs font-bold" style={{ color: levelInfo.current?.color }}>{levelInfo.current?.title}</p>
+            <p className="text-xs font-bold" style={{ color: ink(levelInfo.current?.color) }}>{levelInfo.current?.title}</p>
             <p className="text-[10px] text-muted-foreground">{levelInfo.next ? `${levelInfo.xpToNext} XP to Level ${levelInfo.next.level}` : 'Max Level!'}</p>
           </div>
         </div>
@@ -279,7 +281,7 @@ export default function Home() {
               className="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:scale-[1.05] hover:neon-glow transition-all"
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${action.color}15` }}>
-                <Icon className="w-4 h-4" style={{ color: action.color }} />
+                <Icon className="w-4 h-4" style={{ color: ink(action.color, 0.082) }} />
               </div>
               <span className="text-[10px] font-medium">{action.label}</span>
             </button>
@@ -330,7 +332,7 @@ export default function Home() {
               return (
                 <div key={subject.id} className="glass rounded-xl p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium" style={{ color }}>{subject.name}</span>
+                    <span className="text-xs font-medium" style={{ color: ink(color) }}>{subject.name}</span>
                     <span className="text-[10px] text-muted-foreground">{completed}/{subjectLessons.length}</span>
                   </div>
                   <div className="h-1.5 glass rounded-full overflow-hidden">
@@ -354,7 +356,7 @@ export default function Home() {
             {earnedBadges.slice(0, 8).map(badge => (
               <div key={badge.id} className="glass rounded-xl p-3 min-w-[80px] text-center flex-shrink-0">
                 <div className="w-10 h-10 rounded-full mx-auto mb-1.5 flex items-center justify-center" style={{ background: `${badge.color}20` }}>
-                  <Award className="w-5 h-5" style={{ color: badge.color }} />
+                  <Award className="w-5 h-5" style={{ color: ink(badge.color, 0.125) }} />
                 </div>
                 <span className="text-[9px] font-medium block leading-tight">{badge.name}</span>
               </div>

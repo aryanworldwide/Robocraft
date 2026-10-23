@@ -75,6 +75,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen animated-bg grid-pattern">
+      <a href="#main" className="skip-link">Skip to content</a>
       {/* Top bar */}
       <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass-strong shadow-lg' : 'bg-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
@@ -102,7 +103,7 @@ export default function Layout() {
       </div>
 
       {/* Main content */}
-      <main className="min-h-screen" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+      <main id="main" className="min-h-screen" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
         <Outlet />
       </main>
 

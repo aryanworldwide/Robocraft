@@ -6,8 +6,10 @@ import { getMode } from '@/lib/adaptive';
 import { getAllLessons, getTotalLessons, getSubjects, getProjects } from '@/lib/curriculum';
 import EngineeringProgress from '@/components/adaptive/EngineeringProgress';
 import { Zap, Flame, Trophy, BookOpen, Bookmark, Star, Target, Award, TrendingUp } from 'lucide-react';
+import { useInk } from '@/lib/ui/ink';
 
 export default function ProgressPage() {
+  const ink = useInk();
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass } = useApp();
   if (getMode(selectedClass) === 'engineering') return <EngineeringProgress />;
@@ -128,7 +130,7 @@ export default function ProgressPage() {
           {subjectProgress.map(subject => (
             <div key={subject.id} className="glass-strong rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium" style={{ color: subject.color }}>{subject.name}</h4>
+                <h4 className="text-sm font-medium" style={{ color: ink(subject.color) }}>{subject.name}</h4>
                 <span className="text-xs text-muted-foreground">{subject.completed}/{subject.total}</span>
               </div>
               <div className="h-2 glass rounded-full overflow-hidden">
@@ -148,11 +150,11 @@ export default function ProgressPage() {
             return (
               <div key={ach.id} className={`glass-strong rounded-2xl p-4 text-center transition-all ${ach.earned ? '' : 'opacity-40 grayscale'}`}>
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: `${ach.color}15` }}>
-                  <Icon className="w-6 h-6" style={{ color: ach.color }} />
+                  <Icon className="w-6 h-6" style={{ color: ink(ach.color, 0.125) }} />
                 </div>
                 <h4 className="text-xs font-bold">{ach.title}</h4>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{ach.desc}</p>
-                {ach.earned && <p className="text-[10px] mt-1" style={{ color: ach.color }}>✓ Earned</p>}
+                {ach.earned && <p className="text-[10px] mt-1" style={{ color: ink(ach.color) }}>✓ Earned</p>}
               </div>
             );
           })}

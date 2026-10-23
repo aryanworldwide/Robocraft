@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://aryanworldwide.github.io/Robocraft/privacy.html">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RoboCraft — Privacy Policy</title>
 <style>
@@ -13,10 +15,13 @@
   p, li { color: var(--fg); } .muted { color: var(--muted); font-size: .9rem; }
   table { width:100%; border-collapse: collapse; font-size: .92rem; } td, th { border:1px solid color-mix(in srgb, var(--muted) 35%, transparent); padding:8px; text-align:left; vertical-align: top; }
   th { background: var(--card); } a { color: var(--accent); }
+  .nav { margin: 28px 0 0; font-size: .9rem; }
+  .skip-link { position: absolute; left: -9999px; } .skip-link:focus { left: 8px; top: 8px; background: var(--accent); color: #fff; padding: .5rem .9rem; border-radius: .4rem; }
 </style>
 </head>
 <body>
-<main>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main">
 <h1>RoboCraft Privacy Policy</h1>
 <p class="muted">Last updated: 22 October 2026</p>
 
@@ -41,6 +46,9 @@
 <h2>4. Data that stays on your device</h2>
 <p>Saved 3-D designs, Arduino code, practical-file details (name, roll number, school), downloaded PDFs, and app preferences are kept in your device's storage. They are deleted when you clear the app's data or uninstall the app.</p>
 
+<h2>4b. Cookies and local storage</h2>
+<p>RoboCraft sets <b>no advertising or tracking cookies</b>. It uses your browser's local storage to remember your class, theme, progress, saved designs and circuits, and (when signed in) a Firebase session token so you stay logged in. You can clear all of it from your browser settings or by uninstalling the app; nothing in it is shared with anyone else.</p>
+
 <h2>5. Permissions</h2>
 <ul>
   <li><b>Internet</b> — to sign in, sync progress, load Python, and use AI features.</li>
@@ -64,6 +72,7 @@
 
 <h2>11. Contact</h2>
 <p>Questions or deletion requests: <a id="mail" href="mailto:robocraft.support@example.com">robocraft.support@example.com</a></p>
+<nav class="nav"><a href="./">RoboCraft</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a> · <a href="./accessibility.html">Accessibility</a> · <a href="./contact.html">Contact</a> · <a href="./security.html">Security</a></nav>
 </main>
 </body>
 </html>

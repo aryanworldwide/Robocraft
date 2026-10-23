@@ -12,8 +12,10 @@ import { Activity, AlertTriangle, ArrowRight, BookOpen, Cpu, Download, FileText,
 import { rankFor } from '@/lib/uiMode';
 import { getAllLessons } from '@/lib/curriculum';
 import { topicsForClass } from '@/lib/problems';
+import { useInk } from '@/lib/ui/ink';
 
 export default function EngineeringHome() {
+  const ink = useInk();
   const navigate = useNavigate();
   const { selectedClass, getProgressForClass } = useApp();
   const progress = getProgressForClass(selectedClass);
@@ -61,8 +63,8 @@ export default function EngineeringHome() {
           {domains.map(d => (
             <div key={d.id}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-medium" style={{ color: d.color }}>{d.name}</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums"><span style={{ color: rankFor(d.mastery).color }}>{rankFor(d.mastery).name}</span> · {d.mastery}%</span>
+                <span className="text-[11px] font-medium" style={{ color: ink(d.color) }}>{d.name}</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums"><span style={{ color: ink(rankFor(d.mastery).color) }}>{rankFor(d.mastery).name}</span> · {d.mastery}%</span>
               </div>
               <div className="h-1.5 glass rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${d.mastery}%`, background: d.color }} />
@@ -98,11 +100,11 @@ export default function EngineeringHome() {
       {featured && (
         <div className="glass-strong rounded-2xl p-4 animate-slide-up border-l-2" style={{ animationDelay: '0.05s', borderLeftColor: featured.color }}>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: featured.color }}>{featured.name}</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: ink(featured.color) }}>{featured.name}</h3>
             <span className="text-[10px] glass px-2 py-0.5 rounded-full text-muted-foreground">Priority domain</span>
           </div>
           <div className="flex items-end gap-3 mb-3">
-            <span className="text-3xl font-bold" style={{ color: featured.color }}>{featured.mastery}%</span>
+            <span className="text-3xl font-bold" style={{ color: ink(featured.color, 0, 3) }}>{featured.mastery}%</span>
             <span className="text-[11px] text-muted-foreground mb-1">mastered</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center mb-3">
@@ -245,7 +247,7 @@ export default function EngineeringHome() {
           return (
             <button key={a.label} onClick={() => navigate(a.path)} className="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 hover:neon-glow transition-all">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${a.color}15` }}>
-                <Icon className="w-4 h-4" style={{ color: a.color }} />
+                <Icon className="w-4 h-4" style={{ color: ink(a.color, 0.125) }} />
               </div>
               <span className="text-[10px] font-medium">{a.label}</span>
             </button>

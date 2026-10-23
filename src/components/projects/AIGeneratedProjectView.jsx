@@ -3,6 +3,7 @@ const CircuitDiagram = lazy(() => import('@/components/buildsheet/CircuitDiagram
 const FullscreenCircuit = lazy(() => import('@/components/buildsheet/FullscreenCircuit'));
 import { sanitizeCode } from '@/lib/buildsheet/sanitizeCode';
 import BuildSheetModal from '@/components/buildsheet/BuildSheetModal';
+import { useInk } from '@/lib/ui/ink';
 import {
   ArrowLeft, Clock, IndianRupee, Cpu, AlertTriangle, Copy, Check, Download,
   ChevronDown, ChevronUp, FileText, Eye, Shield, Globe, Lightbulb, CheckCircle2,
@@ -69,6 +70,7 @@ function CollapsibleSection({ title, icon: Icon, iconColor, children, defaultOpe
 }
 
 export default function AIGeneratedProjectView({ project, onBack }) {
+  const ink = useInk();
   const [showBuildSheet, setShowBuildSheet] = useState(false);
   const diffColors = { Beginner: '#4ADE80', Intermediate: '#F59E0B', Advanced: '#EF4444' };
   const diffColor = diffColors[project.difficulty] || '#4ADE80';
@@ -85,7 +87,7 @@ export default function AIGeneratedProjectView({ project, onBack }) {
           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium glass text-purple-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3" /> AI Generated
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColor}20`, color: diffColor }}>
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${diffColor}20`, color: ink(diffColor, 0.125) }}>
             {project.difficulty}
           </span>
         </div>
