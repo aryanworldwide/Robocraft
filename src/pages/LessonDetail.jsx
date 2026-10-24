@@ -4,7 +4,7 @@ import ReportButton from '@/components/ReportButton';
 import { useApp } from '@/lib/AppContext';
 import { getLesson, getQuizForLesson, findLessonAnywhere } from '@/lib/curriculum';
 import { generateFlashCards, generateMatchGame, generateArrangeSteps, generateFillBlank, generateDidYouKnow } from '@/lib/curriculum/flashcardData';
-import { Bookmark, CheckCircle2, Trophy, Share2, BookOpen, Headphones, Gamepad2, Wrench, Clock, Target, Sparkles, FileText, Download, Loader2 } from 'lucide-react';
+import { Bookmark, CheckCircle2, Trophy, Share2, BookOpen, Headphones, Gamepad2, Clock, Target, Sparkles, FileText, Download, Loader2 } from 'lucide-react';
 import { hasSpeech } from '@/lib/platform';
 import MatchGame from '@/components/learning/MatchGame';
 import ArrangeSteps from '@/components/learning/ArrangeSteps';
@@ -12,7 +12,6 @@ import FillBlank from '@/components/learning/FillBlank';
 import Confetti from '@/components/learning/Confetti';
 import PodcastPlayer from '@/components/learning/PodcastPlayer';
 import AIVoicePlayer from '@/components/learning/AIVoicePlayer';
-import BuildWithMe from '@/components/learning/BuildWithMe';
 import FlashCardView from '@/components/learning/FlashCardView';
 import BackButton from '@/components/BackButton';
 import ChallengeMe from '@/components/learning/ChallengeMe';
@@ -69,8 +68,8 @@ export default function LessonDetail() {
     }
   }, [lesson]);
 
-  const { flashCards, matchPairs, arrangeSteps, fillBlankQuestions, didYouKnow, buildChallengeId, concepts, theoryChunks } = useMemo(() => {
-    if (!lesson) return { flashCards: [], matchPairs: [], arrangeSteps: [], fillBlankQuestions: [], didYouKnow: '', buildChallengeId: null, concepts: [], theoryChunks: [] };
+  const { flashCards, matchPairs, arrangeSteps, fillBlankQuestions, didYouKnow, concepts, theoryChunks } = useMemo(() => {
+    if (!lesson) return { flashCards: [], matchPairs: [], arrangeSteps: [], fillBlankQuestions: [], didYouKnow: '', concepts: [], theoryChunks: [] };
 
     const fc = generateFlashCards(lesson).slice(0, 5);
     const mp = generateMatchGame(lesson, quizQuestions);
@@ -78,15 +77,10 @@ export default function LessonDetail() {
     const fb = generateFillBlank(quizQuestions);
     const dyk = generateDidYouKnow(lesson);
 
-    const isRoboticsSubject = ['Robotics', 'Microcontrollers', 'Mechanical Systems', 'Electrical & Control Systems'].includes(lesson.subject);
-    const buildId = lesson.id.includes('sensor') || lesson.id.includes('ultrasonic') ? 'ultrasonic_distance'
-      : lesson.id.includes('servo') || lesson.id.includes('motor') ? 'servo_control'
-      : isRoboticsSubject ? 'led_blink' : null;
-
     const chunks = lesson.theory ? lesson.theory.split('\n\n').filter(t => t.trim().length > 20) : [];
     const conceptsList = lesson.keyConcepts || [];
 
-    return { flashCards: fc, matchPairs: mp, arrangeSteps: as, fillBlankQuestions: fb, didYouKnow: dyk, buildChallengeId: buildId, concepts: conceptsList, theoryChunks: chunks };
+    return { flashCards: fc, matchPairs: mp, arrangeSteps: as, fillBlankQuestions: fb, didYouKnow: dyk, concepts: conceptsList, theoryChunks: chunks };
   }, [lesson, quizQuestions]);
 
   if (!lesson) {
@@ -138,7 +132,7 @@ export default function LessonDetail() {
     { id: 'read', label: pro ? 'Notes' : 'Read', icon: BookOpen },
     { id: 'listen', label: pro ? 'Audio' : 'Listen', icon: Headphones, hidden: !hasSpeech },
     { id: 'interact', label: pro ? 'Practice' : 'Play', icon: pro ? Target : Gamepad2 },
-    { id: 'build', label: pro ? 'Lab' : 'Build', icon: Wrench },
+    // Building lives in the Build tab of the app, not inside each lesson.
   ].filter(m => !m.hidden);
 
   const handleComplete = () => {
@@ -257,6 +251,7 @@ export default function LessonDetail() {
             />
           )}
           <ExamCorner exam={book?.exam} onPracticed={() => recordActivityComplete(selectedClass, lesson.id, 'exam')} />
+          <LessonLabLinks lessonId={lesson.id} />
           </>
         )}
 
@@ -352,30 +347,6 @@ export default function LessonDetail() {
           </>
         )}
 
-        {/* BUILD MODE */}
-        {activeMode === 'build' && (
-          <>
-            <LessonLabLinks lessonId={lesson.id} />
-            {buildChallengeId ? (
-              <BuildWithMe
-                challengeId={buildChallengeId}
-                onComplete={() => recordActivityComplete(selectedClass, lesson.id, 'build')}
-                xpReward={50}
-              />
-            ) : (
-              <div className="glass-strong rounded-2xl p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-orange-500/15 flex items-center justify-center mx-auto mb-3">
-                  <Wrench className="w-8 h-8 text-orange-400" />
-                </div>
-                <h3 className="font-bold text-sm mb-1">No Build Activity</h3>
-                <p className="text-xs text-muted-foreground mb-4">This lesson doesn't have a virtual build challenge yet. Check out the Build Lab for more activities!</p>
-                <button onClick={() => navigate('/lab')} className="px-4 py-2 rounded-xl glass text-cyan-400 text-sm font-medium hover:bg-cyan-500/10 transition-colors">
-                  Open Build Lab
-                </button>
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       {/* Complete button */}

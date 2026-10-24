@@ -151,24 +151,40 @@ export const AppProvider = ({ children }) => {
     lsSet(classKey(uid), classId);
   };
 
+  // Every field a screen might read, with a safe empty value.
+  const emptyProgress = () => ({
+    completedLessons: [],
+    quizScores: {},
+    xp: 0,
+    coins: 0,
+    streak: 0,
+    bookmarks: [],
+    notes: {},
+    achievements: [],
+    recentlyViewed: [],
+    flashcardReviews: {},
+    activitiesCompleted: [],
+    dailyMissions: {},
+    weeklyMissions: {},
+    lastActiveDate: null,
+    lastStreakDate: null,
+  });
+
+  // Saved progress is merged ON TOP of those defaults rather than replacing
+  // them. Data written by an older version, or synced from another device,
+  // can be missing a field, and `progress.bookmarks.includes(...)` on an
+  // undefined value takes the whole screen down.
   const getProgressForClass = (classId) => {
-    return progressRef.current[classId] || {
-      completedLessons: [],
-      quizScores: {},
-      xp: 0,
-      coins: 0,
-      streak: 0,
-      bookmarks: [],
-      notes: {},
-      achievements: [],
-      recentlyViewed: [],
-      flashcardReviews: {},
-      activitiesCompleted: [],
-      dailyMissions: {},
-      weeklyMissions: {},
-      lastActiveDate: null,
-      lastStreakDate: null,
-    };
+    const stored = progressRef.current[classId];
+    if (!stored || typeof stored !== 'object') return emptyProgress();
+    const base = emptyProgress();
+    const out = { ...base, ...stored };
+    for (const [k, v] of Object.entries(base)) {
+      if (Array.isArray(v) && !Array.isArray(out[k])) out[k] = [];
+      else if (v !== null && typeof v === 'object' && (out[k] === null || typeof out[k] !== 'object')) out[k] = {};
+      else if (typeof v === 'number' && typeof out[k] !== 'number') out[k] = v;
+    }
+    return out;
   };
 
   const updateProgress = (classId, updates) => {

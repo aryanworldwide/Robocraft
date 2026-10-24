@@ -51,6 +51,9 @@ jobs:
       - name: Create Android project
         run: |
           [ -d android ] || npx cap add android
+          # The launcher icon: generated from assets/icon*.png into every
+          # density, including the round and adaptive variants Android wants.
+          npx --yes @capacitor/assets@3 generate --android --assetPath assets || echo "icon generation skipped"
           npx cap sync android
           if [ -f android-config/google-services.json ]; then
             cp android-config/google-services.json android/app/google-services.json

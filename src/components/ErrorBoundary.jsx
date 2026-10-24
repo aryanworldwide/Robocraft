@@ -18,7 +18,7 @@ const RELOAD_KEY = 'rc_chunk_reload';
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, details: '', showDetails: false };
   }
 
   static getDerivedStateFromError(error) {
@@ -26,7 +26,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidUpdate(prev) {
-    if (prev.resetKey !== this.props.resetKey && this.state.error) this.setState({ error: null });
+    if (prev.resetKey !== this.props.resetKey && this.state.error) this.setState({ error: null, details: '', showDetails: false });
   }
 
   componentDidCatch(error, info) {
@@ -40,7 +40,31 @@ export default class ErrorBoundary extends React.Component {
         }
       } catch { /* storage unavailable */ }
     }
+    // Keep the details so the student can show us what actually broke: on a
+    // phone there is no console, and "something went wrong" tells nobody
+    // anything. Stored in state, shown behind a tap, never sent anywhere.
+    const where = String(info?.componentStack || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, 3).join(' < ');
+    this.setState({ details: `${error?.name || 'Error'}: ${error?.message || error}` + (where ? `\n${where}` : '') });
     if (import.meta.env?.DEV) console.error('Caught by ErrorBoundary:', error, info);
+  }
+
+  // The error text, behind a tap. A screenshot of this is the one thing that
+  // makes a crash on someone else's phone fixable.
+  renderDetails() {
+    const { details, showDetails } = this.state;
+    if (!details) return null;
+    if (!showDetails) {
+      return (
+        <button onClick={() => this.setState({ showDetails: true })} className="mt-3 text-[10px] underline text-muted-foreground">
+          Show error details
+        </button>
+      );
+    }
+    return (
+      <pre className="mt-3 text-[9px] leading-snug text-left whitespace-pre-wrap break-words max-h-40 overflow-auto rounded-lg bg-black/5 dark:bg-white/5 p-2">
+        {details}
+      </pre>
+    );
   }
 
   render() {
@@ -66,6 +90,7 @@ export default class ErrorBoundary extends React.Component {
             <button onClick={() => this.setState({ error: null })} className="px-3 py-2 rounded-xl glass text-xs font-bold">Try again</button>
             <button onClick={reload} className="px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold">Reload</button>
           </div>
+          {this.renderDetails()}
         </div>
       );
     }
@@ -87,9 +112,12 @@ export default class ErrorBoundary extends React.Component {
             </button>
           </div>
           {!stale && (
-            <p className="text-[10px] text-muted-foreground mt-4">
-              If this keeps happening, please report it from Settings so we can fix it.
-            </p>
+            <>
+              {this.renderDetails()}
+              <p className="text-[10px] text-muted-foreground mt-3">
+                If this keeps happening, please report it from Settings so we can fix it.
+              </p>
+            </>
           )}
         </div>
       </div>

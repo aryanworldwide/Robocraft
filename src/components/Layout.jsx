@@ -3,12 +3,19 @@ import { formatClass } from '@/lib/utils';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Home, BookOpen, FolderGit2, BarChart3, Wrench } from 'lucide-react';
 import { useApp } from '@/lib/AppContext';
+import { equippedItems } from '@/lib/gamification';
 import AIMentor from '@/components/learning/AIMentor';
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedClass, user, isGuest, isLoading } = useApp();
+  const { selectedClass, user, isGuest, isLoading, getProgressForClass } = useApp();
+
+  // Once a student picks an avatar from the Reward Shop, it takes the place of
+  // the logo in the corner — that is the point of buying one. Computed on each
+  // render (not memoised) so it changes the moment they equip it.
+  const classProgress = selectedClass ? getProgressForClass(selectedClass) : null;
+  const avatarEmoji = classProgress?.shop?.avatar ? equippedItems(classProgress).avatar?.emoji : null;
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -80,11 +87,15 @@ export default function Layout() {
       <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass-strong shadow-lg' : 'bg-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center neon-glow">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400" strokeLinejoin="round"/>
-                <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60" strokeLinejoin="round"/>
-              </svg>
+            <div className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center neon-glow" aria-label={avatarEmoji ? 'Your avatar' : 'RoboCraft'}>
+              {avatarEmoji ? (
+                <span className="text-xl leading-none" role="img">{avatarEmoji}</span>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400" strokeLinejoin="round"/>
+                  <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60" strokeLinejoin="round"/>
+                </svg>
+              )}
             </div>
             <span className="font-bold text-lg gradient-text hidden sm:block">RoboCraft</span>
           </div>

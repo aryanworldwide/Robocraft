@@ -1,74 +1,111 @@
 // Generates flash cards and interactive activities from lesson data
 
+// ── Finding a real answer in the lesson's own words ─────────────────────────
+// Key concepts are written as short labels ("Robotics definition", "Karel
+// Capek"), while the theory is written as "Question?\nAnswer" blocks. Matching
+// the label against the text literally almost never hits, which is why every
+// card used to flip over to "Review the theory section".
+
+const STOP = new Set(['definition', 'definitions', 'meaning', 'concept', 'concepts', 'basics', 'introduction',
+  'intro', 'overview', 'types', 'type', 'field', 'fields', 'modern', 'applications', 'application',
+  'examples', 'example', 'vs', 'and', 'or', 'the', 'of', 'a', 'an', 'in', 'to', 'for', 'its', 'it',
+  'what', 'is', 'are', 'how', 'why', 'with', 'using', 'use', 'uses']);
+
+const words = (s) => String(s || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+const keywords = (s) => words(s).filter(w => w.length > 2 && !STOP.has(w));
+
+// First one or two whole sentences, never a slice through the middle of a word.
+function firstSentences(text, max = 240) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+  return (stop > 60 ? cut.slice(0, stop + 1) : cut.replace(/\s+\S*$/, '')) + (stop > 60 ? '' : '…');
+}
+
+// The paragraph of theory that actually explains this concept, or null.
+function theoryBlockFor(lesson, concept) {
+  const theory = lesson?.theory;
+  if (!theory) return null;
+  const keys = keywords(concept);
+  if (keys.length === 0) return null;
+
+  let best = null, bestScore = 0;
+  for (const block of theory.split(/\n{2,}/)) {
+    const lines = block.split('\n');
+    const heading = lines.length > 1 && (lines[0].trim().endsWith('?') || lines[0].trim().length < 60) ? lines[0] : '';
+    const body = (heading ? lines.slice(1) : lines).join(' ').trim();
+    if (body.length < 40) continue;
+
+    const headWords = new Set(words(heading));
+    const bodyWords = new Set(words(body));
+    let score = 0;
+    for (const k of keys) {
+      if (headWords.has(k)) score += 3;
+      else if (bodyWords.has(k)) score += 1;
+    }
+    // The whole label appearing verbatim is as strong a signal as there is.
+    if (String(concept).length > 4 && (heading + ' ' + body).toLowerCase().includes(String(concept).toLowerCase())) score += 4;
+    if (score > bestScore) { bestScore = score; best = body; }
+  }
+  return bestScore >= 2 ? { text: best, score: bestScore } : null;
+}
+
+// A sentence from the summary or an objective that mentions the concept.
+function otherMentionOf(lesson, concept) {
+  const keys = keywords(concept);
+  if (!keys.length) return null;
+  const pool = [];
+  if (lesson?.summary) pool.push(...(String(lesson.summary).match(/[^.!?]+[.!?]*/g) || []));
+  if (Array.isArray(lesson?.objectives)) pool.push(...lesson.objectives);
+  for (const line of pool) {
+    const w = new Set(words(line));
+    if (keys.some(k => w.has(k)) && String(line).trim().length > 25) return String(line).trim();
+  }
+  return null;
+}
+
+// The explanation a student should see on the back of a card.
+function explain(lesson, concept) {
+  return theoryBlockFor(lesson, concept)?.text || otherMentionOf(lesson, concept) || null;
+}
+
 export function generateFlashCards(lesson) {
   if (!lesson) return [];
   const cards = [];
 
-  // Key concepts
-  if (lesson.keyConcepts) {
-    lesson.keyConcepts.forEach((concept, i) => {
-      cards.push({
-        front: concept,
-        back: extractConceptExplanation(lesson, concept),
-        category: 'Key Concept',
-        hint: true,
-      });
+  // Key concepts. A card with nothing real on the back teaches nothing, so a
+  // concept the lesson never explains is left out rather than padded.
+  if (Array.isArray(lesson.keyConcepts)) {
+    lesson.keyConcepts.forEach((concept) => {
+      const back = explain(lesson, concept);
+      if (!back) return;
+      cards.push({ front: concept, back: firstSentences(back), category: 'Key Concept', hint: true });
     });
   }
 
-  // Objectives
-  if (lesson.objectives) {
+  // Objectives, answered from the theory for the same reason.
+  if (Array.isArray(lesson.objectives)) {
     lesson.objectives.forEach(obj => {
-      cards.push({
-        front: '🎯 ' + obj,
-        back: 'This is a learning objective for this lesson. Make sure you understand this concept and can apply it.',
-        category: 'Objective',
-        hint: true,
-      });
+      const back = theoryBlockFor(lesson, obj)?.text;
+      if (!back) return;
+      cards.push({ front: '🎯 ' + obj, back: firstSentences(back), category: 'Objective', hint: true });
     });
   }
 
   // Examples
-  if (lesson.examples) {
+  if (Array.isArray(lesson.examples)) {
     lesson.examples.forEach(ex => {
-      cards.push({
-        front: '📍 Example',
-        back: ex,
-        category: 'Real-World Example',
-        hint: true,
-      });
+      cards.push({ front: '📍 Example', back: ex, category: 'Real-World Example', hint: true });
     });
   }
 
   // Summary
   if (lesson.summary) {
-    cards.push({
-      front: '📝 Summary',
-      back: lesson.summary,
-      category: 'Summary',
-      hint: true,
-    });
+    cards.push({ front: '📝 Summary', back: lesson.summary, category: 'Summary', hint: true });
   }
 
   return cards;
-}
-
-function extractConceptExplanation(lesson, concept) {
-  if (!lesson.theory) return 'This is a key concept from this lesson. Review the theory section for more details.';
-  // Try to find the concept in the theory text
-  const lowerTheory = lesson.theory.toLowerCase();
-  const lowerConcept = concept.toLowerCase();
-  const idx = lowerTheory.indexOf(lowerConcept);
-  if (idx !== -1) {
-    // Extract surrounding text (200 chars before and after)
-    const start = Math.max(0, idx - 50);
-    const end = Math.min(lesson.theory.length, idx + concept.length + 200);
-    let snippet = lesson.theory.substring(start, end).trim();
-    if (start > 0) snippet = '...' + snippet;
-    if (end < lesson.theory.length) snippet = snippet + '...';
-    return snippet;
-  }
-  return `This is a key concept: ${concept}. Review the theory section for more details.`;
 }
 
 export function generateMatchGame(lesson, quizQuestions) {
@@ -122,18 +159,37 @@ export function generateMatchGame(lesson, quizQuestions) {
       'Grashof\'s condition': 'Determines if a link can rotate fully in a 4-bar linkage',
     };
 
+    // A pair is only a question if the right-hand side says something the
+    // left-hand side does not. "Robotics definition → A key concept: Robotics
+    // definition" is not a matching exercise, so a concept the lesson never
+    // defines is dropped instead of echoed back.
+    const usedRight = new Set();
     lesson.keyConcepts.forEach(concept => {
-      const def = conceptDefs[concept] || `A key concept: ${concept}`;
-      pairs.push({ left: concept, right: def });
+      // A matching game needs a definite answer, so only a strong match counts
+      // here: the hand-written definition, or a paragraph whose own heading is
+      // about this concept.
+      const hit = theoryBlockFor(lesson, concept);
+      const explanation = conceptDefs[concept] || (hit && hit.score >= 3 ? hit.text : null);
+      if (!explanation) return;
+      const right = firstSentences(explanation, 110);
+      // Reject an echo of the label, a bare heading, and anything already used
+      // for another concept — two identical answers make the game unsolvable.
+      if (!right || right.length < 25 || right.endsWith(':')) return;
+      if (right.toLowerCase().includes(String(concept).toLowerCase()) && right.length < String(concept).length + 25) return;
+      const fingerprint = right.toLowerCase().slice(0, 50);
+      if (usedRight.has(fingerprint)) return;
+      usedRight.add(fingerprint);
+      pairs.push({ left: concept, right });
     });
   }
 
-  // If not enough pairs, add from quiz
-  if (pairs.length < 4 && quizQuestions) {
+  // Top up from the quiz so there is always a game worth playing.
+  if (pairs.length < 4 && Array.isArray(quizQuestions)) {
     quizQuestions.forEach(q => {
-      if (q.type === 'mcq' && pairs.length < 8) {
-        const correctAnswer = q.options[q.answer];
-        pairs.push({ left: q.q.substring(0, 40) + '...', right: correctAnswer });
+      if (q.type === 'mcq' && pairs.length < 6 && Array.isArray(q.options)) {
+        const correct = q.options[q.answer];
+        if (!correct) return;
+        pairs.push({ left: firstSentences(q.q, 60), right: String(correct) });
       }
     });
   }

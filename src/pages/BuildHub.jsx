@@ -7,7 +7,12 @@ import { PROJECTS as DESIGN_PROJECTS } from '@/lib/design/parts';
 import { useInk } from '@/lib/ui/ink';
 import { Cpu, Bot, Cog, Trophy, ChevronRight, FileText, Plus, Clock, Boxes, CircuitBoard } from 'lucide-react';
 
-const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } };
+// Always a list, whatever is actually in storage: a corrupt or older value
+// used to reach .slice() and take the Build screen down.
+const read = (k) => {
+  try { const v = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(v) ? v : []; }
+  catch { return []; }
+};
 const ago = (t) => {
   const m = Math.round((Date.now() - t) / 60000);
   if (m < 1) return 'just now';
