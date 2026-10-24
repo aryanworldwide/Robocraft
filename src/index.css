@@ -439,6 +439,7 @@ html:not(.dark) .text-slate-400 { color: #475569; } /* 7.0:1  */
 .to-purple-500.text-white { --tw-gradient-to: #9333ea var(--tw-gradient-to-position); }
 .to-violet-500.text-white { --tw-gradient-to: #7c3aed var(--tw-gradient-to-position); }
 .to-fuchsia-500.text-white { --tw-gradient-to: #a21caf var(--tw-gradient-to-position); }
+.to-fuchsia-600.text-white { --tw-gradient-to: #a21caf var(--tw-gradient-to-position); }
 
 .via-cyan-400.text-white { --tw-gradient-via: #0e7490 var(--tw-gradient-via-position); }
 .via-cyan-500.text-white { --tw-gradient-via: #0e7490 var(--tw-gradient-via-position); }
@@ -554,8 +555,6 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-t.from-cyan-600,
 .bg-gradient-to-b.from-cyan-600 {
   --tw-gradient-from: #0e7490 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(14 116 144 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 .bg-gradient-to-r.from-green-500,
 .bg-gradient-to-l.from-green-500,
@@ -564,8 +563,6 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-t.from-green-500,
 .bg-gradient-to-b.from-green-500 {
   --tw-gradient-from: #15803d var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(21 128 61 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 .bg-gradient-to-r.from-orange-400,
 .bg-gradient-to-l.from-orange-400,
@@ -580,8 +577,6 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-t.from-orange-500,
 .bg-gradient-to-b.from-orange-500 {
   --tw-gradient-from: #c2410c var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(194 65 12 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 .bg-gradient-to-r.from-violet-500,
 .bg-gradient-to-l.from-violet-500,
@@ -590,8 +585,6 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-t.from-violet-500,
 .bg-gradient-to-b.from-violet-500 {
   --tw-gradient-from: #6d28d9 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(109 40 217 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 .bg-gradient-to-r.from-purple-500,
 .bg-gradient-to-l.from-purple-500,
@@ -600,8 +593,6 @@ html:not(.dark) :is(.on-dark, .terminal-surface) .text-blue-400    { color: #60a
 .bg-gradient-to-t.from-purple-500,
 .bg-gradient-to-b.from-purple-500 {
   --tw-gradient-from: #7e22ce var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(126 34 206 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 .bg-gradient-to-r.to-blue-500,
 .bg-gradient-to-l.to-blue-500,
