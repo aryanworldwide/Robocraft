@@ -49,9 +49,16 @@ export default function Canvas({
       // put it in clear space to the right of what is already there (wrapping down)
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
       comps.forEach(c => { const d = getDef(c.type); if (!d) return; minX = Math.min(minX, c.x); minY = Math.min(minY, c.y); maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h); });
+      // A part's labels and name stick out well below and to the side of its
+      // body, so the gap has to clear those, not just the rectangle.
+      const labelRoom = (d) => {
+        const longest = (side) => d.pins.filter(p => p.side === side).reduce((m, p) => Math.max(m, p.label.length), 0);
+        return { below: longest('bottom') * 5.2 + 34, above: longest('top') * 5.2 + 14 };
+      };
+      const room = Math.max(...comps.map(c => getDef(c.type)).filter(Boolean).map(d => labelRoom(d).below), 0);
       const GAP = 40;
       if (maxX - minX + def.w + GAP < 900) dropRef.current(type, maxX + GAP, minY);
-      else dropRef.current(type, minX, maxY + GAP + 20);
+      else dropRef.current(type, minX, maxY + GAP + room + labelRoom(def).above);
     };
     window.addEventListener('lab-add', add);
     return () => window.removeEventListener('lab-add', add);
@@ -65,7 +72,10 @@ export default function Canvas({
       comps.forEach(c => {
         const d = getDef(c.type); if (!d) return;
         minX = Math.min(minX, c.x); minY = Math.min(minY, c.y);
-        maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h + 20);
+        const below = d.pins.filter(p => p.side === 'bottom').reduce((m, p) => Math.max(m, p.label.length), 0) * 5.2 + 30;
+        const above = d.pins.filter(p => p.side === 'top').reduce((m, p) => Math.max(m, p.label.length), 0) * 5.2 + 14;
+        minY = Math.min(minY, c.y - above);
+        maxX = Math.max(maxX, c.x + d.w); maxY = Math.max(maxY, c.y + d.h + below);
       });
       if (minX === Infinity) { setView({ x: 40, y: 40, scale: 0.7 }); return; }
       const rect = svgRef.current.getBoundingClientRect();
