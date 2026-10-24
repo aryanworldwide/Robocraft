@@ -5,14 +5,16 @@
 // what to do instead. A red wire a student cannot interpret is not feedback.
 
 import { getDef, isBoard } from './labComponents';
+import { pinMatches } from './validateLab';
 
 const pinOf = (type, pinId) => getDef(type)?.pins.find(p => p.id === pinId);
 const pinLabel = (type, pinId) => pinOf(type, pinId)?.label || pinId;
 const nameOf = (type) => getDef(type)?.name || type;
 
 // A required connection names a component type and a pin, where '*' is either
-// terminal of a symmetric part such as a resistor.
-const specMatches = (spec, type, pinId) => spec.comp === type && (spec.pin === '*' || spec.pin === pinId);
+// terminal of a symmetric part. The checker's own rule is reused, so GND2
+// counts as GND and a second 5V pin counts as 5V — a real Uno has several.
+const specMatches = (spec, type, pinId) => pinMatches(spec, type, pinId);
 
 // "the LED's Cathode (−)" / "either end of the Resistor 220Ω"
 function describe(spec) {

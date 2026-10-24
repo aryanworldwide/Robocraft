@@ -2,7 +2,9 @@
 import { getDef, isBoard} from './labComponents';
 
 // Does a required pin spec match an actual (componentType, pinId)?
-function pinMatches(spec, actualType, actualPinId) {
+// Exported so the wiring advice judges a connection by exactly the same rule
+// the checker does — otherwise the Lab could refuse a wire it then marks right.
+export function pinMatches(spec, actualType, actualPinId) {
   if (spec.comp !== actualType) return false;
   if (spec.pin === '*') return true; // any pin (symmetric resistor terminal)
   const def = getDef(actualType);
