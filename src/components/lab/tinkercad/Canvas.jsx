@@ -324,7 +324,7 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
         const wired = wiredPins.has(pin.id);
         const vertical = pin.side === 'top' || pin.side === 'bottom';
         const labelDx = pin.side === 'left' ? -7 : pin.side === 'right' ? 7 : 0;
-        const labelDy = pin.side === 'top' ? -9 : pin.side === 'bottom' ? 9 : 0;
+        const labelDy = pin.side === 'top' ? -13 : pin.side === 'bottom' ? 13 : 0;
         const anchor = pin.side === 'left' || pin.side === 'top' ? 'end' : 'start';
         return (
           <g key={pin.id}>
@@ -336,12 +336,14 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
               onPointerDown={(e) => onPinDown(e, pin.id)} />
             <circle cx={lp.x} cy={lp.y} r={7} fill="#ffffff" opacity={0.85} pointerEvents="none" />
             <circle cx={lp.x} cy={lp.y} r={5} fill={color} stroke="#0f172a" strokeWidth={1} style={{ cursor: 'crosshair' }} onPointerDown={(e) => onPinDown(e, pin.id)} />
-            {wired && <circle cx={lp.x} cy={lp.y} r={8.5} fill="none" stroke="#22C55E" strokeWidth={1.6} opacity={0.75} />}
+            {wired && <circle cx={lp.x} cy={lp.y} r={8.5} fill="none" stroke="#22C55E" strokeWidth={1.6} opacity={0.75} pointerEvents="none" />}
             {/* Pins along the top and bottom edges carry their labels
                 vertically, the way a real board's silkscreen does — at this
                 pitch "GPIO12" written across would run into its neighbour. */}
+            {/* The label must never take a tap meant for its pin: on the top
+                and bottom rows it sits directly over one. */}
             <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={700} className="pin-label"
-              textAnchor={anchor}
+              pointerEvents="none" textAnchor={anchor}
               transform={`rotate(${-rot + (vertical ? -90 : 0)} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
           </g>
         );
