@@ -132,10 +132,18 @@ jobs:
         run: |
           NOTES="Built from commit ${GITHUB_SHA::7}. Download RoboCraft.apk below and install it on your Android phone."
           # create once, then just replace the file — deleting the release races with other runs
-          gh release view apk-latest >/dev/null 2>&1 || \
-            gh release create apk-latest --title "RoboCraft APK (latest build)" --notes "$NOTES" --latest
+          # If the tag has drifted off the current branch, recreate the
+          # release so it points at the commit this APK was actually built
+          # from. gh release edit --target does not move a published tag.
+          TAGGED=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/apk-latest" --jq .object.sha 2>/dev/null || echo "")
+          if [ -n "$TAGGED" ] && ! git merge-base --is-ancestor "$TAGGED" "$GITHUB_SHA" 2>/dev/null; then
+            gh release delete apk-latest --yes --cleanup-tag || true
+            TAGGED=""
+          fi
+          [ -n "$TAGGED" ] || \
+            gh release create apk-latest --target "$GITHUB_SHA" --title "RoboCraft APK (latest build)" --notes "$NOTES" --latest
           gh release upload apk-latest RoboCraft.apk --clobber
           if [ -f RoboCraft-play.aab ]; then gh release upload apk-latest RoboCraft-play.aab --clobber; fi
           # Keep the tag on the commit that produced this build, so the
           # release never points at an old, rewritten commit.
-          gh release edit apk-latest --notes "$NOTES" --latest --target "$GITHUB_SHA"
+          gh release edit apk-latest --notes "$NOTES" --latest
