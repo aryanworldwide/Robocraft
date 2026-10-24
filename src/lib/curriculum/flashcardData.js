@@ -23,87 +23,141 @@ function firstSentences(text, max = 240) {
   return (stop > 60 ? cut.slice(0, stop + 1) : cut.replace(/\s+\S*$/, '')) + (stop > 60 ? '' : '…');
 }
 
-// The paragraph of theory that actually explains this concept, or null.
-function theoryBlockFor(lesson, concept) {
-  const theory = lesson?.theory;
-  if (!theory) return null;
-  const keys = keywords(concept);
-  if (keys.length === 0) return null;
-
-  let best = null, bestScore = 0;
-  for (const block of theory.split(/\n{2,}/)) {
-    const lines = block.split('\n');
-    const heading = lines.length > 1 && (lines[0].trim().endsWith('?') || lines[0].trim().length < 60) ? lines[0] : '';
-    const body = (heading ? lines.slice(1) : lines).join(' ').trim();
-    if (body.length < 40) continue;
-
-    const headWords = new Set(words(heading));
-    const bodyWords = new Set(words(body));
-    let score = 0;
-    for (const k of keys) {
-      if (headWords.has(k)) score += 3;
-      else if (bodyWords.has(k)) score += 1;
+// Every piece of the lesson that could answer a card: bullet lines first,
+// then sentences, then whole paragraphs. A bullet like
+// "• Hand-guiding: physically move the arm to teach it positions" is a far
+// better answer than the paragraph it sits in, and it is what keeps two
+// concepts from the same paragraph off identical cards.
+function passagesOf(lesson) {
+  const out = [];
+  const push = (text, kind) => {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim().replace(/^[•\-*]\s*/, '');
+    // "Cobots have special safety features:" introduces an answer, it is not
+    // one. Nor is anything too short to teach something.
+    if (clean.length < 45 || clean.endsWith(':')) return;
+    if (clean.split(' ').length < 8) return;
+    out.push({ text: clean, kind });
+  };
+  for (const block of String(lesson?.theory || '').split(/\n{2,}/)) {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    const heading = lines.length > 1 && (lines[0].endsWith('?') || lines[0].length < 60) ? lines.shift() : '';
+    for (const line of lines) {
+      if (/^[•\-*]/.test(line)) { push(line, 'bullet'); continue; }
+      const sentences = line.match(/[^.!?]+[.!?]*/g) || [line];
+      if (sentences.length > 1) for (const sn of sentences) push(sn, 'sentence');
+      push(line, 'line');
     }
-    // The whole label appearing verbatim is as strong a signal as there is.
-    if (String(concept).length > 4 && (heading + ' ' + body).toLowerCase().includes(String(concept).toLowerCase())) score += 4;
-    if (score > bestScore) { bestScore = score; best = body; }
+    push((heading ? heading + ' ' : '') + lines.join(' '), 'block');
   }
-  return bestScore >= 2 ? { text: best, score: bestScore } : null;
+  if (lesson?.summary) push(lesson.summary, 'summary');
+  return out;
 }
 
-// A sentence from the summary or an objective that mentions the concept.
-function otherMentionOf(lesson, concept) {
+// How well a passage answers a concept.
+function scoreFor(passage, concept) {
   const keys = keywords(concept);
-  if (!keys.length) return null;
-  const pool = [];
-  if (lesson?.summary) pool.push(...(String(lesson.summary).match(/[^.!?]+[.!?]*/g) || []));
-  if (Array.isArray(lesson?.objectives)) pool.push(...lesson.objectives);
-  for (const line of pool) {
-    const w = new Set(words(line));
-    if (keys.some(k => w.has(k)) && String(line).trim().length > 25) return String(line).trim();
-  }
-  return null;
+  if (!keys.length) return 0;
+  const low = passage.text.toLowerCase();
+  const w = new Set(words(passage.text));
+  let score = 0;
+  for (const k of keys) if (w.has(k)) score += 2;
+  if (String(concept).length > 4 && low.includes(String(concept).toLowerCase())) score += 5;
+  // "Hand-guiding: you can move the arm" — a labelled bullet is a definition.
+  if (passage.kind === 'bullet' && keys.some(k => low.startsWith(k))) score += 3;
+  // Prefer the tightest passage that still says enough.
+  // A tight passage is a better answer than the paragraph containing it, and
+  // it also stops one card's answer from swallowing another card's.
+  if (score > 0) score += passage.kind === 'bullet' ? 3 : passage.kind === 'sentence' ? 2 : passage.kind === 'line' ? 1 : -2;
+  // A recap list repeats what the lesson already said; prefer the place the
+  // concept is actually explained.
+  if (/^(key points|key takeaway|summary|in short|recap)/i.test(passage.text)) score -= 3;
+  return score;
 }
 
-// The explanation a student should see on the back of a card.
-function explain(lesson, concept) {
-  return theoryBlockFor(lesson, concept)?.text || otherMentionOf(lesson, concept) || null;
+// Give each concept the passage that suits it best, resolving clashes by
+// strength: when "for loop" and "Nested loops" both want the nested-loop
+// example, it goes to the one it actually describes and the other looks
+// elsewhere. Without this they end up with the same text on the back.
+export function assignPassages(concepts, passages, min = 4) {
+  const scored = [];
+  concepts.forEach((concept, ci) => {
+    passages.forEach((p, pi) => {
+      const sc = scoreFor(p, concept);
+      if (sc >= min) scored.push({ ci, pi, sc });
+    });
+  });
+  scored.sort((a, b) => b.sc - a.sc);
+  const byConcept = new Map(), takenPassage = new Set();
+  for (const { ci, pi, sc } of scored) {
+    if (byConcept.has(ci) || takenPassage.has(pi)) continue;
+    byConcept.set(ci, { text: passages[pi].text, score: sc });
+    takenPassage.add(pi);
+  }
+  return { byConcept, takenPassage };
+}
+
+// Pick the best passage this card can use that no other card has taken.
+function pickPassage(passages, concept, used, min = 4) {
+  let best = null, bestScore = min - 1;
+  for (const p of passages) {
+    if (used.has(p.text)) continue;
+    const sc = scoreFor(p, concept);
+    if (sc > bestScore) { bestScore = sc; best = p; }
+  }
+  if (!best) return null;
+  used.add(best.text);
+  return { text: best.text, score: bestScore };
 }
 
 export function generateFlashCards(lesson) {
   if (!lesson) return [];
   const cards = [];
+  const passages = passagesOf(lesson);
+  // No passage answers two cards: that is what put the same paragraph on the
+  // back of "Safety features", "Hand-guided programming" and "Force/torque
+  // limiting" in the Cobots lesson.
+  const used = new Set();
+  // Two different passages can still shorten to the same first few sentences,
+  // so the finished card text is checked as well.
+  const backs = new Set();
+  const add = (front, back, category) => {
+    const text = firstSentences(back);
+    const key = text.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!key || backs.has(key)) return;
+    backs.add(key);
+    cards.push({ front, back: text, category, hint: true });
+  };
 
-  // Key concepts. A card with nothing real on the back teaches nothing, so a
-  // concept the lesson never explains is left out rather than padded.
   if (Array.isArray(lesson.keyConcepts)) {
-    lesson.keyConcepts.forEach((concept) => {
-      const back = explain(lesson, concept);
-      if (!back) return;
-      cards.push({ front: concept, back: firstSentences(back), category: 'Key Concept', hint: true });
+    const { byConcept, takenPassage } = assignPassages(lesson.keyConcepts, passages);
+    takenPassage.forEach(pi => used.add(passages[pi].text));
+    lesson.keyConcepts.forEach((concept, ci) => {
+      const hit = byConcept.get(ci);
+      if (!hit) return;
+      add(concept, hit.text, 'Key Concept');
     });
   }
 
-  // Objectives, answered from the theory for the same reason.
+  // Objectives only earn a card when the lesson has something left to say that
+  // no concept card already covers.
   if (Array.isArray(lesson.objectives)) {
     lesson.objectives.forEach(obj => {
-      const back = theoryBlockFor(lesson, obj)?.text;
-      if (!back) return;
-      cards.push({ front: '🎯 ' + obj, back: firstSentences(back), category: 'Objective', hint: true });
+      const hit = pickPassage(passages, obj, used, 6);
+      if (!hit) return;
+      add('🎯 ' + obj, hit.text, 'Objective');
     });
   }
 
-  // Examples
   if (Array.isArray(lesson.examples)) {
     lesson.examples.forEach(ex => {
-      cards.push({ front: '📍 Example', back: ex, category: 'Real-World Example', hint: true });
+      const text = String(ex || '').trim();
+      if (!text || used.has(text)) return;
+      used.add(text);
+      add('📍 Example', text, 'Real-World Example');
     });
   }
 
-  // Summary
-  if (lesson.summary) {
-    cards.push({ front: '📝 Summary', back: lesson.summary, category: 'Summary', hint: true });
-  }
+  if (lesson.summary && !used.has(String(lesson.summary).trim())) add('📝 Summary', lesson.summary, 'Summary');
 
   return cards;
 }
@@ -164,12 +218,12 @@ export function generateMatchGame(lesson, quizQuestions) {
     // definition" is not a matching exercise, so a concept the lesson never
     // defines is dropped instead of echoed back.
     const usedRight = new Set();
+    const passages = passagesOf(lesson);
     lesson.keyConcepts.forEach(concept => {
-      // A matching game needs a definite answer, so only a strong match counts
-      // here: the hand-written definition, or a paragraph whose own heading is
-      // about this concept.
-      const hit = theoryBlockFor(lesson, concept);
-      const explanation = conceptDefs[concept] || (hit && hit.score >= 3 ? hit.text : null);
+      // A matching game needs a definite answer, and two concepts must never
+      // share one, so each pair takes a passage of its own.
+      const hit = pickPassage(passages, concept, usedRight, 5);
+      const explanation = conceptDefs[concept] || (hit ? hit.text : null);
       if (!explanation) return;
       const right = firstSentences(explanation, 110);
       // Reject an echo of the label, a bare heading, and anything already used
