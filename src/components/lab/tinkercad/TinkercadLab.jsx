@@ -27,6 +27,7 @@ import BuildAnything from './BuildAnything';
 import WorkflowStepper from './WorkflowStepper';
 import HelpMeBuild from './HelpMeBuild';
 import { toast } from '@/components/ui/use-toast';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Returns false when the device refuses the write (storage full, private mode).
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
@@ -386,6 +387,11 @@ export default function TinkercadLab({ onExit }) {
 
         {/* Canvas */}
         <div className="flex-1 min-w-0 relative">
+          {/* The workbench gets its own boundary: if drawing a part or a wire
+              fails, the student keeps the toolbar, the code and the saved work
+              instead of losing the whole screen. */}
+          <ErrorBoundary compact resetKey={components.length + ':' + wires.length}
+            message="The workbench could not draw that. Try again, or undo the last step.">
           <Canvas
             components={components} wires={wires} selectedId={selectedId} pendingWire={pendingWire}
             simState={simState} running={running} wireStatuses={wireStatuses}
@@ -394,6 +400,7 @@ export default function TinkercadLab({ onExit }) {
             onDropComponent={addComponent}
             bottomInset={showSerial ? 208 : 0}
           />
+          </ErrorBoundary>
           {showWelcome && components.length === 0 && (
             <LabWelcome
               onBuildAnything={() => { setShowWelcome(false); setShowBuildAnything(true); }}
