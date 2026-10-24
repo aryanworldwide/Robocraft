@@ -6,53 +6,53 @@ export const LAB_COMPONENTS = {
   arduino_uno: {
     name: 'Arduino Uno', category: 'Boards', w: 210, h: 150, color: '#0EA5E9', emoji: '🔌',
     pins: [
-      { id: 'D0', label: 'D0', side: 'left', type: 'digital' }, { id: 'D1', label: 'D1', side: 'left', type: 'digital' },
-      { id: 'D2', label: 'D2', side: 'left', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'left', type: 'pwm' },
-      { id: 'D4', label: 'D4', side: 'left', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'left', type: 'pwm' },
-      { id: 'D6', label: 'D6~', side: 'left', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'left', type: 'digital' },
-      { id: 'D8', label: 'D8', side: 'left', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'left', type: 'pwm' },
-      { id: 'D10', label: 'D10~', side: 'left', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'left', type: 'pwm' },
-      { id: 'D12', label: 'D12', side: 'left', type: 'digital' }, { id: 'D13', label: 'D13', side: 'left', type: 'digital' },
-      { id: 'A0', label: 'A0', side: 'right', type: 'analog' }, { id: 'A1', label: 'A1', side: 'right', type: 'analog' },
-      { id: 'A2', label: 'A2', side: 'right', type: 'analog' }, { id: 'A3', label: 'A3', side: 'right', type: 'analog' },
-      { id: 'A4', label: 'A4', side: 'right', type: 'analog' }, { id: 'A5', label: 'A5', side: 'right', type: 'analog' },
-      { id: '5V', label: '5V', side: 'right', type: 'power' }, { id: '3V3', label: '3.3V', side: 'right', type: 'power' },
-      { id: 'GND', label: 'GND', side: 'right', type: 'ground' }, { id: 'GND2', label: 'GND', side: 'right', type: 'ground' },
-      { id: 'VIN', label: 'VIN', side: 'right', type: 'power' }, { id: 'REF', label: 'AREF', side: 'right', type: 'signal' },
+      { id: 'D0', label: 'D0', side: 'top', type: 'digital' }, { id: 'D1', label: 'D1', side: 'top', type: 'digital' },
+      { id: 'D2', label: 'D2', side: 'top', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'top', type: 'pwm' },
+      { id: 'D4', label: 'D4', side: 'top', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'top', type: 'pwm' },
+      { id: 'D6', label: 'D6~', side: 'top', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'top', type: 'digital' },
+      { id: 'D8', label: 'D8', side: 'top', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'top', type: 'pwm' },
+      { id: 'D10', label: 'D10~', side: 'top', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'top', type: 'pwm' },
+      { id: 'D12', label: 'D12', side: 'top', type: 'digital' }, { id: 'D13', label: 'D13', side: 'top', type: 'digital' },
+      { id: 'A0', label: 'A0', side: 'bottom', type: 'analog' }, { id: 'A1', label: 'A1', side: 'bottom', type: 'analog' },
+      { id: 'A2', label: 'A2', side: 'bottom', type: 'analog' }, { id: 'A3', label: 'A3', side: 'bottom', type: 'analog' },
+      { id: 'A4', label: 'A4', side: 'bottom', type: 'analog' }, { id: 'A5', label: 'A5', side: 'bottom', type: 'analog' },
+      { id: '5V', label: '5V', side: 'bottom', type: 'power' }, { id: '3V3', label: '3.3V', side: 'bottom', type: 'power' },
+      { id: 'GND', label: 'GND', side: 'bottom', type: 'ground' }, { id: 'GND2', label: 'GND', side: 'bottom', type: 'ground' },
+      { id: 'VIN', label: 'VIN', side: 'bottom', type: 'power' }, { id: 'REF', label: 'AREF', side: 'bottom', type: 'signal' },
     ],
   },
   arduino_nano: {
     name: 'Arduino Nano', category: 'Boards', w: 170, h: 130, color: '#0EA5E9', emoji: '🔌',
     pins: [
-      { id: 'D2', label: 'D2', side: 'left', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'left', type: 'pwm' },
-      { id: 'D4', label: 'D4', side: 'left', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'left', type: 'pwm' },
-      { id: 'D6', label: 'D6~', side: 'left', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'left', type: 'digital' },
-      { id: 'D8', label: 'D8', side: 'left', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'left', type: 'pwm' },
-      { id: 'D10', label: 'D10~', side: 'left', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'left', type: 'pwm' },
-      { id: 'D12', label: 'D12', side: 'left', type: 'digital' }, { id: 'D13', label: 'D13', side: 'left', type: 'digital' },
-      { id: 'A0', label: 'A0', side: 'right', type: 'analog' }, { id: 'A1', label: 'A1', side: 'right', type: 'analog' },
-      { id: 'A2', label: 'A2', side: 'right', type: 'analog' }, { id: 'A3', label: 'A3', side: 'right', type: 'analog' },
-      { id: 'A4', label: 'A4', side: 'right', type: 'analog' }, { id: 'A5', label: 'A5', side: 'right', type: 'analog' },
-      { id: 'A6', label: 'A6', side: 'right', type: 'analog' }, { id: 'A7', label: 'A7', side: 'right', type: 'analog' },
-      { id: '5V', label: '5V', side: 'right', type: 'power' }, { id: 'GND', label: 'GND', side: 'right', type: 'ground' },
-      { id: '3V3', label: '3.3V', side: 'right', type: 'power' }, { id: 'VIN', label: 'VIN', side: 'right', type: 'power' },
+      { id: 'D2', label: 'D2', side: 'top', type: 'digital' }, { id: 'D3', label: 'D3~', side: 'top', type: 'pwm' },
+      { id: 'D4', label: 'D4', side: 'top', type: 'digital' }, { id: 'D5', label: 'D5~', side: 'top', type: 'pwm' },
+      { id: 'D6', label: 'D6~', side: 'top', type: 'pwm' }, { id: 'D7', label: 'D7', side: 'top', type: 'digital' },
+      { id: 'D8', label: 'D8', side: 'top', type: 'digital' }, { id: 'D9', label: 'D9~', side: 'top', type: 'pwm' },
+      { id: 'D10', label: 'D10~', side: 'top', type: 'pwm' }, { id: 'D11', label: 'D11~', side: 'top', type: 'pwm' },
+      { id: 'D12', label: 'D12', side: 'top', type: 'digital' }, { id: 'D13', label: 'D13', side: 'top', type: 'digital' },
+      { id: 'A0', label: 'A0', side: 'bottom', type: 'analog' }, { id: 'A1', label: 'A1', side: 'bottom', type: 'analog' },
+      { id: 'A2', label: 'A2', side: 'bottom', type: 'analog' }, { id: 'A3', label: 'A3', side: 'bottom', type: 'analog' },
+      { id: 'A4', label: 'A4', side: 'bottom', type: 'analog' }, { id: 'A5', label: 'A5', side: 'bottom', type: 'analog' },
+      { id: 'A6', label: 'A6', side: 'bottom', type: 'analog' }, { id: 'A7', label: 'A7', side: 'bottom', type: 'analog' },
+      { id: '5V', label: '5V', side: 'bottom', type: 'power' }, { id: 'GND', label: 'GND', side: 'bottom', type: 'ground' },
+      { id: '3V3', label: '3.3V', side: 'bottom', type: 'power' }, { id: 'VIN', label: 'VIN', side: 'bottom', type: 'power' },
     ],
   },
   esp32: {
     name: 'ESP32', category: 'Boards', w: 180, h: 140, color: '#A78BFA', emoji: '📶',
     pins: [
-      { id: 'D2', label: 'GPIO2', side: 'left', type: 'digital' }, { id: 'D4', label: 'GPIO4', side: 'left', type: 'digital' },
-      { id: 'D5', label: 'GPIO5', side: 'left', type: 'digital' }, { id: 'D12', label: 'GPIO12', side: 'left', type: 'digital' },
-      { id: 'D13', label: 'GPIO13', side: 'left', type: 'digital' }, { id: 'D14', label: 'GPIO14', side: 'left', type: 'digital' },
-      { id: 'D15', label: 'GPIO15', side: 'left', type: 'pwm' }, { id: 'D18', label: 'GPIO18', side: 'left', type: 'pwm' },
-      { id: 'D19', label: 'GPIO19', side: 'left', type: 'digital' }, { id: 'D21', label: 'GPIO21', side: 'left', type: 'digital' },
-      { id: 'D22', label: 'GPIO22', side: 'left', type: 'digital' }, { id: 'D23', label: 'GPIO23', side: 'left', type: 'digital' },
-      { id: 'A34', label: 'VP', side: 'right', type: 'analog' }, { id: 'A35', label: 'VN', side: 'right', type: 'analog' },
-      { id: 'A32', label: 'GPIO32', side: 'right', type: 'analog' }, { id: 'A33', label: 'GPIO33', side: 'right', type: 'analog' },
-      { id: 'A36', label: 'GPIO36', side: 'right', type: 'analog' }, { id: 'A39', label: 'GPIO39', side: 'right', type: 'analog' },
-      { id: '3V3', label: '3.3V', side: 'right', type: 'power' }, { id: 'GND', label: 'GND', side: 'right', type: 'ground' },
-      { id: 'GND2', label: 'GND', side: 'right', type: 'ground' }, { id: 'VIN', label: 'VIN', side: 'right', type: 'power' },
-      { id: 'EN', label: 'EN', side: 'right', type: 'signal' },
+      { id: 'D2', label: 'GPIO2', side: 'top', type: 'digital' }, { id: 'D4', label: 'GPIO4', side: 'top', type: 'digital' },
+      { id: 'D5', label: 'GPIO5', side: 'top', type: 'digital' }, { id: 'D12', label: 'GPIO12', side: 'top', type: 'digital' },
+      { id: 'D13', label: 'GPIO13', side: 'top', type: 'digital' }, { id: 'D14', label: 'GPIO14', side: 'top', type: 'digital' },
+      { id: 'D15', label: 'GPIO15', side: 'top', type: 'pwm' }, { id: 'D18', label: 'GPIO18', side: 'top', type: 'pwm' },
+      { id: 'D19', label: 'GPIO19', side: 'top', type: 'digital' }, { id: 'D21', label: 'GPIO21', side: 'top', type: 'digital' },
+      { id: 'D22', label: 'GPIO22', side: 'top', type: 'digital' }, { id: 'D23', label: 'GPIO23', side: 'top', type: 'digital' },
+      { id: 'A34', label: 'VP', side: 'bottom', type: 'analog' }, { id: 'A35', label: 'VN', side: 'bottom', type: 'analog' },
+      { id: 'A32', label: 'GPIO32', side: 'bottom', type: 'analog' }, { id: 'A33', label: 'GPIO33', side: 'bottom', type: 'analog' },
+      { id: 'A36', label: 'GPIO36', side: 'bottom', type: 'analog' }, { id: 'A39', label: 'GPIO39', side: 'bottom', type: 'analog' },
+      { id: '3V3', label: '3.3V', side: 'bottom', type: 'power' }, { id: 'GND', label: 'GND', side: 'bottom', type: 'ground' },
+      { id: 'GND2', label: 'GND', side: 'bottom', type: 'ground' }, { id: 'VIN', label: 'VIN', side: 'bottom', type: 'power' },
+      { id: 'EN', label: 'EN', side: 'bottom', type: 'signal' },
     ],
   },
   breadboard: { name: 'Breadboard', category: 'Boards', w: 240, h: 120, color: '#FDE68A', emoji: '🧰', symmetric: true,
@@ -114,6 +114,20 @@ export const PALETTE_CATEGORIES = [
 ];
 
 const BOARD_TYPES = new Set(['arduino_uno', 'arduino_nano', 'esp32']);
+
+// Pins on a real board sit 2.54mm apart, which at any readable zoom is a few
+// pixels — unusable with a finger. Each part is grown until its busiest edge
+// gives every pin this much room. The artwork scales with it, so the part
+// still looks like itself.
+const MIN_PIN_PITCH = 26;
+for (const def of Object.values(LAB_COMPONENTS)) {
+  const count = { left: 0, right: 0, top: 0, bottom: 0 };
+  def.pins.forEach(p => { count[p.side] = (count[p.side] || 0) + 1; });
+  const down = Math.max(count.left, count.right);
+  const across = Math.max(count.top, count.bottom);
+  if (down > 1) def.h = Math.max(def.h, MIN_PIN_PITCH * (down + 1));
+  if (across > 1) def.w = Math.max(def.w, MIN_PIN_PITCH * (across + 1));
+}
 
 export function isBoard(type) { return BOARD_TYPES.has(type); }
 

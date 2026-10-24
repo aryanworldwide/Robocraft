@@ -289,6 +289,13 @@ export default function Canvas({
 
 function ComponentNode({ comp, def, selected, wires, simState, running, onPointerDown, onPinDown }) {
   if (!def) return null;
+  // Half the distance between neighbouring pins, so every tap lands on the
+  // pin nearest the finger and never on its neighbour.
+  const counts = { left: 0, right: 0, top: 0, bottom: 0 };
+  def.pins.forEach(p => { counts[p.side] = (counts[p.side] || 0) + 1; });
+  const down = Math.max(counts.left, counts.right), across = Math.max(counts.top, counts.bottom);
+  const pitch = Math.min(down > 1 ? def.h / (down + 1) : 99, across > 1 ? def.w / (across + 1) : 99);
+  const hitRadius = Math.max(7, Math.min(15, pitch / 2));
   const rot = comp.rot || 0;
   const partState = running ? { ...(simState || {}), ...((simState?.comp || {})[comp.id] || {}) } : undefined;
   const wiredPins = new Set();
@@ -315,21 +322,27 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
         if (!lp) return null;
         const color = PIN_COLORS[pin.type] || '#94A3B8';
         const wired = wiredPins.has(pin.id);
+        const vertical = pin.side === 'top' || pin.side === 'bottom';
         const labelDx = pin.side === 'left' ? -7 : pin.side === 'right' ? 7 : 0;
-        const labelDy = pin.side === 'top' ? -7 : pin.side === 'bottom' ? 7 : 0;
-        const anchor = pin.side === 'left' ? 'end' : pin.side === 'right' ? 'start' : 'middle';
+        const labelDy = pin.side === 'top' ? -9 : pin.side === 'bottom' ? 9 : 0;
+        const anchor = pin.side === 'left' || pin.side === 'top' ? 'end' : 'start';
         return (
           <g key={pin.id}>
             {/* An invisible, finger-sized target: a 5px dot is far too small to
                 hit on a phone, and missing it panned the canvas instead. A
                 board's pins sit close together, so theirs stays tighter to
                 avoid stealing the neighbouring pin's taps. */}
-            <circle cx={lp.x} cy={lp.y} r={def.pins.length > 8 ? 8 : 15} fill="transparent" style={{ cursor: 'crosshair' }}
+            <circle cx={lp.x} cy={lp.y} r={hitRadius} fill="transparent" style={{ cursor: 'crosshair' }}
               onPointerDown={(e) => onPinDown(e, pin.id)} />
             <circle cx={lp.x} cy={lp.y} r={7} fill="#ffffff" opacity={0.85} pointerEvents="none" />
             <circle cx={lp.x} cy={lp.y} r={5} fill={color} stroke="#0f172a" strokeWidth={1} style={{ cursor: 'crosshair' }} onPointerDown={(e) => onPinDown(e, pin.id)} />
             {wired && <circle cx={lp.x} cy={lp.y} r={8.5} fill="none" stroke="#22C55E" strokeWidth={1.6} opacity={0.75} />}
-            <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={700} className="pin-label" textAnchor={anchor} transform={`rotate(${-rot} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
+            {/* Pins along the top and bottom edges carry their labels
+                vertically, the way a real board's silkscreen does — at this
+                pitch "GPIO12" written across would run into its neighbour. */}
+            <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={700} className="pin-label"
+              textAnchor={anchor}
+              transform={`rotate(${-rot + (vertical ? -90 : 0)} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
           </g>
         );
       })}
