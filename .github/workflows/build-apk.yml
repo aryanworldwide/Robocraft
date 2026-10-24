@@ -60,6 +60,20 @@ jobs:
             sed -i 's/^ext {/ext {\n    rgcfaIncludeGoogle = true/' android/variables.gradle
           fi
 
+      # Hardening that costs nothing and breaks nothing: no device backup of the
+      # app's data (a student's saved work cannot be pulled off a phone over
+      # adb), and no plain-HTTP traffic. The app already serves its own files
+      # over https inside the WebView.
+      - name: Lock down the Android manifest
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q 'android:allowBackup' $M && sed -i -E 's/android:allowBackup="[^"]*"/android:allowBackup="false"/' $M \
+            || sed -i '0,/<application/s//<application android:allowBackup="false"/' $M
+          grep -q 'android:usesCleartextTraffic' $M \
+            && sed -i -E 's/android:usesCleartextTraffic="[^"]*"/android:usesCleartextTraffic="false"/' $M \
+            || sed -i '0,/<application/s//<application android:usesCleartextTraffic="false"/' $M
+          grep -E 'allowBackup|usesCleartextTraffic' $M
+
       # Google Play requires apps to target Android 16 (API 36) from 31 Aug 2026.
       # Every build gets a higher versionCode so Play accepts updates.
       - name: Set SDK levels and version
