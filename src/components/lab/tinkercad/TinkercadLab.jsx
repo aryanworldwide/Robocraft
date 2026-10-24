@@ -28,6 +28,7 @@ import WorkflowStepper from './WorkflowStepper';
 import HelpMeBuild from './HelpMeBuild';
 import { toast } from '@/components/ui/use-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { checkWire } from '@/lib/lab/wireAdvice';
 
 // Returns false when the device refuses the write (storage full, private mode).
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
@@ -222,16 +223,24 @@ export default function TinkercadLab({ onExit }) {
   };
   const clearAll = () => { snapshot(); setUserCode(null); setComponents([]); setWires([]); setSelectedId(null); setPendingWire(null); setWiringGuide(null); pendingRef.current = null; setShowWelcome(true); setRunning(false); };
 
+  // Wiring is two taps: one pin, then the other. Nothing is dragged.
   const onPinDown = (compId, pinId) => {
     setSelectedId(compId);
     const prev = pendingRef.current;
     if (!prev) { pendingRef.current = { compId, pinId }; setPendingWire({ compId, pinId }); return; }
+    // Tapping the same pin again cancels.
     if (prev.compId === compId && prev.pinId === pinId) { pendingRef.current = null; setPendingWire(null); return; }
-    const exists = wires.some(w =>
-      (w.from.compId === prev.compId && w.from.pinId === prev.pinId && w.to.compId === compId && w.to.pinId === pinId) ||
-      (w.to.compId === prev.compId && w.to.pinId === prev.pinId && w.from.compId === compId && w.from.pinId === pinId));
-    if (!exists) { snapshot(); setWires(ws => [...ws, { id: newId(), from: prev, to: { compId, pinId } }]); }
+
+    const to = { compId, pinId };
+    const verdict = checkWire({ from: prev, to, components, wires, experiment });
     pendingRef.current = null; setPendingWire(null);
+
+    if (verdict.message) {
+      toast({ title: verdict.ok ? 'Careful' : 'That wire will not work', description: verdict.message });
+    }
+    if (!verdict.ok) return;
+    snapshot();
+    setWires(ws => [...ws, { id: newId(), from: prev, to }]);
   };
 
   const chooseExperiment = (id) => {

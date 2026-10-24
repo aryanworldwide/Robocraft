@@ -10,7 +10,6 @@ export default function Canvas({
 }) {
   const svgRef = useRef(null);
   const [view, setView] = useState({ x: 40, y: 40, scale: 0.7 });
-  const [cursor, setCursor] = useState(null);
   const drag = useRef(null);
   const pointers = useRef(new Map());
 
@@ -140,7 +139,6 @@ export default function Canvas({
   };
 
   const onPointerMove = (e) => {
-    if (pendingWire) setCursor(toWorld(e.clientX, e.clientY));
     if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const pinch = drag.current?.mode === 'pinch' ? drag.current : null;
     if (pinch) {
@@ -251,13 +249,21 @@ export default function Canvas({
             );
           })}
 
-          {/* rubber band */}
-          {pendingWire && cursor && (() => {
+          {/* The first pin of a new wire is marked where it is. Nothing trails
+              the finger: a wire is two taps, not a drag. */}
+          {pendingWire && (() => {
             const comp = components.find(c => c.id === pendingWire.compId);
             const def = comp && getDef(comp.type);
             const a = comp && pinWorldPos(comp, def, pendingWire.pinId);
             if (!a) return null;
-            return <path d={cable(a, cursor)} stroke="#0EA5E9" strokeWidth={2.5} strokeDasharray="6 5" fill="none" opacity={0.9} />;
+            return (
+              <g pointerEvents="none">
+                <circle cx={a.x} cy={a.y} r={13} fill="#0EA5E9" opacity={0.18}>
+                  <animate attributeName="r" values="11;16;11" dur="1.3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx={a.x} cy={a.y} r={9} fill="none" stroke="#0EA5E9" strokeWidth={2.5} />
+              </g>
+            );
           })()}
 
           {/* components */}
@@ -269,10 +275,13 @@ export default function Canvas({
         </g>
       </svg>
 
-      <div className="absolute left-2 bottom-2 text-[10px] bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-lg pointer-events-none shadow-sm">
-        {typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
-          ? 'Tap a part to add · tap 2 pins to wire · pinch to zoom'
-          : 'Drag parts in · click 2 pins to wire · scroll to zoom'}
+      <div className={`absolute left-2 bottom-2 text-[10px] px-2 py-1 rounded-lg pointer-events-none shadow-sm ${
+        pendingWire ? 'bg-cyan-500 text-white font-semibold' : 'bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300'}`}>
+        {pendingWire
+          ? 'Now tap the other pin · tap the same pin again to cancel'
+          : (typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
+            ? 'Tap a part to add · tap one pin, then another, to wire'
+            : 'Drag parts in · click one pin, then another, to wire')}
       </div>
     </div>
   );
@@ -311,7 +320,13 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
         const anchor = pin.side === 'left' ? 'end' : pin.side === 'right' ? 'start' : 'middle';
         return (
           <g key={pin.id}>
-            <circle cx={lp.x} cy={lp.y} r={7} fill="#ffffff" opacity={0.85} />
+            {/* An invisible, finger-sized target: a 5px dot is far too small to
+                hit on a phone, and missing it panned the canvas instead. A
+                board's pins sit close together, so theirs stays tighter to
+                avoid stealing the neighbouring pin's taps. */}
+            <circle cx={lp.x} cy={lp.y} r={def.pins.length > 8 ? 8 : 15} fill="transparent" style={{ cursor: 'crosshair' }}
+              onPointerDown={(e) => onPinDown(e, pin.id)} />
+            <circle cx={lp.x} cy={lp.y} r={7} fill="#ffffff" opacity={0.85} pointerEvents="none" />
             <circle cx={lp.x} cy={lp.y} r={5} fill={color} stroke="#0f172a" strokeWidth={1} style={{ cursor: 'crosshair' }} onPointerDown={(e) => onPinDown(e, pin.id)} />
             {wired && <circle cx={lp.x} cy={lp.y} r={8.5} fill="none" stroke="#22C55E" strokeWidth={1.6} opacity={0.75} />}
             <text x={lp.x + labelDx} y={lp.y + labelDy + 3} fontSize={7.5} fontWeight={700} className="pin-label" textAnchor={anchor} transform={`rotate(${-rot} ${lp.x + labelDx} ${lp.y + labelDy + 3})`}>{pin.label}</text>
