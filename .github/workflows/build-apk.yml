@@ -136,4 +136,6 @@ jobs:
             gh release create apk-latest --title "RoboCraft APK (latest build)" --notes "$NOTES" --latest
           gh release upload apk-latest RoboCraft.apk --clobber
           if [ -f RoboCraft-play.aab ]; then gh release upload apk-latest RoboCraft-play.aab --clobber; fi
-          gh release edit apk-latest --notes "$NOTES" --latest
+          # Keep the tag on the commit that produced this build, so the
+          # release never points at an old, rewritten commit.
+          gh release edit apk-latest --notes "$NOTES" --latest --target "$GITHUB_SHA"
