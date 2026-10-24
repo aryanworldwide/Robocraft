@@ -6,9 +6,10 @@ import { SHAPES, newObjId, makeGroup, ungroup, objectSoup, toSTL } from '@/lib/d
 import { combine, volume } from '@/lib/design/csg';
 import { PARTS, PROJECTS, buildPart, designBounds } from '@/lib/design/parts';
 import { downloadFile } from '@/lib/platform';
+import BuildAnything3D from '@/components/design/BuildAnything3D';
 import {
   ChevronLeft, Undo2, Redo2, Save, Download, Trash2, Copy, Group, Ungroup, Move3d, Rotate3d, Scaling,
-  Home as HomeIcon, ArrowDownToLine, FlipHorizontal2, Box, Layers, ClipboardList, X, Check, FolderOpen, ZoomIn, ZoomOut, MousePointer2, SlidersHorizontal, FilePlus2,
+  Home as HomeIcon, ArrowDownToLine, FlipHorizontal2, Box, Layers, ClipboardList, X, Check, FolderOpen, ZoomIn, ZoomOut, MousePointer2, SlidersHorizontal, FilePlus2, Sparkles,
 } from 'lucide-react';
 
 const StudioView = lazy(() => import('@/components/design/StudioView'));
@@ -44,6 +45,9 @@ export default function DesignStudio() {
   const [design, setDesign] = useState({ id: null, name: 'Untitled design' });
   const [projectId, setProjectId] = useState(null);
   const [showFiles, setShowFiles] = useState(false);
+  const [showBuildAnything, setShowBuildAnything] = useState(false);
+  const [robotPlan, setRobotPlan] = useState(null);
+  const [showRobotPlan, setShowRobotPlan] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
   const objRef = useRef(objects); objRef.current = objects;
@@ -78,6 +82,28 @@ export default function DesignStudio() {
       const o = { ...g, id: newObjId(), pos: [x, g.pos[1], z] };
       commit([...objRef.current, o]); setSelected([o.id]); setBusy(false);
       // a library part is big — show the whole model again
+      setTimeout(() => setViewCmd({ name: 'home', t: Date.now() }), 60);
+    }, 20);
+  };
+
+  // Place a generated robot: every part is a normal object in the design, so
+  // it can be selected, moved, resized and exported like anything else.
+  const placeRobot = (plan) => {
+    setBusy(true);
+    setShowBuildAnything(false);
+    setTimeout(() => {
+      const b = designBounds(objRef.current);
+      const offsetX = b ? b.max[0] + 40 : 0;
+      const placed = plan.parts.map(part => ({
+        ...part,
+        id: newObjId(),
+        pos: [part.pos[0] + offsetX, part.pos[1], part.pos[2]],
+      }));
+      commit([...objRef.current, ...placed]);
+      setSelected(placed.map(o => o.id));
+      setRobotPlan(plan);
+      setBusy(false);
+      flash(`${plan.title} built · ${placed.length} parts`);
       setTimeout(() => setViewCmd({ name: 'home', t: Date.now() }), 60);
     }, 20);
   };
@@ -213,6 +239,12 @@ export default function DesignStudio() {
           <IconBtn onClick={redo} disabled={!future.length} title="Redo"><Redo2 className="w-4 h-4" /></IconBtn>
           <IconBtn onClick={() => setShowFiles(true)} title="My designs"><FolderOpen className="w-4 h-4" /></IconBtn>
           <IconBtn onClick={save} title="Save"><Save className="w-4 h-4" /></IconBtn>
+          {robotPlan && (
+            <button onClick={() => setShowRobotPlan(true)} className="px-2.5 py-1.5 rounded-lg glass text-[11px] font-bold text-violet-500 shrink-0" title="Wiring, code and parts for the robot you built">
+              {robotPlan.title} · plan
+            </button>
+          )}
+          <button onClick={() => setShowBuildAnything(true)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white text-[11px] font-bold shrink-0"><Sparkles className="w-3.5 h-3.5" /> Build anything</button>
           <button onClick={exportSTL} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[11px] font-bold"><Download className="w-3.5 h-3.5" /> STL</button>
         </div>
       </div>
@@ -300,6 +332,13 @@ export default function DesignStudio() {
           </div>
         )}
       </div>
+
+      {showBuildAnything && (
+        <BuildAnything3D onBuild={placeRobot} onClose={() => setShowBuildAnything(false)} />
+      )}
+      {showRobotPlan && robotPlan && (
+        <BuildAnything3D initial={robotPlan} onBuild={() => { setShowRobotPlan(false); setShowBuildAnything(true); }} onClose={() => setShowRobotPlan(false)} />
+      )}
 
       {/* bottom drawer */}
       <div className="glass-strong border-t border-border safe-area-bottom">
