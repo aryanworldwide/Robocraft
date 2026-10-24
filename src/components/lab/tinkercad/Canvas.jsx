@@ -93,12 +93,14 @@ export default function Canvas({
   }, []);
 
   const toWorld = useCallback((clientX, clientY) => {
+    if (!svgRef.current) return { x: 0, y: 0 };
     const rect = svgRef.current.getBoundingClientRect();
     return { x: (clientX - rect.left - view.x) / view.scale, y: (clientY - rect.top - view.y) / view.scale };
   }, [view]);
 
   const onWheel = (e) => {
     e.preventDefault();
+    if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const factor = e.deltaY < 0 ? 1.1 : 0.9;
     const ns = Math.min(3, Math.max(0.3, view.scale * factor));
@@ -110,7 +112,10 @@ export default function Canvas({
 
   const onPointerDownBg = (e) => {
     onBackgroundDown();
-    svgRef.current.setPointerCapture(e.pointerId);
+    if (!svgRef.current) return;
+    // Some Android devices refuse the capture for a pointer that has already
+    // gone; losing the capture is survivable, throwing here is not.
+    try { svgRef.current.setPointerCapture(e.pointerId); } catch { /* keep going */ }
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     drag.current = { mode: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y };
     // Second finger lands → switch to pinch-zoom, anchored at the midpoint
@@ -129,28 +134,34 @@ export default function Canvas({
     e.stopPropagation();
     onSelect(comp.id);
     onMoveStart?.();
-    svgRef.current.setPointerCapture(e.pointerId);
+    if (!svgRef.current) return;
+    try { svgRef.current.setPointerCapture(e.pointerId); } catch { /* keep going */ }
     drag.current = { mode: 'move', id: comp.id, sx: e.clientX, sy: e.clientY, ox: comp.x, oy: comp.y };
   };
 
   const onPointerMove = (e) => {
     if (pendingWire) setCursor(toWorld(e.clientX, e.clientY));
     if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (drag.current?.mode === 'pinch') {
+    const pinch = drag.current?.mode === 'pinch' ? drag.current : null;
+    if (pinch) {
       const p = pinchInfo();
-      if (!p) return;
-      const ns = Math.min(3, Math.max(0.3, drag.current.startScale * (p.dist / drag.current.startDist)));
+      if (!p || !svgRef.current) return;
+      const ns = Math.min(3, Math.max(0.3, pinch.startScale * (p.dist / pinch.startDist)));
       const rect = svgRef.current.getBoundingClientRect();
-      setView({ scale: ns, x: (p.mx - rect.left) - drag.current.wx * ns, y: (p.my - rect.top) - drag.current.wy * ns });
+      setView({ scale: ns, x: (p.mx - rect.left) - pinch.wx * ns, y: (p.my - rect.top) - pinch.wy * ns });
       return;
     }
-    if (!drag.current) return;
-    if (drag.current.mode === 'pan') {
-      setView(v => ({ ...v, x: drag.current.vx + (e.clientX - drag.current.sx), y: drag.current.vy + (e.clientY - drag.current.sy) }));
+    // Read the drag once. React runs the updater below during the next render,
+    // and on a touch screen pointerup often lands first and clears drag.current
+    // — reading it inside the updater then threw and took the canvas down.
+    const d = drag.current;
+    if (!d) return;
+    if (d.mode === 'pan') {
+      setView(v => ({ ...v, x: d.vx + (e.clientX - d.sx), y: d.vy + (e.clientY - d.sy) }));
     } else {
-      const dx = (e.clientX - drag.current.sx) / view.scale;
-      const dy = (e.clientY - drag.current.sy) / view.scale;
-      onMove(drag.current.id, drag.current.ox + dx, drag.current.oy + dy);
+      const dx = (e.clientX - d.sx) / view.scale;
+      const dy = (e.clientY - d.sy) / view.scale;
+      onMove(d.id, d.ox + dx, d.oy + dy);
     }
   };
 
@@ -158,7 +169,7 @@ export default function Canvas({
     pointers.current.delete(e.pointerId);
     if (drag.current?.mode === 'pinch' && pointers.current.size < 2) drag.current = null;
     else if (drag.current?.mode !== 'pinch') drag.current = null;
-    try { svgRef.current.releasePointerCapture(e.pointerId); } catch {}
+    try { svgRef.current?.releasePointerCapture(e.pointerId); } catch { /* already released */ }
   };
 
   const onDrop = (e) => {
