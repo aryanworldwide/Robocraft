@@ -70,8 +70,20 @@ const auth = {
       try { await A.signInWithCredential(a, cred); } catch (e) { throw authError(e); }
       return;
     }
-    try { await A.signInWithPopup(a, new A.GoogleAuthProvider()); }
-    catch (e) { throw authError(e); }
+    // A popup is nicer when it works, but plenty of mobile browsers and
+    // in-app webviews block it outright. Fall back to a full-page redirect
+    // rather than leaving the student staring at an error.
+    const provider = new A.GoogleAuthProvider();
+    try {
+      await A.signInWithPopup(a, provider);
+    } catch (e) {
+      const code = e?.code || '';
+      if (/popup-blocked|operation-not-supported|popup-closed-by-user|cancelled-popup-request|web-storage-unsupported/.test(code)) {
+        if (code === 'auth/popup-closed-by-user') throw Object.assign(new Error('Sign-in was cancelled.'), { cancelled: true });
+        try { await A.signInWithRedirect(a, provider); return; } catch (e2) { throw authError(e2); }
+      }
+      throw authError(e);
+    }
   },
   async resendVerification() {
     const { auth: a, A } = await fb();

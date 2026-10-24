@@ -10,9 +10,17 @@ export function fb() {
       ]);
       const app = initializeApp(firebaseConfig);
       // IndexedDB persistence keeps students signed in (also inside the Android app).
+      //
+      // The popup resolver has to be passed explicitly. getAuth() includes one;
+      // initializeAuth() does not, and without it signInWithPopup fails with
+      // auth/argument-error before a window ever opens — which is exactly what
+      // "Continue with Google" was doing.
       let auth;
       try {
-        auth = authMod.initializeAuth(app, { persistence: [authMod.indexedDBLocalPersistence, authMod.browserLocalPersistence] });
+        auth = authMod.initializeAuth(app, {
+          persistence: [authMod.indexedDBLocalPersistence, authMod.browserLocalPersistence],
+          popupRedirectResolver: authMod.browserPopupRedirectResolver,
+        });
       } catch {
         auth = authMod.getAuth(app);
       }
