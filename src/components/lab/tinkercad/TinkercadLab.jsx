@@ -29,6 +29,7 @@ import HelpMeBuild from './HelpMeBuild';
 import { toast } from '@/components/ui/use-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { checkWire } from '@/lib/lab/wireAdvice';
+import { checkCircuit, blockingFaults } from '@/lib/lab/electrical';
 
 // Returns false when the device refuses the write (storage full, private mode).
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
@@ -36,6 +37,13 @@ const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch
 let _id = 1;
 const newId = () => `c${_id++}`;
 const BUILDS_KEY = 'robocraft_lab_builds';
+
+// The headline of a fault; the rest is there when the student taps for it.
+const firstLine = (msg) => {
+  const s = String(msg || '');
+  const end = s.indexOf('. ');
+  return end > 30 ? s.slice(0, end + 1) : s;
+};
 
 export default function TinkercadLab({ onExit }) {
   const navigate = useNavigate();
@@ -53,6 +61,7 @@ export default function TinkercadLab({ onExit }) {
   const [wires, setWires] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [pendingWire, setPendingWire] = useState(null);
+  const [showFaults, setShowFaults] = useState(false);
 
   const [running, setRunning] = useState(false);
   const [simState, setSimState] = useState(free ? createFreeSimState() : createSimState());
@@ -117,6 +126,10 @@ export default function TinkercadLab({ onExit }) {
   // ── derived ──
   const templateValidation = useMemo(() => experiment ? validateCircuit(experiment, components, wires) : null, [experiment, components, wires]);
   const freeCheck = useMemo(() => free ? validateFreeBuild(components, wires) : null, [free, components, wires]);
+  // What the circuit would actually do on a real board: an LED with no
+  // resistor, a motor straight off a pin, a sensor with no ground.
+  const faults = useMemo(() => checkCircuit(components, wires), [components, wires]);
+  const dangers = useMemo(() => blockingFaults(faults), [faults]);
   const templatePins = useMemo(() => experiment ? resolvePins(experiment, components, wires) : {}, [experiment, components, wires]);
   const freePins = useMemo(() => free ? resolveFreePins(components, wires) : {}, [free, components, wires]);
   const pins = experiment ? templatePins : freePins;
@@ -298,6 +311,14 @@ export default function TinkercadLab({ onExit }) {
       toast({ title: 'Wire the parts first', description: 'Connect your parts to the board — tap one pin, then the other, to draw a wire.' });
       return;
     }
+    if (dangers.length) {
+      const f = dangers[0];
+      setCodeError(`${f.title}. ${f.message}`);
+      setSerial([`⛔ ${f.title}`, f.message, '', 'Fix the wiring and press Run again.']);
+      setShowSerial(true);
+      toast({ title: f.title, description: f.message });
+      return;
+    }
     if (!canRun) {
       const problem = experiment
         ? 'Finish the wiring shown in the guide, then press Run.'
@@ -378,6 +399,30 @@ export default function TinkercadLab({ onExit }) {
           {experiment && <span className="text-[10px] text-cyan-400 font-medium hidden sm:inline">{experiment.title}</span>}
         </div>
       </div>
+
+      {/* What this circuit would do on a real board. The first fault is shown
+          as the student wires, not held back until they press Run. */}
+      {faults.length > 0 && (
+        <button
+          onClick={() => { setSelectedId(faults[0].compId || null); setShowFaults(f => !f); }}
+          className={`w-full text-left px-3 py-2 border-b border-border ${faults[0].level === 'danger' ? 'bg-red-500/10' : 'bg-amber-500/10'}`}
+        >
+          <span className={`text-[11px] font-bold ${faults[0].level === 'danger' ? 'text-red-500' : 'text-amber-600 dark:text-amber-400'}`}>
+            {faults[0].level === 'danger' ? '⛔ ' : '⚠ '}{faults[0].title}
+          </span>
+          <span className="block text-[10px] text-muted-foreground leading-snug mt-0.5">
+            {showFaults ? faults[0].message : firstLine(faults[0].message)}
+          </span>
+          {faults.length > 1 && (
+            <span className="block text-[10px] text-cyan-500 mt-1">{showFaults ? 'Hide' : `+${faults.length - 1} more · tap for detail`}</span>
+          )}
+          {showFaults && faults.slice(1).map((f, i) => (
+            <span key={i} className="block text-[10px] text-muted-foreground leading-snug mt-1.5">
+              {f.level === 'danger' ? '⛔ ' : '⚠ '}<b>{f.title}.</b> {f.message}
+            </span>
+          ))}
+        </button>
+      )}
 
       {/* ── MAIN WORKSPACE ── */}
       <div className="flex-1 flex min-h-0 relative">
