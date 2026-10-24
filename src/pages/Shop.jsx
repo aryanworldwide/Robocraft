@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '@/lib/AppContext';
 import { REWARD_SHOP, MYSTERY_BOXES, equippedItems } from '@/lib/gamification';
 import { Coins, Gift, Check, Lock, Sparkles, Zap, X } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import { toast } from '@/components/ui/use-toast';
 import Confetti from '@/components/learning/Confetti';
+import { getPhotoAvatar, savePhotoAvatar } from '@/lib/photoAvatar';
 
 const TABS = [
   { id: 'avatar', label: 'Avatars' },
@@ -16,16 +17,27 @@ const TABS = [
 
 export function AvatarBadge({ progress, size = 48 }) {
   const { avatar, frame } = equippedItems(progress);
+  // The photo lives on this device only, so it is read here rather than from
+  // progress — it is never synced and never shown to anyone else.
+  const photo = avatar?.photo ? getPhotoAvatar() : null;
   return (
     <div className="rounded-full p-[3px] shrink-0" style={{ width: size, height: size, background: frame?.value || 'transparent' }}>
-      <div className="w-full h-full rounded-full glass-strong flex items-center justify-center" style={{ fontSize: size * 0.5 }}>
-        <span aria-hidden>{avatar?.emoji || '🤖'}</span>
+      <div className="w-full h-full rounded-full glass-strong flex items-center justify-center overflow-hidden" style={{ fontSize: size * 0.5 }}>
+        {photo
+          ? <img src={photo} alt="" className="w-full h-full object-cover rounded-full" />
+          : <span aria-hidden>{avatar?.emoji || '🤖'}</span>}
       </div>
     </div>
   );
 }
 
 function ItemPreview({ item }) {
+  if (item.type === 'avatar' && item.photo) {
+    const photo = getPhotoAvatar();
+    return photo
+      ? <img src={photo} alt="Your avatar photo" className="w-12 h-12 rounded-full object-cover" />
+      : <span className="text-4xl" aria-hidden>{item.emoji}</span>;
+  }
   if (item.type === 'avatar') return <span className="text-4xl" aria-hidden>{item.emoji}</span>;
   if (item.type === 'accent') return <span className="w-10 h-10 rounded-full shadow-lg" style={{ background: item.swatch, boxShadow: `0 0 18px ${item.swatch}80` }} />;
   if (item.type === 'frame') return (
@@ -45,11 +57,30 @@ export default function Shop() {
   const [tab, setTab] = useState('avatar');
   const [confirmItem, setConfirmItem] = useState(null);
   const [boxResult, setBoxResult] = useState(null);
+  const [, setPhotoTick] = useState(0);   // redraw the badge after a new photo
+  const fileRef = useRef(null);
 
   const items = REWARD_SHOP.filter(i => i.type === tab);
 
+  const pickPhoto = () => fileRef.current?.click();
+
+  const onPhotoChosen = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      await savePhotoAvatar(file);
+      buyOrEquipItem(selectedClass, 'av_photo');
+      setPhotoTick(n => n + 1);
+      toast({ title: 'Photo set as your avatar', description: 'It stays on this phone — nobody else can see it.' });
+    } catch (err) {
+      toast({ title: 'Could not use that picture', description: err.message });
+    }
+  };
+
   const handleItem = (item) => {
     const isOwned = item.cost === 0 || owned.includes(item.id);
+    if (item.photo && isOwned) { pickPhoto(); return; }
     if (isOwned) {
       buyOrEquipItem(selectedClass, item.id);
       toast({ title: `${item.name} equipped` });
@@ -65,7 +96,9 @@ export default function Shop() {
   const confirmBuy = () => {
     const item = confirmItem;
     setConfirmItem(null);
-    if (buyOrEquipItem(selectedClass, item.id) === 'bought') toast({ title: `You got ${item.name}! 🎉`, description: 'It is now equipped.' });
+    const outcome = buyOrEquipItem(selectedClass, item.id);
+    if (item.photo) { pickPhoto(); return; }
+    if (outcome === 'bought') toast({ title: `You got ${item.name}! 🎉`, description: 'It is now equipped.' });
   };
 
   const openBox = (box) => {
@@ -95,6 +128,17 @@ export default function Shop() {
       </div>
 
       <p className="text-xs text-muted-foreground mb-4">Earn coins by finishing lessons (+10), quizzes (+2 per correct answer), flash cards and missions. Spend them here.</p>
+
+      {/* The picture is read here, resized and kept on this device. It is
+          never uploaded and never appears on the leaderboard. */}
+      <input ref={fileRef} type="file" accept="image/*" onChange={onPhotoChosen} className="hidden" aria-hidden="true" tabIndex={-1} />
+
+      {tab === 'avatar' && (
+        <p className="text-[11px] text-muted-foreground mb-3 glass rounded-xl p-2.5 leading-relaxed">
+          Your own photo stays on this phone. It is shown to you inside the app only — the leaderboard always
+          shows an emoji, so no one else ever sees your picture.
+        </p>
+      )}
 
       <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-1 px-1">
         {TABS.map(t => (

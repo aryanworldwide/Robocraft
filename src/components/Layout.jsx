@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { formatClass } from '@/lib/utils';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { Home, BookOpen, FolderGit2, BarChart3, Wrench } from 'lucide-react';
+import { Home, BookOpen, FolderGit2, BarChart3, Wrench, ShoppingBag } from 'lucide-react';
 import { useApp } from '@/lib/AppContext';
 import { equippedItems } from '@/lib/gamification';
+import { getPhotoAvatar } from '@/lib/photoAvatar';
 import AIMentor from '@/components/learning/AIMentor';
 
 export default function Layout() {
@@ -15,7 +16,10 @@ export default function Layout() {
   // the logo in the corner — that is the point of buying one. Computed on each
   // render (not memoised) so it changes the moment they equip it.
   const classProgress = selectedClass ? getProgressForClass(selectedClass) : null;
-  const avatarEmoji = classProgress?.shop?.avatar ? equippedItems(classProgress).avatar?.emoji : null;
+  const equippedAvatar = classProgress?.shop?.avatar ? equippedItems(classProgress).avatar : null;
+  const avatarEmoji = equippedAvatar?.emoji || null;
+  // A photo avatar is read from this device; it is never synced or shared.
+  const avatarPhoto = equippedAvatar?.photo ? getPhotoAvatar() : null;
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -30,6 +34,7 @@ export default function Layout() {
     if (pathname.startsWith('/learn') || pathname.startsWith('/lesson') || pathname.startsWith('/quiz')) return '/learn';
     if (pathname.startsWith('/project')) return '/projects';
     if (['/build', '/lab', '/arena', '/design', '/mechanisms', '/challenges', '/assessment'].some(x => pathname.startsWith(x))) return '/build';
+    if (pathname.startsWith('/shop')) return '/shop';
     if (pathname.startsWith('/progress')) return '/progress';
     if (pathname === '/') return '/';
     return null; // settings, mentor, revision, search, challenges: no tab highlighted
@@ -76,6 +81,7 @@ export default function Layout() {
     { path: '/', label: 'Home', icon: Home },
     { path: '/learn', label: 'Learn', icon: BookOpen },
     { path: '/build', label: 'Build', icon: Wrench },
+    { path: '/shop', label: 'Shop', icon: ShoppingBag },
     { path: '/projects', label: 'Projects', icon: FolderGit2 },
     { path: '/progress', label: 'Progress', icon: BarChart3 },
   ];
@@ -87,8 +93,10 @@ export default function Layout() {
       <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass-strong shadow-lg' : 'bg-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center neon-glow" aria-label={avatarEmoji ? 'Your avatar' : 'RoboCraft'}>
-              {avatarEmoji ? (
+            <div className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center neon-glow overflow-hidden" aria-label={avatarEmoji ? 'Your avatar' : 'RoboCraft'}>
+              {avatarPhoto ? (
+                <img src={avatarPhoto} alt="" className="w-full h-full object-cover rounded-xl" />
+              ) : avatarEmoji ? (
                 <span className="text-xl leading-none" role="img">{avatarEmoji}</span>
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
@@ -128,7 +136,7 @@ export default function Layout() {
               <button
                 key={item.path}
                 onClick={() => handleTabClick(item.path)}
-                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-300 ${
+                className={`flex flex-col items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl transition-all duration-300 ${
                   active ? 'text-cyan-400 scale-110' : 'text-muted-foreground hover:text-cyan-400/70'
                 }`}
               >
