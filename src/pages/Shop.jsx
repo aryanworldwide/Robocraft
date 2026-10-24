@@ -6,6 +6,7 @@ import BackButton from '@/components/BackButton';
 import { toast } from '@/components/ui/use-toast';
 import Confetti from '@/components/learning/Confetti';
 import { getPhotoAvatar, savePhotoAvatar } from '@/lib/photoAvatar';
+import AvatarBadge from '@/components/AvatarBadge';
 
 const TABS = [
   { id: 'avatar', label: 'Avatars' },
@@ -14,22 +15,6 @@ const TABS = [
   { id: 'title', label: 'Titles' },
   { id: 'mystery', label: 'Mystery' },
 ];
-
-export function AvatarBadge({ progress, size = 48 }) {
-  const { avatar, frame } = equippedItems(progress);
-  // The photo lives on this device only, so it is read here rather than from
-  // progress — it is never synced and never shown to anyone else.
-  const photo = avatar?.photo ? getPhotoAvatar() : null;
-  return (
-    <div className="rounded-full p-[3px] shrink-0" style={{ width: size, height: size, background: frame?.value || 'transparent' }}>
-      <div className="w-full h-full rounded-full glass-strong flex items-center justify-center overflow-hidden" style={{ fontSize: size * 0.5 }}>
-        {photo
-          ? <img src={photo} alt="" className="w-full h-full object-cover rounded-full" />
-          : <span aria-hidden>{avatar?.emoji || '🤖'}</span>}
-      </div>
-    </div>
-  );
-}
 
 function ItemPreview({ item }) {
   if (item.type === 'avatar' && item.photo) {

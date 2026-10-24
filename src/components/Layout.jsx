@@ -3,8 +3,7 @@ import { formatClass } from '@/lib/utils';
 import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Home, BookOpen, FolderGit2, BarChart3, Wrench, ShoppingBag } from 'lucide-react';
 import { useApp } from '@/lib/AppContext';
-import { equippedItems } from '@/lib/gamification';
-import { getPhotoAvatar } from '@/lib/photoAvatar';
+import AvatarBadge from '@/components/AvatarBadge';
 import AIMentor from '@/components/learning/AIMentor';
 
 export default function Layout() {
@@ -16,10 +15,7 @@ export default function Layout() {
   // the logo in the corner — that is the point of buying one. Computed on each
   // render (not memoised) so it changes the moment they equip it.
   const classProgress = selectedClass ? getProgressForClass(selectedClass) : null;
-  const equippedAvatar = classProgress?.shop?.avatar ? equippedItems(classProgress).avatar : null;
-  const avatarEmoji = equippedAvatar?.emoji || null;
-  // A photo avatar is read from this device; it is never synced or shared.
-  const avatarPhoto = equippedAvatar?.photo ? getPhotoAvatar() : null;
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -93,18 +89,18 @@ export default function Layout() {
       <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass-strong shadow-lg' : 'bg-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center neon-glow overflow-hidden" aria-label={avatarEmoji ? 'Your avatar' : 'RoboCraft'}>
-              {avatarPhoto ? (
-                <img src={avatarPhoto} alt="" className="w-full h-full object-cover rounded-xl" />
-              ) : avatarEmoji ? (
-                <span className="text-xl leading-none" role="img">{avatarEmoji}</span>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+            {/* The avatar wears its bought frame here too, so the ring the
+                student paid for is on every screen, not only in the shop. */}
+            <AvatarBadge
+              progress={classProgress}
+              size={38}
+              fallback={(
+                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" aria-label="RoboCraft">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400" strokeLinejoin="round"/>
                   <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60" strokeLinejoin="round"/>
                 </svg>
               )}
-            </div>
+            />
             <span className="font-bold text-lg gradient-text hidden sm:block">RoboCraft</span>
           </div>
           <div className="flex items-center gap-3">

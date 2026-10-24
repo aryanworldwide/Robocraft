@@ -5,7 +5,7 @@ import { useApp } from '@/lib/AppContext';
 import { getMode } from '@/lib/adaptive';
 import { getAllLessons, getRecommendedLessons, getRecommendedProjects, getTotalLessons, getSubjects} from '@/lib/curriculum';
 import { getLevel, BADGES } from '@/lib/gamification';
-import { AvatarBadge } from '@/pages/Shop';
+import AvatarBadge from '@/components/AvatarBadge';
 import { WeeklyChallengeCard } from '@/pages/Leaderboard';
 import { equippedItems, localDay } from '@/lib/gamification';
 import { getReminderSettings } from '@/lib/reminders';
