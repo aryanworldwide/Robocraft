@@ -296,6 +296,9 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
   const down = Math.max(counts.left, counts.right), across = Math.max(counts.top, counts.bottom);
   const pitch = Math.min(down > 1 ? def.h / (down + 1) : 99, across > 1 ? def.w / (across + 1) : 99);
   const hitRadius = Math.max(7, Math.min(15, pitch / 2));
+  // Roughly how far the bottom labels reach once rotated upright.
+  const longestBottom = def.pins.filter(p => p.side === 'bottom').reduce((m, p) => Math.max(m, p.label.length), 0);
+  const bottomLabelRoom = longestBottom ? longestBottom * 5.2 + 12 : 0;
   const rot = comp.rot || 0;
   const partState = running ? { ...(simState || {}), ...((simState?.comp || {})[comp.id] || {}) } : undefined;
   const wiredPins = new Set();
@@ -313,7 +316,9 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
 
       {/* name tag */}
       <g transform={`rotate(${-rot} ${def.w / 2} ${def.h + 14})`}>
-        <text x={def.w / 2} y={def.h + 15} textAnchor="middle" fontSize={11} fontWeight={700} className="part-label">{def.name}</text>
+        {/* Clear of the bottom row's vertical labels, whose length depends on
+            the longest one (GPIO12, Cathode (−)…). */}
+        <text x={def.w / 2} y={def.h + 15 + bottomLabelRoom} textAnchor="middle" fontSize={11} fontWeight={700} className="part-label">{def.name}</text>
       </g>
 
       {/* pins */}
@@ -325,7 +330,10 @@ function ComponentNode({ comp, def, selected, wires, simState, running, onPointe
         const vertical = pin.side === 'top' || pin.side === 'bottom';
         const labelDx = pin.side === 'left' ? -7 : pin.side === 'right' ? 7 : 0;
         const labelDy = pin.side === 'top' ? -13 : pin.side === 'bottom' ? 13 : 0;
-        const anchor = pin.side === 'left' || pin.side === 'top' ? 'end' : 'start';
+        const anchor = pin.side === 'left' ? 'end'
+          : pin.side === 'right' ? 'start'
+          : pin.side === 'top' ? 'start'    // rotated -90°, this runs upwards
+          : 'end';                          // and this runs downwards
         return (
           <g key={pin.id}>
             {/* An invisible, finger-sized target: a 5px dot is far too small to
